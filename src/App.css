@@ -1,0 +1,132 @@
+.required {
+  color: red;
+}
+.errorMsg {
+  color: red;
+}
+
+.label-text {
+  color: #183084;
+  font-weight: 600 !important;
+  font-size: 0.8rem;
+}
+
+.MuiTableSortLabel-root.MuiTableSortLabel-active,
+.MuiTableSortLabel-root:hover,
+.MuiTableSortLabel-icon {
+  color: inherit !important;
+}
+
+.modify-dialog-content {
+  padding: 0.3rem 0.5rem 0.5rem 0.5rem !important;
+}
+
+.modify-dialog-content-paper {
+  padding: 0.25rem 1rem !important;
+}
+
+.modify-dialog-actions {
+  margin: 0.5rem 1rem !important;
+}
+.view-params-comments-list-comment {
+  font-size: 0.8rem !important;
+  line-height: 1.2 !important;
+}
+.view-params-comments-list {
+  max-height: 4.9rem;
+  overflow: auto;
+}
+.other-config-view-params-accordian .MuiAccordionSummary-root.Mui-expanded {
+  max-height: 30px !important;
+  min-height: 30px !important;
+  font-weight: 600;
+}
+.other-config-view-params-accordian .MuiAccordionSummary-root {
+  max-height: 30px !important;
+  min-height: 30px !important;
+  font-weight: 600;
+}
+.other-config-view-params-accordian .MuiAccordionSummary-content.Mui-expanded {
+  margin: 10px 0 !important;
+}
+.numericInput {
+  text-align: end !important;
+}
+.future-date-text {
+  /*color: green !important;*/
+  /*font-weight: 500 !important;*/
+
+  color: #183084;
+  font-weight: bold !important;
+  font-size: 0.8rem;
+}
+.past-date-text-editable {
+  color: gray !important;
+}
+.past-date-text-non-editable {
+  color: silver !important;
+}
+
+.rbc-day-slot .rbc-event-content {
+  height: auto !important;
+  margin: auto !important;
+  flex: none !important;
+}
+
+.rbc-month-row > * .rbc-event-content {
+  font-size: 11px !important;
+}
+
+.rbc-toolbar-label {
+  color: #183084;
+  font-weight: bold !important;
+}
+
+.rbc-allday-cell {
+  display: none;
+}
+
+.rbc-time-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1;
+  width: 100%;
+  border: 2px solid #000 !important;
+  min-height: 0;
+}
+
+.rbc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px !important;
+  font-size: 16px;
+}
+
+.MuiAccordionSummary-root {
+  padding: 0px 5px !important;
+}
+.MuiAccordionSummary-content.Mui-expanded {
+  margin: 0px !important;
+}
+.MuiButtonBase-root.MuiAccordionSummary-root.Mui-expanded {
+  min-height: 32px !important;
+}
+.MuiButtonBase-root.MuiAccordionSummary-root {
+  min-height: 32px !important;
+}
+.MuiAccordionSummary-content {
+  color: #183084;
+  font-weight: 600;
+  margin: 0px !important;
+}
+
+.MuiButtonBase-root.MuiRadio-root {
+  padding-right: 4px !important;
+}
+
+.flex-row-break {
+  flex-basis: 100%;
+  height: 0;
+}

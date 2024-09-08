@@ -1,0 +1,64 @@
+[
+  {
+    "eventId": 1,
+    "label": "MICHAEL SEVERANCE",
+    "appointmentDt": "09/02/2024",
+    "startTime": "11:30 AM",
+    "endTime": "01:00 PM",
+    "appointmentType": "I",
+    "usageDesc": "Initial Appointment",
+    "eventTypeDesc": "In Use"
+  },
+  {
+    "eventId": 5,
+    "label": "State Holiday",
+    "appointmentDt": "09/03/2024",
+    "startTime": "09:00 AM",
+    "endTime": "05:30 PM",
+    "usageDesc": "State Holiday"
+  },
+  {
+    "eventId": 2,
+    "label": "DAVID BECKHAM",
+    "appointmentDt": "09/04/2024",
+    "startTime": "11:30 AM",
+    "endTime": "01:00 PM",
+    "appointmentType": "I",
+    "usageDesc": "1st Subsequent Appointment",
+    "eventTypeDesc": "In Use"
+  },
+  {
+    "eventId": 6,
+    "label": "Unused",
+    "appointmentDt": "09/04/2024",
+    "startTime": "02:30 PM",
+    "endTime": "04:00 PM",
+    "eventTypeDesc": "Unused"
+  },
+  {
+    "eventId": 4,
+    "label": "Time-Off",
+    "appointmentDt": "09/05/2024",
+    "startTime": "09:00 AM",
+    "endTime": "05:30 PM",
+    "usageDesc": "Time-Off"
+  },
+  {
+    "eventId": 3,
+    "label": "DAVID MCKENNEY",
+    "appointmentDt": "09/06/2024",
+    "startTime": "11:30 AM",
+    "endTime": "01:00 PM",
+    "appointmentType": "I",
+    "usageDesc": "2nd Subsequent Appointment",
+    "eventTypeDesc": "In Use"
+  },
+  {
+    "eventId": 7,
+    "label": "Available",
+    "appointmentDt": "09/06/2024",
+    "startTime": "02:00 PM",
+    "endTime": "03:30 PM",
+    "eventTypeDesc": "Available"
+  }
+]

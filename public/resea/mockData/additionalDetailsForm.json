@@ -1,0 +1,76 @@
+{
+  "102": true,
+  "106": false,
+  "107": true,
+  "123": false,
+  "153": true,
+  "160": false,
+  "179": true,
+  "205": false,
+  "209": true,
+  "500": false,
+  "addSelf": true,
+  "jMSCaseNotes": false,
+  "jMSRegistrationComplete": true,
+  "jMSRegistrationIncomplete": false,
+  "activeResume": true,
+  "activeResumeDate": "2024-08-01",
+  "activeRecruiter": true,
+  "ActiveRecruiterDate": "2024-08-10",
+  "wPACompleted": false,
+  "wPASignatureSent": false,
+  "sendIEP": false,
+  "claimantsReview": [
+    {
+      "isReviewed": false,
+      "isNoIssues": false,
+      "createdIssue": false,
+      "createdIssueType": "",
+      "createdSubIssue": "",
+      "label": "Week ending 7/21/2024"
+    },
+    {
+      "isReviewed": false,
+      "isNoIssues": false,
+      "createdIssue": false,
+      "createdIssueType": "",
+      "createdSubIssue": "",
+      "label": "Week ending 7/14/2024"
+    },
+    {
+      "isReviewed": false,
+      "isNoIssues": false,
+      "createdIssue": false,
+      "createdIssueType": "",
+      "createdSubIssue": "",
+      "label": "Week ending 7/07/2024"
+    }
+  ],
+  "createdIssues": [
+    {
+      "createdIssue": false,
+      "issueType": "",
+      "subIssue": "",
+      "label": "Issue Type"
+    },
+    {
+      "createdIssue": false,
+      "issueType": "",
+      "subIssue": "",
+      "label": "Issue Type"
+    },
+    {
+      "createdIssue": false,
+      "issueType": "",
+      "subIssue": "",
+      "label": "Issue Type"
+    }
+  ],
+  "reviewdChapter": false,
+  "assginedChapters": false,
+  "chapter": "1-4",
+  "physicallyVerified": false,
+  "remindedClaiment": false,
+  "claimentScheduleBy": "2024-08-01",
+  "interviewerNotes": "Sample notes about the interview."
+}

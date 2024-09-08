@@ -1,0 +1,29 @@
+<svg width="512" height="452.64" xmlns="http://www.w3.org/2000/svg" clip-rule="evenodd" fill-rule="evenodd" image-rendering="optimizeQuality" text-rendering="geometricPrecision" shape-rendering="geometricPrecision">
+
+ <g>
+  <path transform="rotate(13.1306 256.335 234.847)" stroke="null" id="svg_1" d="m362.13212,171.96533c-31.12221,-57.17331 -85.35301,-94.68185 -155.14021,-86.69454c-65.03176,7.43812 -124.21575,55.53538 -138.60448,126.87194c-12.03455,59.72655 10.16062,116.68789 49.56012,155.21772c46.01944,44.99483 115.5053,64.86193 181.37515,34.69516c0.94167,42.8848 -59.73016,59.4086 -120.59974,46.56532c-56.72623,-11.96651 -102.821,-47.13377 -131.38186,-94.22901c-49.9462,-82.33958 -38.56141,-181.44383 13.42822,-250.92086c32.28988,-43.15457 80.24916,-74.88219 138.89639,-84.07386c99.01665,-15.52177 198.41938,40.72659 230.25726,130.37903l40.03041,-13.10342c11.09288,-3.59381 22.93909,2.68813 26.46094,14.038a21.0275,21.51466 0 0 1 -0.8475,15.30981l-45.80285,104.56722c-4.74602,10.8874 -17.22315,15.76264 -27.86403,10.90667l-1.55376,-0.79006l-0.01883,0.0289l-100.40091,-56.7012c-10.22654,-5.74238 -13.96497,-18.88434 -8.35262,-29.34781c2.96626,-5.53041 7.9477,-9.2013 13.50355,-10.59835l37.05473,-12.12066z"/>
+  <rect stroke="null" id="svg_2" height="29.00102" width="181.00638" y="327.69949" x="328.00252"/>
+  <line stroke="null" fill="none" id="svg_4" y2="212.69544" x2="207.99831" y1="129.69252" x1="131.99564"/>
+  <line id="svg_7" y2="344.70009" x2="727.01658" y1="344.70009" x1="728.01661" stroke="#000000" fill="none"/>
+  <line stroke-width="0" id="svg_9" y2="170.69397" x2="142.99602" y1="144.69305" x1="104.99469" stroke="#000000" fill="none"/>
+  <line stroke-width="0" id="svg_10" y2="223.69583" x2="129.99557" y1="209.69534" x1="81.99388" stroke="#000000" fill="none"/>
+  <line transform="rotate(145 98.4953 231.193)" stroke="#000000" id="svg_12" y2="245.69388" x2="115.99595" y1="216.69286" x1="80.99472" stroke-width="10" fill="none"/>
+  <text transform="matrix(9.94073 0 0 9.26195 -1801.83 -1905.79)" stroke="#000000" font-style="normal" font-weight="bold" xml:space="preserve" text-anchor="start" font-family="monospace" font-size="30" id="svg_13" y="241.69646" x="196.99792" stroke-width="0" fill="#00bf00">R</text>
+  <line transform="rotate(125 103.495 269.194)" stroke="#000000" id="svg_14" y2="283.69425" x2="120.99525" y1="254.69323" x1="85.99402" stroke-width="10" fill="none"/>
+  <line transform="rotate(160 105.996 196.693)" stroke="#000000" id="svg_15" y2="211.19343" x2="123.49647" y1="182.19241" x1="88.49523" stroke-width="10" fill="none"/>
+  <line transform="rotate(175 120.997 165.192)" stroke="#000000" id="svg_16" y2="179.69299" x2="138.49713" y1="150.69197" x1="103.4959" stroke-width="10" fill="none"/>
+  <line transform="rotate(5 140.497 142.192)" filter="url(#svg_17_blur)" stroke="#000000" id="svg_17" y2="156.69245" x2="157.99793" y1="127.69144" x1="122.9967" stroke-width="10" fill="none"/>
+  <line transform="rotate(20 164.498 124.192)" stroke="#000000" id="svg_18" y2="138.69219" x2="181.99901" y1="109.69117" x1="146.99777" stroke-width="10" fill="none"/>
+  <line transform="rotate(115 115.995 301.195)" stroke="#000000" id="svg_19" y2="315.69524" x2="133.4952" y1="286.69422" x1="98.49397" stroke-width="10" fill="none"/>
+  <line transform="rotate(100 134.495 329.197)" stroke="#000000" id="svg_20" y2="343.69719" x2="151.99523" y1="314.69617" x1="116.994" stroke-width="10" fill="none"/>
+  <line transform="rotate(80 162.995 354.698)" stroke="#000000" id="svg_21" y2="369.19867" x2="180.49552" y1="340.19765" x1="145.49429" stroke-width="10" fill="none"/>
+  <line transform="rotate(65 193.996 371.2)" stroke="#000000" id="svg_22" y2="385.70029" x2="211.49638" y1="356.69927" x1="176.49515" stroke-width="10" fill="none"/>
+  <line transform="rotate(50 230.998 381.201)" stroke="#000000" id="svg_23" y2="395.70193" x2="248.49883" y1="366.70092" x1="213.4976" stroke-width="10" fill="none"/>
+  <line transform="rotate(35 193.498 114.192)" stroke="#000000" id="svg_24" y2="128.6923" x2="210.99869" y1="99.69128" x1="175.99746" stroke-width="10" fill="none"/>
+  <line transform="rotate(50 223.998 109.192)" stroke="#000000" id="svg_25" y2="123.69236" x2="241.49836" y1="94.69134" x1="206.49713" stroke-width="10" fill="none"/>
+  <line transform="rotate(65 254.997 113.192)" stroke="#000000" id="svg_26" y2="127.69231" x2="272.49801" y1="98.69129" x1="237.49678" stroke-width="10" fill="none"/>
+  <line transform="rotate(75 285.997 123.692)" stroke="#000000" id="svg_27" y2="138.1922" x2="303.49767" y1="109.19118" x1="268.49644" stroke-width="10" fill="none"/>
+  <line transform="rotate(90 310.997 144.191)" stroke="#000000" id="svg_28" y2="158.69197" x2="328.49741" y1="129.69095" x1="293.49618" stroke-width="10" fill="none"/>
+  <line transform="rotate(105 331.997 168.691)" stroke="#000000" id="svg_29" y2="183.1917" x2="349.49718" y1="154.19069" x1="314.49595" stroke-width="10" fill="none"/>
+ </g>
+</svg>
