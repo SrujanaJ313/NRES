@@ -32,7 +32,6 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { STATES } from "../../../helpers/Constants";
 import InputAdornment from "@mui/material/InputAdornment";
-import { CookieNames, getCookieItem } from "../../../utils/cookies";
 import { rescheduleValidationSchema } from "../../../helpers/Validation";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
 
@@ -40,13 +39,14 @@ import {
   convertISOToMMDDYYYY,
   convertTimeToHoursMinutes,
 } from "../../../helpers/utils";
+import { isUpdateAccessExist } from "../../../utils/cookies";
 
 function RescheduleRequest({ onCancel, event }) {
   const [reasons, setReasons] = useState([{}]);
-  const [rescheduleReasons, setRescheduleReasons] = useState([{}]);
+  const [rescheduleReasons, setRescheduleReasons] = useState([]);
   const [errors, setErrors] = useState([]);
+  const [rescheduleReason, setRescheduleReason] = useState([{}]);
   const states = STATES;
-  let rescheduleReason = "";
 
   const formik = useFormik({
     initialValues: {
@@ -58,8 +58,8 @@ function RescheduleRequest({ onCancel, event }) {
       reasonForRescheduling: "",
       lateSchedulingReason: "",
       staffNotes: "",
-      appointmentDate: null,
-      appointmentTime: null,
+      appointmentDate: "",
+      appointmentTime: "",
       entityCity: null,
       entityState: null,
       entityName: "",
@@ -77,34 +77,36 @@ function RescheduleRequest({ onCancel, event }) {
         },
       ],
     },
-    validationSchema: (rescheduleReasons, rescheduleReason) =>
-      rescheduleValidationSchema(rescheduleReasons, rescheduleReason),
+    validationSchema: rescheduleValidationSchema,
+
     onSubmit: async (values) => {
-      const userId = getCookieItem(CookieNames.USER_ID);
       const selectedPrefMtgModeInPerson =
         values?.mode?.selectedPrefMtgModeInPerson;
       const selectedPrefMtgModeVirtual =
         values?.mode?.selectedPrefMtgModeVirtual;
-      const appointmentTime = convertTimeToHoursMinutes(
-        values?.appointmentTime
-      );
-      const appointmentDate = convertISOToMMDDYYYY(values?.appointmentDate);
-      const issueDTOList = values.issues.map((issue) => ({
-        issueId: issue.issueType.issueId,
+      const appointmentTime = values?.appointmentTime
+        ? convertTimeToHoursMinutes(values?.appointmentTime)
+        : null;
+      const appointmentDate = values?.appointmentDate
+        ? convertISOToMMDDYYYY(values?.appointmentDate)
+        : null;
+      const issuesDTOList = values.issues.map((issue) => ({
+        issueId: issue.subIssueType.issueId,
         startDt: convertISOToMMDDYYYY(issue.issueStartDate),
         endDt: convertISOToMMDDYYYY(issue.issueEndDate),
       }));
       try {
         const payload = {
-          userId: userId,
+          // userId: userId,
           oldEventId: event.id,
-          newEventId: rescheduleReason.newRsicId,
+          newEventId: rescheduleReason.newRschRecNum,
+          nonComplianceInd: rescheduleReason.nonComplianceInd,
           selectedPrefMtgModeInPerson: selectedPrefMtgModeInPerson ? "I" : "",
           selectedPrefMtgModeVirtual: selectedPrefMtgModeVirtual ? "V" : "",
           reasonForRescheduling: values.reasonForRescheduling,
           staffNotes: values.staffNotes,
           lateSchedulingReason: values.lateSchedulingReason,
-          issueDTOList,
+          issuesDTOList,
           entityCity: [3159, 3160].includes(values.reasonForRescheduling)
             ? values.entityCity
             : "",
@@ -128,7 +130,6 @@ function RescheduleRequest({ onCancel, event }) {
         await client.post(rescheduleSaveURL, payload);
         onCancel();
       } catch (errorResponse) {
-        console.log('errorResponse-->', errorResponse);
         const newErrMsgs = getMsgsFromErrorCode(
           `POST:${process.env.REACT_APP_RESCHEDULE_SAVE}`,
           errorResponse
@@ -150,10 +151,14 @@ function RescheduleRequest({ onCancel, event }) {
         setReasons(
           data?.map((d) => ({ id: d.constId, name: d.constShortDesc }))
         );
-      }   catch (errorResponse) {
-        const newErrMsgs = getMsgsFromErrorCode(`GET:${process.env.REACT_APP_RESCHEDULING_REASONS_LIST}`,errorResponse)
-        setErrors(newErrMsgs)
-    }}
+      } catch (errorResponse) {
+        const newErrMsgs = getMsgsFromErrorCode(
+          `GET:${process.env.REACT_APP_RESCHEDULING_REASONS_LIST}`,
+          errorResponse
+        );
+        setErrors(newErrMsgs);
+      }
+    }
     fetchRescheduleReasonsListData();
   }, []);
 
@@ -175,9 +180,13 @@ function RescheduleRequest({ onCancel, event }) {
             : await client.post(reschedulingToURL, payload);
         setRescheduleReasons(data);
       } catch (errorResponse) {
-        const newErrMsgs = getMsgsFromErrorCode(`POST:${process.env.REACT_APP_RESCHEDULING_TO}`,errorResponse)
-        setErrors(newErrMsgs)
-    }}
+        const newErrMsgs = getMsgsFromErrorCode(
+          `POST:${process.env.REACT_APP_RESCHEDULING_TO}`,
+          errorResponse
+        );
+        setErrors(newErrMsgs);
+      }
+    }
     fetchRescheduleToListData();
   }, [
     event.id,
@@ -196,9 +205,9 @@ function RescheduleRequest({ onCancel, event }) {
     }
   };
 
-  rescheduleReason = rescheduleReasons?.find(
-    (r) => r.newRsicId === formik.values.rescheduleTo
-  );
+  // rescheduleReason = rescheduleReasons?.find(
+  //   (r) => r.newRsicId === formik.values.rescheduleTo
+  // );
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -263,24 +272,31 @@ function RescheduleRequest({ onCancel, event }) {
               <Select
                 label="*Reschedule to"
                 value={formik.values.rescheduleTo}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  const rescheduleToValue = rescheduleReasons?.find(
+                    (r) => r.newRschRecNum === e.target.value
+                  );
+                  setRescheduleReason(rescheduleToValue);
+                }}
                 onBlur={formik.handleBlur}
                 name="rescheduleTo"
                 sx={{ width: "50%" }}
               >
-                {rescheduleReasons?.map((reason) => {
-                  return (
-                    <MenuItem
-                      key={reason.newRsicId}
-                      value={reason.newRsicId}
-                      style={{
-                        color: reason.nonComplianceInd === "Y" ? "red" : "",
-                      }}
-                    >
-                      {`${reason?.rsicCalEventDate}, ${reason?.rsicCalEventStartTime}, ${reason?.rsicCalEventStartTime}`}
-                    </MenuItem>
-                  );
-                })}
+                {rescheduleReasons.length &&
+                  rescheduleReasons?.map((reason) => {
+                    return (
+                      <MenuItem
+                        key={reason.newRschRecNum}
+                        value={reason.newRschRecNum}
+                        style={{
+                          color: reason.nonComplianceInd === "Y" ? "red" : "",
+                        }}
+                      >
+                        {`${reason?.rsicCalEventDate}, ${reason?.rsicCalEventStartTime}, ${reason?.rsicCalEventStartTime}`}
+                      </MenuItem>
+                    );
+                  })}
               </Select>
               {formik.errors.rescheduleTo && (
                 <FormHelperText error>
@@ -675,15 +691,20 @@ function RescheduleRequest({ onCancel, event }) {
         {errors?.length && (
           <Stack mt={1} direction="column" useFlexGap flexWrap="wrap">
             {errors.map((x) => (
-                <div>
-                  <span className="errorMsg">*{x}</span>
-                </div>
-              ))}
+              <div>
+                <span className="errorMsg">*{x}</span>
+              </div>
+            ))}
           </Stack>
         )}
 
         <Stack direction="row" spacing={2} justifyContent="flex-end">
-          <Button variant="contained" color="primary" type="submit">
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            disabled={!isUpdateAccessExist()}
+          >
             Submit
           </Button>
           <Button variant="outlined" onClick={onCancel}>

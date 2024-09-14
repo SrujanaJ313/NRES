@@ -13,7 +13,9 @@ const initialAppointmentDetailsSchema = yup.object().shape({
       AttendedRESEA: yup.boolean().oneOf([true], "Required field"),
       DevelopIEP: yup.boolean().oneOf([true], "Required field"),
       ReferWIOATraining: yup.boolean().oneOf([true], "Required field"),
-      RsidJmsSelfCmInd: yup.boolean().oneOf([true], "Required field"),
+      AddSelfCaseManager: yup.boolean().oneOf([true], "Required field"),
+      ActiveResume: yup.boolean().oneOf([true], "Required field"),
+      ActiveVirtualRecuiter: yup.boolean().oneOf([true], "Required field"),
       JMSCaseNotes: yup.boolean().oneOf([true], "Required field"),
       JMSRegComplete: yup.boolean(),
       JMSRegIncomplete: yup.boolean(),
@@ -42,7 +44,7 @@ const initialAppointmentDetailsSchema = yup.object().shape({
     .of(
       yup.object().shape({
         jobTitle: yup.string().required("Title is required"),
-        employerName: yup.string().required("Employer Name is required"),
+        empName: yup.string().required("Employer Name is required"),
       })
     )
     .test(
@@ -65,7 +67,7 @@ const initialAppointmentDetailsSchema = yup.object().shape({
     .of(
       yup.object().shape({
         jobTitle: yup.string().required("Title is required"),
-        employerName: yup.string().required("Employer Name is required"),
+        empName: yup.string().required("Employer Name is required"),
       })
     )
     .test(
@@ -73,20 +75,20 @@ const initialAppointmentDetailsSchema = yup.object().shape({
       "At least one job referral is required",
       function (value) {
         const { jmsItems } = this.parent;
-        if (jmsItems.jMSJobReferral && (!value || value.length === 0)) {
+        if (jmsItems.JMSJobReferral && (!value || value.length === 0)) {
           return false;
         }
         return true;
       }
     ),
-  rsidJmsResumeExpDt: yup
+  jmsResumeExpDt: yup
     .date()
     .nullable()
     .when("jmsItems.ActiveResume", {
       is: true,
       then: (schema) => schema.required("Date value is required"),
     }),
-  rsidJmsVRecrtExpDt: yup
+  jmsVRExpDt: yup
     .date()
     .nullable()
     .when("jmsItems.ActiveVirtualRecuiter", {
@@ -156,11 +158,11 @@ const initialAppointmentDetailsSchema = yup.object().shape({
     PhysicallyVerifiedID: yup.boolean().oneOf([true], "Required field"),
     RemindedSelfSchedule: yup.boolean().oneOf([true], "Required field"),
   }),
-  rsidMrpAssgnd: yup.string().when("actionTaken.AssignedReEmpPlan", {
+  assignedMrpChap: yup.string().when("actionTaken.AssignedReEmpPlan", {
     is: true,
     then: (schema) => schema.required("Assigned Chapters must be selected"),
   }),
-  rsidSlfSchByDt: yup
+  selfSchByDt: yup
     .date()
     .nullable()
     .when("actionTaken.RemindedSelfSchedule", {
@@ -185,7 +187,7 @@ const firstAppointmentDetailsSchema = yup.object().shape({
     ReferWIOATraining: yup.boolean().oneOf([true], "Required field"),
     ReferToVRorDHHS: yup.boolean().oneOf([true], "Required field"),
     IEPSignatureCopy: yup.boolean().oneOf([true], "Required field"),
-    RsidJmsSelfCmInd: yup.boolean().oneOf([true], "Required field"),
+    AddSelfCaseManager: yup.boolean().oneOf([true], "Required field"),
     JMSCaseNotes: yup.boolean().oneOf([true], "Required field"),
   }),
   outsideWebReferral: yup
@@ -197,7 +199,7 @@ const firstAppointmentDetailsSchema = yup.object().shape({
     .of(
       yup.object().shape({
         jobTitle: yup.string().required("Title is required"),
-        employerName: yup.string().required("Employer Name is required"),
+        empName: yup.string().required("Employer Name is required"),
       })
     )
     .test(
@@ -220,7 +222,7 @@ const firstAppointmentDetailsSchema = yup.object().shape({
     .of(
       yup.object().shape({
         jobTitle: yup.string().required("Title is required"),
-        employerName: yup.string().required("Employer Name is required"),
+        empName: yup.string().required("Employer Name is required"),
       })
     )
     .test(
@@ -228,7 +230,7 @@ const firstAppointmentDetailsSchema = yup.object().shape({
       "At least one job referral is required",
       function (value) {
         const { jmsItems } = this.parent;
-        if (jmsItems.jMSJobReferral && (!value || value.length === 0)) {
+        if (jmsItems.JMSJobReferral && (!value || value.length === 0)) {
           return false;
         }
         return true;
@@ -282,11 +284,11 @@ const firstAppointmentDetailsSchema = yup.object().shape({
     PhysicallyVerifiedID: yup.boolean().oneOf([true], "Required field"),
     RemindedSelfSchedule: yup.boolean().oneOf([true], "Required field"),
   }),
-  // rsidMrpAssgnd: yup.string().when("actionTaken.AssignedReEmpPlan", {
-  //   is: true,
-  //   then: (schema) => schema.required("Assigned Chapters must be selected"),
-  // }),
-  rsidSlfSchByDt: yup
+  reviewedMrpChap: yup.string().when("actionTaken.ReviewedReEmpPlan", {
+    is: true,
+    then: (schema) => schema.required("Assigned Chapters must be selected"),
+  }),
+  selfSchByDt: yup
     .date()
     .nullable()
     .when("actionTaken.RemindedSelfSchedule", {
@@ -311,7 +313,7 @@ const secondAppointmentDetailsSchema = yup.object().shape({
     ReferWIOATraining: yup.boolean().oneOf([true], "Required field"),
     ReferToVRorDHHS: yup.boolean().oneOf([true], "Required field"),
     IEPSignatureCopy: yup.boolean().oneOf([true], "Required field"),
-    RsidJmsSelfCmInd: yup.boolean().oneOf([true], "Required field"),
+    AddSelfCaseManager: yup.boolean().oneOf([true], "Required field"),
     JMSCaseNotes: yup.boolean().oneOf([true], "Required field"),
     CloseGoals: yup.boolean().oneOf([true], "Required field"),
     JmsCloseIEP: yup.boolean().oneOf([true], "Required field"),
@@ -325,7 +327,7 @@ const secondAppointmentDetailsSchema = yup.object().shape({
     .of(
       yup.object().shape({
         jobTitle: yup.string().required("Title is required"),
-        employerName: yup.string().required("Employer Name is required"),
+        empName: yup.string().required("Employer Name is required"),
       })
     )
     .test(
@@ -348,7 +350,7 @@ const secondAppointmentDetailsSchema = yup.object().shape({
     .of(
       yup.object().shape({
         jobTitle: yup.string().required("Title is required"),
-        employerName: yup.string().required("Employer Name is required"),
+        empName: yup.string().required("Employer Name is required"),
       })
     )
     .test(
@@ -356,7 +358,7 @@ const secondAppointmentDetailsSchema = yup.object().shape({
       "At least one job referral is required",
       function (value) {
         const { jmsItems } = this.parent;
-        if (jmsItems.jMSJobReferral && (!value || value.length === 0)) {
+        if (jmsItems.JMSJobReferral && (!value || value.length === 0)) {
           return false;
         }
         return true;
@@ -506,99 +508,117 @@ const returnToWorkValidationsSchema = (values) => {
   return errors;
 };
 
-const rescheduleValidationSchema = (rescheduleReasons, rescheduleReason) => {
-  return yup.object({
-    rescheduleTo: yup.string().required("Reschedule to is required"),
-    mode: yup
-      .object({
-        selectedPrefMtgModeInPerson: yup.boolean(),
-        selectedPrefMtgModeVirtual: yup.boolean(),
-      })
-      .test(
-        "at-least-one",
-        "At least one mode must be selected",
-        (value) =>
-          value.selectedPrefMtgModeInPerson || value.selectedPrefMtgModeVirtual
-      ),
-    reasonForRescheduling: yup
-      .string()
-      .required("Reason for rescheduling is required"),
-    // tempSuspendedInd: yup
-    //   .string()
-    //   .oneOf(["Y"], "You must check Placeholder Meeting")
-    //   .required("You must check Placeholder Meeting"),
-    lateSchedulingReason: yup.string().when("rescheduleTo", {
-      is: (rescheduleTo) => {
-        rescheduleReason = rescheduleReasons.find(
-          (r) => r.newRsicId === Number(rescheduleTo)
-        );
-        return (
-          rescheduleTo !== "" && rescheduleReason?.nonComplianceInd === "Y"
-        );
-      },
-      then: () => yup.string().required("Reason for scheduling is required"),
-    }),
-    staffNotes: yup.string(),
-    appointmentDate: yup.date().when("reasonForRescheduling", {
+const rescheduleValidationSchema = yup.object({
+  rescheduleTo: yup.string().required("Reschedule to is required"),
+  mode: yup
+    .object({
+      selectedPrefMtgModeInPerson: yup.boolean(),
+      selectedPrefMtgModeVirtual: yup.boolean(),
+    })
+    .test(
+      "at-least-one",
+      "At least one mode must be selected",
+      (value) =>
+        value.selectedPrefMtgModeInPerson || value.selectedPrefMtgModeVirtual
+    ),
+  reasonForRescheduling: yup
+    .string()
+    .required("Reason for rescheduling is required"),
+  // tempSuspendedInd: yup
+  //   .string()
+  //   .oneOf(["Y"], "You must check Placeholder Meeting")
+  //   .required("You must check Placeholder Meeting"),
+  // lateSchedulingReason: yup.string().when("rescheduleTo", {
+  //   is: (rescheduleTo) => {
+  //     rescheduleReason = rescheduleReasons.find(
+  //       (r) => r.newRsicId === Number(rescheduleTo)
+  //     );
+  //     return (
+  //       rescheduleTo !== "" && rescheduleReason?.nonComplianceInd === "Y"
+  //     );
+  //   },
+  //   then: () => yup.string().required("Reason for scheduling is required"),
+  // }),
+  staffNotes: yup.string(),
+  appointmentDate: yup
+    .date()
+    .nullable()
+    .when("reasonForRescheduling", {
       is: (reasonForRescheduling) =>
         ["3159", "3160", "3163"].includes(reasonForRescheduling),
       then: () => yup.date().required("Appointment Date is required"),
     }),
-    appointmentTime: yup.string().when("reasonForRescheduling", {
+  appointmentTime: yup
+    .string()
+    .nullable()
+    .when("reasonForRescheduling", {
       is: (reasonForRescheduling) =>
         ["3159", "3160", "3163"].includes(reasonForRescheduling),
       then: () => yup.string().required("Appointment Time is required"),
     }),
-    entityCity: yup.string().when("reasonForRescheduling", {
+  entityCity: yup
+    .string()
+    .nullable()
+    .when("reasonForRescheduling", {
       is: (reasonForRescheduling) =>
         ["3159", "3160"].includes(reasonForRescheduling),
       then: () => yup.string().required("City is required"),
     }),
-    entityState: yup.string().when("reasonForRescheduling", {
+  entityState: yup
+    .string()
+    .nullable()
+    .when("reasonForRescheduling", {
       is: (reasonForRescheduling) =>
         ["3159", "3160"].includes(reasonForRescheduling),
       then: () => yup.string().required("State is required"),
     }),
-    entityName: yup.string().when("reasonForRescheduling", {
+  entityName: yup.string().when("reasonForRescheduling", {
+    is: (reasonForRescheduling) => reasonForRescheduling === "3163",
+    then: () => yup.string().required("Employer Name is required"),
+  }),
+  entityTeleNumber: yup
+    .string()
+    .matches(/^\d{10}$/, "Telephone number must be exactly 10 digits")
+    .when("reasonForRescheduling", {
       is: (reasonForRescheduling) => reasonForRescheduling === "3163",
-      then: () => yup.string().required("Employer Name is required"),
+      then: () => yup.string().required("Contact Number is required"),
     }),
-    entityTeleNumber: yup
-      .string()
-      .matches(/^\d{10}$/, "Telephone number must be exactly 10 digits")
-      .when("reasonForRescheduling", {
-        is: (reasonForRescheduling) => reasonForRescheduling === "3163",
-        then: () => yup.string().required("Contact Number is required"),
-      }),
-    jobTitle: yup.string().when("reasonForRescheduling", {
-      is: (reasonForRescheduling) => reasonForRescheduling === "3163",
-      then: () =>
-        yup
-          .string()
-          .required("Job Title is required")
-          .matches(
-            /^[a-zA-Z0-9\s]*$/,
-            "Job Title cannot contain special characters"
-          ),
-    }),
-    issues: yup.array().of(
-      yup.object().shape({
-        issueType: yup.object().required("Issue Type is required"),
-        subIssueType: yup.object().required("Sub Issue Type is required"),
-        issueStartDate: yup.date().required("Start Date is required"),
-        issueEndDate: yup.date().required("End Date is required"),
-      })
-    ),
-    partFullTimeInd: yup
-      .string()
-      .required("Work schedule is required. Please select a work schedule."),
-  });
-};
+  jobTitle: yup.string().when("reasonForRescheduling", {
+    is: (reasonForRescheduling) => reasonForRescheduling === "3163",
+    then: () =>
+      yup
+        .string()
+        .required("Job Title is required")
+        .matches(
+          /^[a-zA-Z0-9\s]*$/,
+          "Job Title cannot contain special characters"
+        ),
+  }),
+  issues: yup.array().of(
+    yup.object().shape({
+      issueType: yup.object().required("Issue Type is required"),
+      subIssueType: yup.object().required("Sub Issue Type is required"),
+      issueStartDate: yup.date().required("Start Date is required"),
+      issueEndDate: yup.date().required("End Date is required"),
+    })
+  ),
+  partFullTimeInd: yup.string().when("reasonForRescheduling", {
+    is: (reasonForRescheduling) => reasonForRescheduling === "3163",
+    then: () =>
+      yup
+        .string()
+        .required("Work schedule is required. Please select a work schedule."),
+  }),
+});
 
 const availableEventSchema = yup.object().shape({
   claimant: yup.string().required("For is required"),
-  claimantId: yup.string().required("claimant is required"),
+  claimantId: yup.object().required("claimant is required"),
   staffNotes: yup.string().optional(),
+  lateStaffNote:yup.string().when("claimantId",{
+    is:(claimantId) => claimantId.beyondReseaDeadline === "Y",
+    then:() => yup.string().required("lateStaffNote is required")
+  }),
   informedCmtInd: yup
     .string()
     .oneOf(["Y"], "Please Check Informed Claimant")
@@ -632,6 +652,19 @@ const switchValidationSchema = yup.object({
   ),
 });
 
+const reAssignPageValidationSchema = yup.object({
+  reassignReasonCd: yup
+    .string()
+    .required("Reason for Reassignment is required"),
+  caseManagerAvl: yup
+    .string()
+    .required("Case Manager Availability is required"),
+  localOffice: yup
+    .string()
+    .oneOf(["Y", "N"])
+    .required("Look Up Case Manager Availability is required"),
+});
+
 export {
   initialAppointmentDetailsSchema,
   firstAppointmentDetailsSchema,
@@ -639,7 +672,7 @@ export {
   returnToWorkValidationsSchema,
   isDateValid,
   rescheduleValidationSchema,
-  availableEventSchema,
   switchValidationSchema,
+  availableEventSchema,
+  reAssignPageValidationSchema,
 };
-
