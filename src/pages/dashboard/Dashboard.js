@@ -19,6 +19,10 @@ const Dashboard = () => {
     setStage(selectedStage);
   }, []);
 
+  const handleItemsSelection = (event) => {
+    setUserId(event.target.value);
+  };
+
   return (
     <Box>
       <Grid container sx={{ border: "2px solid #000" }}>
@@ -31,6 +35,8 @@ const Dashboard = () => {
               showCalendarView={isCalendarView}
               onSwitchView={handleSwitchView}
               onChange={handleMetricChange}
+              userId={userId}
+              handleItemsSelection={handleItemsSelection}
             />
             {isCalendarView ? (
               <InterviewCalendarView userId={userId} />

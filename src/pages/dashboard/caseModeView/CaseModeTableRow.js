@@ -21,11 +21,11 @@ const indicatorColors = {
   WL: "#f36d6d",
 };
 
-const CaseModeTableRow = ({ row }) => {
+const CaseModeTableRow = ({ row, setSelectedRow }) => {
   return (
     <TableRow>
       <StyledTableCell padding="checkbox" sx={{ width: "10px", padding: 0 }}>
-        <Radio size="small" />
+        <Radio size="small" onClick={() => setSelectedRow(row)} />
       </StyledTableCell>
       <StyledTableCell>
         <Stack spacing={1.5} direction="row">

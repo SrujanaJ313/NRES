@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Stack from "@mui/material/Stack";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import moment from "moment";
 
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -13,12 +14,8 @@ import Switch from "./Switch";
 import CaseHeader from "../../../components/caseHeader";
 import NoShowup from "./noShow";
 
-function ScheduleEvent({ caseDetails, event, onClose }) {
+function ScheduleEvent({ caseDetails, event, onSubmitClose }) {
   const [type, setType] = useState("");
-
-  const handleSubmit = () => {
-    onClose();
-  };
 
   const getTitle = () => {
     switch (type) {
@@ -40,6 +37,37 @@ function ScheduleEvent({ caseDetails, event, onClose }) {
     }
   };
 
+  const getIsFutureAppointment = () => {
+    const appointmentDateTime = moment(
+      `${event.appointmentDt} ${event.startTime}`
+    );
+    const adjustedDateTime = appointmentDateTime.subtract(30, "minutes");
+    const isFutureAppointment = moment().isBefore(adjustedDateTime);
+    return isFutureAppointment;
+  };
+
+  const getIsPastAppointment = () => {
+    const appointmentDateTime = moment(
+      `${event.appointmentDt} ${event.endTime}`
+    );
+    const adjustedDateTime = appointmentDateTime.add(30, "minutes");
+    const isPastAppointment = moment().isAfter(adjustedDateTime);
+    return isPastAppointment;
+  };
+
+  const isCurrentAppointment = () => {
+    const appointmentStartTime = moment(
+      `${event.appointmentDt} ${event.startTime}`
+    ).subtract(30, "minutes");
+    const appointmentEndTime = moment(
+      `${event.appointmentDt} ${event.endTime}`
+    ).add(30, "minutes");
+    return (
+      moment().isAfter(appointmentStartTime) &&
+      moment().isBefore(appointmentEndTime)
+    );
+  };
+
   return (
     <>
       <DialogContent dividers sx={{ paddingBottom: 1 }}>
@@ -55,6 +83,7 @@ function ScheduleEvent({ caseDetails, event, onClose }) {
               {type === "reschedule" && (
                 <Stack>
                   <RescheduleRequest
+                    onSubmitClose={onSubmitClose}
                     onCancel={() => setType("")}
                     event={event}
                   />
@@ -62,17 +91,26 @@ function ScheduleEvent({ caseDetails, event, onClose }) {
               )}
               {type === "switch" && (
                 <Stack>
-                  <Switch onCancel={() => setType("")} event={event} />
+                  <Switch
+                    onSubmitClose={onSubmitClose}
+                    onCancel={() => setType("")}
+                    event={event}
+                  />
                 </Stack>
               )}
               {type === "returnToWork" && (
                 <Stack>
-                  <ReturnedToWork onCancel={() => setType("")} event={event} />
+                  <ReturnedToWork
+                    onSubmitClose={onSubmitClose}
+                    onCancel={() => setType("")}
+                    event={event}
+                  />
                 </Stack>
               )}
               {type === "appointmentDetails" && (
                 <Stack>
                   <AppointmentDetails
+                    onSubmitClose={onSubmitClose}
                     event={event}
                     onCancel={() => setType("")}
                     caseDetails={caseDetails}
@@ -82,7 +120,11 @@ function ScheduleEvent({ caseDetails, event, onClose }) {
 
               {type === "noShow" && (
                 <Stack>
-                  <NoShowup onCancel={() => setType("")} event={event} />
+                  <NoShowup
+                    onSubmitClose={onSubmitClose}
+                    onCancel={() => setType("")}
+                    event={event}
+                  />
                 </Stack>
               )}
             </>
@@ -94,6 +136,7 @@ function ScheduleEvent({ caseDetails, event, onClose }) {
           variant="contained"
           onClick={() => setType("reschedule")}
           size="small"
+          disabled={!getIsFutureAppointment()}
         >
           Reschedule
         </Button>
@@ -101,6 +144,7 @@ function ScheduleEvent({ caseDetails, event, onClose }) {
           variant="contained"
           onClick={() => setType("switch")}
           size="small"
+          disabled={!getIsFutureAppointment()}
         >
           Switch Mode
         </Button>
@@ -117,6 +161,7 @@ function ScheduleEvent({ caseDetails, event, onClose }) {
           sx={{ height: "fit-content" }}
           onClick={() => setType("appointmentDetails")}
           size="small"
+          disabled={!getIsPastAppointment()}
         >
           Appointment Details
         </Button>
@@ -125,6 +170,7 @@ function ScheduleEvent({ caseDetails, event, onClose }) {
           sx={{ height: "fit-content" }}
           onClick={() => setType("noShow")}
           size="small"
+          disabled={!isCurrentAppointment()}
         >
           No Show
         </Button>

@@ -156,7 +156,7 @@ export default function Header() {
             </Stack>
           </Stack>
           <Stack direction={"row"} alignItems={"center"}>
-            <Typography color="white">Good Morning {getUserName()}</Typography>
+            <Typography color="white">Good Morning, {getUserName()}</Typography>
             <IconButton
               color="inherit"
               onClick={handleOpenMenu}

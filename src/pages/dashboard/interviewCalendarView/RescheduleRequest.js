@@ -34,44 +34,50 @@ import { STATES } from "../../../helpers/Constants";
 import InputAdornment from "@mui/material/InputAdornment";
 import { rescheduleValidationSchema } from "../../../helpers/Validation";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
+import { useNavigate } from "react-router-dom";
 
 import {
   convertISOToMMDDYYYY,
-  convertTimeToHoursMinutes,
+  // convertTimeToHoursMinutes,
 } from "../../../helpers/utils";
 import { isUpdateAccessExist } from "../../../utils/cookies";
 
-function RescheduleRequest({ onCancel, event }) {
+function RescheduleRequest({ onCancel, event, onSubmitClose }) {
   const [reasons, setReasons] = useState([{}]);
   const [rescheduleReasons, setRescheduleReasons] = useState([]);
   const [errors, setErrors] = useState([]);
-  const [rescheduleReason, setRescheduleReason] = useState([{}]);
+  // const [rescheduleReason, setRescheduleReason] = useState([{}]);
   const states = STATES;
+  const navigate = useNavigate();
+
+  const handleNavigation = (page) => {
+    navigate(page);
+  };
 
   const formik = useFormik({
     initialValues: {
       rescheduleTo: "",
       mode: {
-        selectedPrefMtgModeInPerson: false,
+        selectedPrefMtgModeInPerson:
+          event?.usageDesc === "Initial Appointment" ? true : false,
         selectedPrefMtgModeVirtual: false,
       },
       reasonForRescheduling: "",
       lateSchedulingReason: "",
       staffNotes: "",
-      appointmentDate: "",
-      appointmentTime: "",
-      entityCity: null,
-      entityState: null,
+      appointmentDate: null,
+      appointmentTime: null,
+      entityCity: "",
+      entityState: "",
       entityName: "",
       entityTeleNumber: "",
-      // tempSuspendedInd: "",
       partFullTimeInd: "",
       jobTitle: "",
       issues: [
         {
           id: uuidv4(),
-          issueType: "",
-          subIssueType: "",
+          issueType: {},
+          subIssueType: {},
           issueStartDate: null,
           issueEndDate: null,
         },
@@ -80,55 +86,71 @@ function RescheduleRequest({ onCancel, event }) {
     validationSchema: rescheduleValidationSchema,
 
     onSubmit: async (values) => {
+      const issuesDTOList = [];
       const selectedPrefMtgModeInPerson =
         values?.mode?.selectedPrefMtgModeInPerson;
       const selectedPrefMtgModeVirtual =
         values?.mode?.selectedPrefMtgModeVirtual;
-      const appointmentTime = values?.appointmentTime
-        ? convertTimeToHoursMinutes(values?.appointmentTime)
-        : null;
+      const appointmentTime = values?.appointmentTime;
       const appointmentDate = values?.appointmentDate
         ? convertISOToMMDDYYYY(values?.appointmentDate)
         : null;
-      const issuesDTOList = values.issues.map((issue) => ({
-        issueId: issue.subIssueType.issueId,
-        startDt: convertISOToMMDDYYYY(issue.issueStartDate),
-        endDt: convertISOToMMDDYYYY(issue.issueEndDate),
-      }));
+      values.issues.forEach((issue) => {
+        if (issue?.subIssueType?.issueId) {
+          issuesDTOList.push({
+            issueId: issue.subIssueType.issueId,
+            startDt: convertISOToMMDDYYYY(issue.issueStartDate),
+            endDt: convertISOToMMDDYYYY(issue.issueEndDate),
+          });
+        }
+      });
       try {
-        const payload = {
-          // userId: userId,
+        let payload = {
           oldEventId: event.id,
-          newEventId: rescheduleReason.newRschRecNum,
-          nonComplianceInd: rescheduleReason.nonComplianceInd,
+          newEventId: values?.rescheduleTo?.newRschRecNum,
+          nonComplianceInd: values?.rescheduleTo?.nonComplianceInd,
           selectedPrefMtgModeInPerson: selectedPrefMtgModeInPerson ? "I" : "",
           selectedPrefMtgModeVirtual: selectedPrefMtgModeVirtual ? "V" : "",
           reasonForRescheduling: values.reasonForRescheduling,
           staffNotes: values.staffNotes,
-          lateSchedulingReason: values.lateSchedulingReason,
-          issuesDTOList,
-          entityCity: [3159, 3160].includes(values.reasonForRescheduling)
-            ? values.entityCity
-            : "",
-          entityState: [3159, 3160].includes(values.reasonForRescheduling)
-            ? values.entityState
-            : "",
-          entityName: [3163].includes(values.reasonForRescheduling)
-            ? values.entityName
-            : "",
-          entityTeleNumber: [3163].includes(values.reasonForRescheduling)
-            ? values.entityTeleNumber
-            : "",
-          jobTitle: [3163].includes(values.reasonForRescheduling)
-            ? values.jobTitle
-            : "",
-          partFullTimeInd: values.partFullTimeInd,
-          appointmentTime,
-          appointmentDate,
         };
+        if ([3159, 3160, 3163].includes(values.reasonForRescheduling)) {
+          const jobOrDoctorAppointment = {
+            entityCity: [3159, 3160].includes(values.reasonForRescheduling)
+              ? values.entityCity
+              : "",
+            entityState: [3159, 3160].includes(values.reasonForRescheduling)
+              ? values.entityState
+              : "",
+            entityName: [3163].includes(values.reasonForRescheduling)
+              ? values.entityName
+              : "",
+            entityTeleNumber: [3163].includes(values.reasonForRescheduling)
+              ? values.entityTeleNumber
+              : "",
+            jobTitle: [3163].includes(values.reasonForRescheduling)
+              ? values.jobTitle
+              : "",
+            partFullTimeInd: values.partFullTimeInd,
+            appointmentTime,
+            appointmentDate,
+          };
+          payload = { ...payload, ...jobOrDoctorAppointment };
+        }
 
+        if (values?.rescheduleTo?.nonComplianceInd === "Y") {
+          payload = {
+            ...payload,
+            lateSchedulingReason: values.lateSchedulingReason,
+          };
+        }
+
+        if (issuesDTOList?.length) {
+          payload = { ...payload, issuesDTOList };
+        }
+        handleNavigation("");
         await client.post(rescheduleSaveURL, payload);
-        onCancel();
+        onSubmitClose();
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
           `POST:${process.env.REACT_APP_RESCHEDULE_SAVE}`,
@@ -137,10 +159,9 @@ function RescheduleRequest({ onCancel, event }) {
         setErrors(newErrMsgs);
       }
     },
-    validateOnChange: false,
+    validateOnChange: true,
     validateOnBlur: false,
   });
-
   useEffect(() => {
     async function fetchRescheduleReasonsListData() {
       try {
@@ -205,10 +226,6 @@ function RescheduleRequest({ onCancel, event }) {
     }
   };
 
-  // rescheduleReason = rescheduleReasons?.find(
-  //   (r) => r.newRsicId === formik.values.rescheduleTo
-  // );
-
   return (
     <form onSubmit={formik.handleSubmit}>
       <Stack spacing={2}>
@@ -229,8 +246,8 @@ function RescheduleRequest({ onCancel, event }) {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      value={formik.values.selectedPrefMtgModeInPerson}
-                      checked={formik.values.selectedPrefMtgModeInPerson}
+                      value={formik.values.mode.selectedPrefMtgModeInPerson}
+                      checked={formik.values.mode.selectedPrefMtgModeInPerson}
                       onChange={handleCheckboxChange}
                       onBlur={formik.handleBlur}
                       name="selectedPrefMtgModeInPerson"
@@ -243,7 +260,7 @@ function RescheduleRequest({ onCancel, event }) {
                   control={
                     <Checkbox
                       value={formik.values.mode.selectedPrefMtgModeVirtual}
-                      checked={formik.values.selectedPrefMtgModeVirtual}
+                      checked={formik.values.mode.selectedPrefMtgModeVirtual}
                       onChange={handleCheckboxChange}
                       onBlur={formik.handleBlur}
                       disabled={event?.usageDesc === "Initial Appointment"}
@@ -262,7 +279,7 @@ function RescheduleRequest({ onCancel, event }) {
                 (choose all that apply)
               </Typography>
             </FormControl>
-            {formik.errors.mode && (
+            {formik.touched.mode && formik.errors.mode && (
               <FormHelperText error>{formik.errors.mode}</FormHelperText>
             )}
             <FormControl size="small" fullWidth>
@@ -273,11 +290,7 @@ function RescheduleRequest({ onCancel, event }) {
                 label="*Reschedule to"
                 value={formik.values.rescheduleTo}
                 onChange={(e) => {
-                  formik.handleChange(e);
-                  const rescheduleToValue = rescheduleReasons?.find(
-                    (r) => r.newRschRecNum === e.target.value
-                  );
-                  setRescheduleReason(rescheduleToValue);
+                  formik.setFieldValue("rescheduleTo", e.target.value);
                 }}
                 onBlur={formik.handleBlur}
                 name="rescheduleTo"
@@ -288,17 +301,17 @@ function RescheduleRequest({ onCancel, event }) {
                     return (
                       <MenuItem
                         key={reason.newRschRecNum}
-                        value={reason.newRschRecNum}
+                        value={reason}
                         style={{
                           color: reason.nonComplianceInd === "Y" ? "red" : "",
                         }}
                       >
-                        {`${reason?.rsicCalEventDate}, ${reason?.rsicCalEventStartTime}, ${reason?.rsicCalEventStartTime}`}
+                        {`${reason?.rsicCalEventDate}, ${reason?.rsicCalEventStartTime}- ${reason?.rsicCalEventEndTime}`}
                       </MenuItem>
                     );
                   })}
               </Select>
-              {formik.errors.rescheduleTo && (
+              {formik.touched.rescheduleTo && formik.errors.rescheduleTo && (
                 <FormHelperText error>
                   {formik.errors.rescheduleTo}
                 </FormHelperText>
@@ -327,31 +340,13 @@ function RescheduleRequest({ onCancel, event }) {
                   </MenuItem>
                 ))}
               </Select>
-              {formik.errors.reasonForRescheduling && (
-                <FormHelperText error>
-                  {formik.errors.reasonForRescheduling}
-                </FormHelperText>
-              )}
+              {formik.touched.reasonForRescheduling &&
+                formik.errors.reasonForRescheduling && (
+                  <FormHelperText error>
+                    {formik.errors.reasonForRescheduling}
+                  </FormHelperText>
+                )}
             </FormControl>
-            {/* <FormControl sx={{ width: "55%" }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    value={formik.values.tempSuspendedInd}
-                    checked={formik.values.tempSuspendedInd === "Y"}
-                    onChange={handleCheckboxChange}
-                    onBlur={formik.handleBlur}
-                    name="tempSuspendedInd"
-                  />
-                }
-                // label="Placeholder Meeting -do not generate Notice"
-              />
-              {formik.errors.tempSuspendedInd && (
-                <FormHelperText error>
-                  {formik.errors.tempSuspendedInd}
-                </FormHelperText>
-              )}
-            </FormControl> */}
           </Stack>
         </Stack>
 
@@ -370,9 +365,9 @@ function RescheduleRequest({ onCancel, event }) {
                       textField: { size: "small" },
                     }}
                     value={formik.values.appointmentDate}
-                    onChange={(value) =>
-                      formik.setFieldValue("appointmentDate", value)
-                    }
+                    onChange={(date) => {
+                      formik.setFieldValue("appointmentDate", date);
+                    }}
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -382,11 +377,13 @@ function RescheduleRequest({ onCancel, event }) {
                       />
                     )}
                   />
-                  {formik.errors.appointmentDate && (
-                    <FormHelperText error>
-                      {formik.errors.appointmentDate}
-                    </FormHelperText>
-                  )}
+                  {formik.touched.appointmentDate &&
+                    formik.errors.appointmentDate &&
+                    formik.errors.appointmentDate && (
+                      <FormHelperText error>
+                        {formik.errors.appointmentDate}
+                      </FormHelperText>
+                    )}
                 </FormControl>
               </LocalizationProvider>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -396,20 +393,16 @@ function RescheduleRequest({ onCancel, event }) {
                     slotProps={{
                       textField: { size: "small" },
                     }}
-                    value={
-                      formik.values.staffNotes
-                        ? dayjs(formik.values.staffNotes)
-                        : null
-                    }
+                    value={formik.values.appointmentTime}
                     onChange={(value) =>
                       formik.setFieldValue(
                         "appointmentTime",
-                        value ? value.toISOString() : ""
+                        value ? dayjs(value).format("hh:mm A") : ""
                       )
                     }
                     onBlur={formik.handleBlur}
                     name="appointmentTime"
-                    inputFormat="HH:mm"
+                    inputFormat="hh:mm a"
                     minutesStep={15}
                     renderInput={(params) => (
                       <TextField
@@ -420,11 +413,12 @@ function RescheduleRequest({ onCancel, event }) {
                       />
                     )}
                   />
-                  {formik.errors.appointmentTime && (
-                    <FormHelperText error>
-                      {formik.errors.appointmentTime}
-                    </FormHelperText>
-                  )}
+                  {formik.touched.appointmentTime &&
+                    formik.errors.appointmentTime && (
+                      <FormHelperText error>
+                        {formik.errors.appointmentTime}
+                      </FormHelperText>
+                    )}
                 </FormControl>
               </LocalizationProvider>
             </Stack>
@@ -439,13 +433,27 @@ function RescheduleRequest({ onCancel, event }) {
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
-                <FormHelperText error>
-                  {formik.errors.entityCity}
-                </FormHelperText>
+                {formik.touched.entityCity && formik.errors.entityCity && (
+                  <FormHelperText error>
+                    {formik.errors.entityCity}
+                  </FormHelperText>
+                )}
               </FormControl>
 
               <FormControl style={{ width: "12rem", marginLeft: 10 }}>
-                <InputLabel id="state-dropdown">*State</InputLabel>
+                <InputLabel
+                  id="state-dropdown"
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "0",
+                    transform: "translateY(-50%)",
+                    paddingLeft: "8px",
+                  }}
+                  Ï
+                >
+                  *State
+                </InputLabel>
                 <Select
                   label="*State"
                   variant="outlined"
@@ -462,9 +470,11 @@ function RescheduleRequest({ onCancel, event }) {
                     </MenuItem>
                   ))}
                 </Select>
-                <FormHelperText error>
-                  {formik.errors.entityState}
-                </FormHelperText>
+                {formik.touched.entityState && formik.errors.entityState && (
+                  <FormHelperText error>
+                    {formik.errors.entityState}
+                  </FormHelperText>
+                )}
               </FormControl>
             </Stack>
           </>
@@ -485,17 +495,20 @@ function RescheduleRequest({ onCancel, event }) {
                       textField: { size: "small" },
                     }}
                     value={formik.values.appointmentDate}
-                    onChange={formik.handleChange}
+                    onChange={(date) => {
+                      formik.setFieldValue("appointmentDate", date);
+                    }}
                     renderInput={(params) => (
                       <TextField {...params} size="small" variant="outlined" />
                     )}
                     name="appointmentDate"
                   />
-                  {formik.errors.appointmentDate && (
-                    <FormHelperText error>
-                      {formik.errors.appointmentDate}
-                    </FormHelperText>
-                  )}
+                  {formik.touched.appointmentDate &&
+                    formik.errors.appointmentDate && (
+                      <FormHelperText error>
+                        {formik.errors.appointmentDate}
+                      </FormHelperText>
+                    )}
                 </FormControl>
               </LocalizationProvider>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -505,20 +518,16 @@ function RescheduleRequest({ onCancel, event }) {
                     slotProps={{
                       textField: { size: "small" },
                     }}
-                    value={
-                      formik.values.staffNotes
-                        ? dayjs(formik.values.staffNotes)
-                        : null
-                    }
+                    value={formik.values.appointmentTime}
                     onChange={(value) =>
                       formik.setFieldValue(
                         "appointmentTime",
-                        value ? value.toISOString() : ""
+                        value ? dayjs(value).format("hh:mm A") : ""
                       )
                     }
                     onBlur={formik.handleBlur}
                     name="appointmentTime"
-                    inputFormat="HH:mm"
+                    inputFormat="hh:mm a"
                     minutesStep={15}
                     renderInput={(params) => (
                       <TextField
@@ -529,11 +538,12 @@ function RescheduleRequest({ onCancel, event }) {
                       />
                     )}
                   />
-                  {formik.errors.appointmentTime && (
-                    <FormHelperText error>
-                      {formik.errors.appointmentTime}
-                    </FormHelperText>
-                  )}
+                  {formik.touched.appointmentTime &&
+                    formik.errors.appointmentTime && (
+                      <FormHelperText error>
+                        {formik.errors.appointmentTime}
+                      </FormHelperText>
+                    )}
                 </FormControl>
               </LocalizationProvider>
             </Stack>
@@ -548,7 +558,7 @@ function RescheduleRequest({ onCancel, event }) {
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
-                {formik.errors.entityName && (
+                {formik.touched.entityName && formik.errors.entityName && (
                   <FormHelperText error>
                     {formik.errors.entityName}
                   </FormHelperText>
@@ -575,11 +585,12 @@ function RescheduleRequest({ onCancel, event }) {
                     ),
                   }}
                 />
-                {formik.errors.entityTeleNumber && (
-                  <FormHelperText error>
-                    {formik.errors.entityTeleNumber}
-                  </FormHelperText>
-                )}
+                {formik.touched.entityTeleNumber &&
+                  formik.errors.entityTeleNumber && (
+                    <FormHelperText error>
+                      {formik.errors.entityTeleNumber}
+                    </FormHelperText>
+                  )}
               </FormControl>
             </Stack>
 
@@ -594,7 +605,7 @@ function RescheduleRequest({ onCancel, event }) {
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
-                {formik.errors.jobTitle && (
+                {formik.touched.jobTitle && formik.errors.jobTitle && (
                   <FormHelperText error>
                     {formik.errors.jobTitle}
                   </FormHelperText>
@@ -634,17 +645,18 @@ function RescheduleRequest({ onCancel, event }) {
                     label="Part time"
                   />
                 </RadioGroup>
-                {formik.errors.partFullTimeInd && (
-                  <FormHelperText error sx={{ alignSelf: "center" }}>
-                    {formik.errors.partFullTimeInd}
-                  </FormHelperText>
-                )}
+                {formik.touched.partFullTimeInd &&
+                  formik.errors.partFullTimeInd && (
+                    <FormHelperText error sx={{ alignSelf: "center" }}>
+                      {formik.errors.partFullTimeInd}
+                    </FormHelperText>
+                  )}
               </FormControl>
             </Stack>
           </>
         ) : null}
 
-        {rescheduleReason?.nonComplianceInd === "Y" && (
+        {formik?.values?.rescheduleTo?.nonComplianceInd === "Y" && (
           <Stack direction={"column"} spacing={2}>
             <TextField
               name="lateSchedulingReason"
@@ -688,7 +700,7 @@ function RescheduleRequest({ onCancel, event }) {
           <IssueSubIssueType formik={formik} />
         </Stack>
 
-        {errors?.length && (
+        {!!errors?.length && (
           <Stack mt={1} direction="column" useFlexGap flexWrap="wrap">
             {errors.map((x) => (
               <div>

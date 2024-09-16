@@ -25,16 +25,20 @@ import client from "../../../helpers/Api";
 import { caseloadMetricsURL } from "../../../helpers/Urls";
 import { CookieNames, getCookieItem } from "../../../utils/cookies";
 import { appointmentStaffListURL } from "../../../helpers/Urls";
-import { getMsgsFromErrorCode } from "../../../helpers/utils";
+import {
+  getMsgsFromErrorCode,
+  sortAlphabetically,
+} from "../../../helpers/utils";
 
 const STAGES = [
-  "Initial",
-  "First 1-on-1s",
-  "Second 1-on-1s",
-  "Follow-ups",
-  "HI Priority",
-  "Failed",
-  "Delayed",
+  "Initial Appointment",
+  "1st Subsequent Appointment",
+  "2nd Subsequent Appointment",
+  "followUp",
+  "hiPriority",
+  "failed",
+  "delayed",
+  "All",
 ];
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -61,17 +65,23 @@ const StyledBox = styled(Box)(({ theme }) => ({
 }));
 
 const CaseloadMetrics = React.memo(
-  ({ showCalendarView, onSwitchView, onChange }) => {
+  ({
+    showCalendarView,
+    onSwitchView,
+    onChange,
+    userId,
+    handleItemsSelection,
+  }) => {
     const [selectedStage, setSelectedStage] = useState(STAGES[0]);
     const [caseloadMetrics, setCaseloadMetrics] = useState({});
     const [metricLabels, setMetricLabels] = useState([]);
     const [metricValues, setMetricValues] = useState([]);
-    const [items, setItems] = useState([]);
+
     const [appointmentStaffList, setAppointmentStaffList] = useState([]);
-    console.log("Items", items);
-    const userId = getCookieItem(CookieNames.USER_ID);
+
+    const [errors, setErrors] = useState([]);
     const keyMapping = {
-      init: "initialInterview",
+      Initial: "initialInterview",
       "1stSub": "firstSubInterview",
       "2ndSub": "secondSubInterview",
       "Follow-up": "followUp",
@@ -82,19 +92,18 @@ const CaseloadMetrics = React.memo(
 
     useEffect(() => {
       getCaseloadMetrics();
-    }, [items]);
+    }, [userId]);
 
     const getCaseloadMetrics = async () => {
       try {
         const response =
           process.env.REACT_APP_ENV === "mockserver"
             ? await client.get(caseloadMetricsURL)
-            : items !== userId
-              ? await client.get(`${caseloadMetricsURL}/${items}`)
-              : await client.get(`${caseloadMetricsURL}/${userId}`);
+            : await client.get(`${caseloadMetricsURL}/${userId}`);
         setCaseloadMetrics(response);
-      } catch (error) {
-        console.error("Failed to fetch caseload metrics", error);
+      } catch (err) {
+        console.error("Failed to fetch caseload metrics", err);
+        setErrors(err);
       }
     };
 
@@ -108,7 +117,8 @@ const CaseloadMetrics = React.memo(
       async function fetchAppointmentStaffListData() {
         try {
           const data = await client.get(appointmentStaffListURL);
-          setAppointmentStaffList(data);
+          const sortedData = sortAlphabetically(data);
+          setAppointmentStaffList(sortedData);
         } catch (errorResponse) {
           const newErrMsgs = getMsgsFromErrorCode(
             `GET:${process.env.REACT_APP_APPOINTMENT_STAFF_LIST}`,
@@ -128,14 +138,12 @@ const CaseloadMetrics = React.memo(
       [onSwitchView]
     );
 
-    const handleItemsSelection = (event) => {
-      setItems(event.target.value);
-    };
-
     const handleCellClick = (index) => {
       const stage = STAGES[index] || STAGES[0];
+
       setSelectedStage(stage);
-      onChange(caseloadMetrics[keyMapping[metricLabels[index]]]);
+
+      onChange(stage);
     };
     return (
       <Box sx={{ paddingBottom: 0, paddingTop: 0.5 }}>
@@ -151,7 +159,7 @@ const CaseloadMetrics = React.memo(
               <Select
                 labelId="select-source-label"
                 size="small"
-                value={items}
+                value={userId}
                 onChange={handleItemsSelection}
                 label="Items Assigned To"
               >
@@ -173,8 +181,17 @@ const CaseloadMetrics = React.memo(
                 <TableRow>
                   {metricLabels.map((label, index) => (
                     <StyledTableCell key={index}>
-                      {/* {caseloadMetrics[label]} */}
-                      {label}
+                      {label === "1stSub" ? (
+                        <>
+                          1<sup>st</sup>Sub
+                        </>
+                      ) : label === "2ndSub" ? (
+                        <>
+                          2<sup>nd</sup>Sub
+                        </>
+                      ) : (
+                        label
+                      )}
                     </StyledTableCell>
                   ))}
                 </TableRow>
@@ -222,6 +239,15 @@ const CaseloadMetrics = React.memo(
               : "Switch to Interview Calendar View"}
           </Link>
         </Box>
+        {!!errors?.length && (
+          <Stack mt={1} direction="column" useFlexGap flexWrap="wrap">
+            {errors.map((x) => (
+              <div>
+                <span className="errorMsg">*{x}</span>
+              </div>
+            ))}
+          </Stack>
+        )}
 
         {!showCalendarView && (
           <Stack direction="row" justifyContent="flex-start" spacing={1}>

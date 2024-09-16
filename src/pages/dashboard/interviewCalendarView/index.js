@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import Box from "@mui/material/Box";
@@ -22,6 +22,10 @@ function InterviewCalendarView({ userId }) {
   const [caseDetails, setCaseDetails] = useState();
   const [events, setEvents] = useState([]);
   const [errorMessages, setErrorMessages] = useState([]);
+  const [currentDateRange, setCurrentDateRange] = useState({
+    start: moment().startOf("week").add(1, "days").format("MM/DD/YYYY"),
+    end: moment().endOf("week").subtract(1, "days").format("MM/DD/YYYY"),
+  });
 
   const showEventInfo = async (event) => {
     if (
@@ -54,10 +58,8 @@ function InterviewCalendarView({ userId }) {
   };
 
   useEffect(() => {
-    const start = moment().startOf("week").add(1, "days").format("MM/DD/YYYY");
-    const end = moment().endOf("week").subtract(1, "days").format("MM/DD/YYYY");
-    getCalendarEvents(start, end);
-  }, []);
+    getCalendarEvents(currentDateRange.start, currentDateRange.end);
+  }, [userId]);
 
   const getCalendarEvents = async (start, end) => {
     try {
@@ -70,25 +72,15 @@ function InterviewCalendarView({ userId }) {
       };
       const response = await client.post(calendarDetailsURL, payload);
       const data = response.map((event) => {
-        const startDate = new Date(event.appointmentDt);
-        const startHours = parseInt(event.startTime.substring(0, 2));
-        const startMinutes = parseInt(event.startTime.substring(3, 5));
+        const startDate = moment(
+          `${event.appointmentDt} ${event.startTime}`,
+          "MM/DD/YYYY hh:mm A"
+        ).toDate();
 
-        if (event.startTime.endsWith("PM")) {
-          startDate.setHours(startHours + 12, startMinutes, 0);
-        } else {
-          startDate.setHours(startHours, startMinutes, 0);
-        }
-
-        const endDate = new Date(event.appointmentDt);
-        const endHours = parseInt(event.endTime.substring(0, 2));
-        const endMinutes = parseInt(event.endTime.substring(3, 5));
-
-        if (event.endTime.endsWith("PM")) {
-          endDate.setHours(endHours + 12, endMinutes, 0);
-        } else {
-          endDate.setHours(endHours, endMinutes, 0);
-        }
+        const endDate = moment(
+          `${event.appointmentDt} ${event.endTime}`,
+          "MM/DD/YYYY hh:mm A"
+        ).toDate();
         return {
           id: event.eventId,
           title: title(event),
@@ -166,6 +158,13 @@ function InterviewCalendarView({ userId }) {
     eventTimeRangeFormat: () => {
       return "";
     },
+    dayRangeHeaderFormat: ({ start, end }, culture, localizer) => {
+      return `${localizer.format(
+        start,
+        "MMMM DD",
+        culture
+      )} - ${localizer.format(end, "DD, yyyy", culture)}`;
+    },
   };
 
   const getTitle = () => {
@@ -191,8 +190,14 @@ function InterviewCalendarView({ userId }) {
   const onRangeChange = useCallback((range) => {
     const start = moment(range[0]).format("MM/DD/YYYY");
     const end = moment(range[range.length - 1]).format("MM/DD/YYYY");
+    setCurrentDateRange({ start, end });
     getCalendarEvents(start, end);
   }, []);
+
+  const onSubmitModalClose = () => {
+    setOpen(false);
+    getCalendarEvents(currentDateRange.start, currentDateRange.end);
+  };
 
   return (
     <Box
@@ -218,7 +223,12 @@ function InterviewCalendarView({ userId }) {
       </Stack>
       <Calendar
         localizer={localizer}
-        defaultDate={new Date()}
+        defaultDate={useMemo(
+          () => ({
+            defaultDate: new Date(),
+          }),
+          []
+        )}
         defaultView="work_week"
         events={events}
         style={{ height: "90vh" }}
@@ -259,14 +269,18 @@ function InterviewCalendarView({ userId }) {
             "Initial Appointment",
           ].includes(event?.usageDesc) ? (
             <>
-              <AvailableEvent event={event} onClose={() => setOpen(false)} />
+              <AvailableEvent
+                event={event}
+                onSubmitClose={onSubmitModalClose}
+                onCancel={() => setOpen(false)}
+              />
             </>
           ) : (
             <>
               <ScheduleEvent
                 caseDetails={caseDetails}
                 event={event}
-                onClose={() => setOpen(false)}
+                onSubmitClose={onSubmitModalClose}
               />
             </>
           )}

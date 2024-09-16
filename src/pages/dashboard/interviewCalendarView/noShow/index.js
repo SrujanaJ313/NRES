@@ -7,8 +7,9 @@ import { appointmentNoShowURL } from "../../../../helpers/Urls";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { getMsgsFromErrorCode } from "../../../../helpers/utils";
+import { isUpdateAccessExist } from "../../../../utils/cookies";
 
-function NoShowup({ event, onCancel }) {
+function NoShowup({ event, onCancel, onSubmitClose }) {
   const [checked, setChecked] = useState(false);
   const [showSuccessMsg, setShowSuccessMsg] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
@@ -30,7 +31,7 @@ function NoShowup({ event, onCancel }) {
 
       setShowSuccessMsg(true);
       setSuccessMsg("Details updated successfully");
-      onCancel();
+      onSubmitClose();
     } catch (errorResponse) {
       const newErrMsgs = getMsgsFromErrorCode(
         `POST:${process.env.REACT_APP_APPOINTMENT_NO_SHOW}`,
@@ -58,7 +59,11 @@ function NoShowup({ event, onCancel }) {
       />
 
       <Stack direction="row" justifyContent="flex-end" spacing={2}>
-        <Button variant="contained" disabled={!checked} onClick={handleSubmit}>
+        <Button
+          variant="contained"
+          disabled={!checked || !isUpdateAccessExist()}
+          onClick={handleSubmit}
+        >
           Submit
         </Button>
         <Button variant="outlined" onClick={onCancel}>

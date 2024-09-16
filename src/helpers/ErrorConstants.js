@@ -58,8 +58,6 @@ export const ERROR_CODES_MAPPER = {
     404: "Requested resource not found.",
     405: "Requested HTTP method is not supported.",
     500: "An error occurred while processing your request. Please try again or contact the administrator for assistance.",
-    default:
-      "An error occurred while processing your request. Please try again or contact the administrator for assistance.",
   },
 };
 
@@ -77,6 +75,11 @@ ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_NMI_LIST}`] = {
 
 ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_CALENDAR_DETAILS}`] = {
   "userId.mandatory": "User Id is mandatory",
+
+  "eventId.mandatory ": "Event Id is mandatory ",
+  "eventId.notFound": "Record is not found.",
+  "startDt.mandatory": "Start Date is mandatory",
+  "endDt.mandatory": "End Date is mandatory",
 };
 
 ERROR_CODES_MAPPER[`GET:${process.env.REACT_APP_CASE_HEADER}`] = {
@@ -85,12 +88,12 @@ ERROR_CODES_MAPPER[`GET:${process.env.REACT_APP_CASE_HEADER}`] = {
 
 ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_SWITCH_SAVE}`] = {
   "switchmeetingmode.reason.mandatory":
-    "Reason for switching meeting mode is mandatory",
+    "A reason for switching the meeting mode is mandatory.",
   "change.reason.text.exceeds_limit":
-    "Reason for switching meeting mode exceeds character limit, please limit to 1000 characters",
+    "Reason for Switch Meeting Mode exceeds character limit, please limit your input to 1000 characters.",
   "currentmeetingmode.mandatory": "Current Meeting mode is mandatory",
   "meetingModeChgReasonTxt.mandatory":
-    "Please enter the description for switching meeting mode",
+    "Please enter the description for 'Switching Meeting Mode'",
 };
 
 ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_RETURNED_TO_WORK_SAVE}`] = {
@@ -105,20 +108,22 @@ ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_RETURNED_TO_WORK_SAVE}`] = {
   "staffNotes.exceeds_limit":
     "Staff Notes exceeds character limit, please limit to 4000 characters",
   "jms890IndAnjmsReferralInd.bothEmpty":
-    "Either Non-Direct placement Recorded or JMS Referral Recorded should be checked",
+    "Please select either 'Non-Direct placement Recorded in JMS' or 'JMS Referral Recorded in JMS'.",
   "jmsCompletedItems.checkedOff":
-    "For future start date, None of the items listed for JMS completed should not be checked.",
+    "For a future start date, please ensure none of the JMS items are checked.",
   "jmsCompletedItems.checkedNotOff":
-    "For past start date, JMS completed checklist should be checked.",
+    "Please verify the JMS checklist has been completed.",
 };
 
 ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_RESCHEDULE_SAVE}`] = {
-  "nonCompliance.indicator.mandatory": "Non Compliance Indicator is mandatory",
+  "oldEventId.mandatory": "Previous event Id is mandatory ",
+  "newEventId.mandatory": "New Event Id is Mandatory",
+  "nonComplaince.indicator.mandatory": "Non Compliance Indicator is mandatory",
   "reschedule.reason.mandatory": "Reschedule Reason is mandatory",
   "lateSchedulingNotes.exceeds_limit":
-    "Late Notes exceeds character limit, please limit to 4000 characters",
+    "Please verify the JMS checklist has been completed.",
   "preferredMeetingMode.bothNotChecked":
-    "Either In-Person or Virtual should be checked",
+    "Please select either 'In-Person' or 'Virtual'",
   "appointmentDate.mandatory": "Appointment Date is mandatory",
   "appointmentTime.mandatory": "Appointment Time is mandatory",
   "entityCity.mandatory": "City is mandatory",
@@ -127,16 +132,117 @@ ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_RESCHEDULE_SAVE}`] = {
   "entityTeleNumber.mandatory": "Employer telephone number is mandatory",
   "jobTitle.mandatory": "Job title is mandatory",
   "partFullTimeInd.mandatory": "Part time/Full time indicator is mandatory",
+  "lateSchedulingReason.empty": "Please enter the reason for late scheduling",
 };
 
 ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_APPOINTMENT_SAVE}`] = {
-  "rsicId.notAvailable": "Appointment Slot is not Available",
+  "eventId.notAvailable": "Appointment Slot is not Available",
+
   "for.lof.invalid": "User does not have access to For Local Office option",
   "for.mgr.invalid": "User does not have access to For Case Manager option",
-  "claimId.mandatory":
-    "Please select a claimant for scheduling the appointment",
+  "claimId.mandatory": "Please select a claimant to schedule the appointment",
   "informedCmtInd.mandatory":
-    "Please inform claimant and select Informed Claimant to check claimant portal",
+    "Please inform claimant and select Informed Claimant to check the claimant portal",
   "informedConveyedBy.mandatory":
-    "Please check option by which information was conveyed to claimant",
+    "Please check the option by which the information was conveyed to the claimant.",
+  "status.mandatory": "Status is mandatory",
+  "createIssue.issueStartDt.invalid":
+    "The Start Date for a 'Create Issue' should be within the Benefit Year End date.",
+};
+
+ERROR_CODES_MAPPER[
+  `POST:${process.env.REACT_APP_APPOINTMENT_DETAILS_SUBMISSION}`
+] = {
+  "OutsideWebReferral.jobReferral.invalid": "error in employer name",
+  "InitialAssessment.mandatory": "102: Initial Assessment is mandatory",
+  "Eri1On1.mandatory": "106: Eri 1-on-1 is mandatory",
+  "ELMIServices.mandatory": "107: ELMI Services is mandatory",
+  "JobDevelopment.mandatory": "123: Job Development is mandatory",
+  "CaseManagement.mandatory": "153: Case Management is mandatory",
+  "AttendedRESEA.mandatory": "160: Attended RESEA is mandatory",
+  "OutsideWebReferral.mandatory": "179: Outside Web Referral is mandatory",
+  "DevelopIEP.mandatory": "205: Develop IEP is mandatory",
+  "ReferWIOATraining.mandatory":
+    "209: Refer to WIOA state & local training  is mandatory",
+  "ReferToVRorDHHS.mandatory": "Refer to VR or DHHS is mandatory",
+  "JMSJobReferral.mandatory": "500+: JMS Job Referral is mandatory",
+  "AddSelfCaseManager.mandatory": "Add Self as Case Manager is mandatory",
+  "JMSCaseNotes.mandatory": "JMS Case Notes is mandatory",
+  "CloseGoals.mandatory": "Close Goals is mandatory",
+  "JmsCloseIEP.mandatory":
+    "Close IEP if not being case managed by a Partner is mandatory",
+  "ActiveResume.mandatory": "Active Resume is mandatory",
+  "ActiveVirtualRecuiter.mandatory": "Active Virtual Recruiter is mandatory",
+  "WagnerPeyserApplComplete.mandatory":
+    "Wagner-Peyser Application Completed with Individual is mandatory",
+  "WagnerPeyserApplSignature.mandatory":
+    "Wagner-Peyser Application Signature sent is mandatory",
+  "IEPSignatureCopy.mandatory":
+    "Send IEP for Signature and give copy is mandatory",
+  "OutsideWebReferral.jobReferral":
+    "179 Outside Web Referral is selected, please enter the related Job Referral details.",
+  "OutsideWebReferral.jobReferral.invalid":
+    "179 Outside Web Referral Job Referral entries are invalid, the employer name and job title are mandatory",
+  "JMSJobReferral.jobReferral":
+    "500+: JMS Job Referral is selected, please enter the related Job Referral details.",
+  "JMSJobReferral.jobReferral.invalid":
+    "500+: JMS Job Referral Job Referral entries are invalid, the employer name and job title are mandatory",
+  "JMSRegComplete.exclusive":
+    "Please select either checkbox : 'JMS Registration Complete' OR 'JMS Registration Incomplete & Warning Issued', but not both.",
+  "rsidSlfSchByDt.mandatory":
+    "Self-schedule by date is mandatory when this option is selected. Please enter valid date.",
+  "rsidSlfSchByDt.invalid":
+    "Self-schedule by date should be future date within 10 days of the appointment. Please enter valid date",
+  "ActiveVirtualRecuiter.mandatoryDt":
+    "Please select the Active Virtual Recruiter option to enter the Expiration date",
+  "virtualRecuiterExpDt.mandatory":
+    "Virtual Recruiter Expiration date is mandatory when this option is selected. Please enter valid date.",
+  "virtualRecuiterExpDt.invalid":
+    "Virtual Recruiter Expiration date should be a valid future date",
+  "ActiveResume.mandatoryDt":
+    "Active Resume Expiration date is entered, please select Active Resume checkbox",
+  "resumeExpDt.mandatory":
+    "Active Resume Expiration date is mandatory when this option is selected. Please enter valid date.",
+  "resumeExpDt.invalid":
+    "Active Resume Expiration date should be a valid future date",
+  "otherIssues.invalid":
+    "Please enter all fields for the selected 'Create Issue' option",
+  "otherIssues.startDt.invalid":
+    "Start Date for a 'Create Issue' should be a valid date prior to Claim BYE Date",
+  "otherIssues.endDt.invalid":
+    "End Date for a 'Create Issue' should be a valid future date and should be after Start Date",
+  "workSearchIssues.invalid":
+    "Please check-off at least each of the most recent three continued claim weeks as reviewed.",
+  "ReviewedReEmpPlan.mandatory":
+    "Reviewed Chapters 1-4 of My Reemployment Plan is mandatory.",
+  "rsidMrpRvwd.mandatory":
+    "Please select chapters for Reviewed My Reemployment Plan",
+  "AssignedReEmpPlan.mandatory": "Assigned My Reemployment Plan' is mandatory.",
+  "PhysicallyVerifiedID.mandatory":
+    "Physically Verified Claimant's ID is mandatory.",
+  "RemindedSelfSchedule.mandatory":
+    "Reminded Claimant to Self-schedule is mandatory.",
+  "rsidMrpAssgnd.mandatory":
+    "Please select chapters for 'Assigned My Reemployment Plan'",
+  "EsConfirm.mandatory":
+    "Please select checkbox to confirm that Employment Services have been provided",
+  "CheckedPriorJobReferrals.mandatory":
+    "Checked Prior Job Referrals is mandatory",
+  "EPandCheckListUpld.mandatory":
+    "Copy of EP and Checklist uploaded into JMS is mandatory",
+  // sample msg. todo replace with actual one
+};
+ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_REASSIGN_SAVE}`] = {
+  "eventld.notAvailable":
+    "Appointment is no longer available for scheduling. Please select another appointment",
+  "eventld.mismatch":
+    "Case Stage and Apponinment Selected do not match. Please select appropriate appointment",
+  "caseOffice.mandatory":
+    "Please select lookup case manager availability office",
+  "caseld.mandatory": "Case ID is mandatory",
+  "eventld.mandatory": "Event ID is mandatory",
+};
+ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_APPOINTMENT_AVAILABLE}`] = {
+  "for.lof.invalid": "User does not have access to For Local Office option",
+  "for.mgr.invalid": "User does not have access to For Case Manager option",
 };

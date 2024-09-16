@@ -16,7 +16,7 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { OTHER_ACTIONS_SELF_SCHEDULE } from "../../../../helpers/Constants";
 
-function OtherActions({ formik, otherActionsList, event }) {
+function OtherActions({ formik, otherActionsList, event, disableForm }) {
   const { touched, values, errors, setFieldValue } = formik;
 
   const handleCheckboxChange = (event) => {
@@ -48,7 +48,7 @@ function OtherActions({ formik, otherActionsList, event }) {
             }}
           >
             <Stack
-              key={item.value}
+              key={item.value + index}
               direction="row"
               spacing={1}
               alignItems="flex-start"
@@ -60,6 +60,7 @@ function OtherActions({ formik, otherActionsList, event }) {
                     checked={values.actionTaken[item.value]}
                     onChange={handleCheckboxChange}
                     name={item.value}
+                    disabled={disableForm}
                   />
                 }
                 label={item.label}
@@ -84,7 +85,9 @@ function OtherActions({ formik, otherActionsList, event }) {
                             values[item.radioFieldName] === "Chapter1To4"
                           }
                           sx={{ py: 0 }}
-                          disabled={!values.actionTaken[item.value]}
+                          disabled={
+                            !values.actionTaken[item.value] || disableForm
+                          }
                         />
                       }
                       label="Chapter 1 to 4"
@@ -98,7 +101,9 @@ function OtherActions({ formik, otherActionsList, event }) {
                             values[item.radioFieldName] === "Chapter5To10"
                           }
                           sx={{ py: 0 }}
-                          disabled={!values.actionTaken[item.value]}
+                          disabled={
+                            !values.actionTaken[item.value] || disableForm
+                          }
                         />
                       }
                       label="Chapters 5 to 10"
@@ -123,11 +128,17 @@ function OtherActions({ formik, otherActionsList, event }) {
                         slotProps={{
                           textField: { size: "small" },
                         }}
-                        value={values[item.dateFieldName]}
+                        value={
+                          values[item.dateFieldName]
+                            ? moment(values[item.dateFieldName])
+                            : null
+                        }
                         onChange={(value) => {
                           handleDateValueChange(value, item.dateFieldName);
                         }}
-                        disabled={!values.actionTaken[item.value]}
+                        disabled={
+                          !values.actionTaken[item.value] || disableForm
+                        }
                         minDate={moment()}
                         maxDate={moment(event.appointmentDt).add(
                           OTHER_ACTIONS_SELF_SCHEDULE,

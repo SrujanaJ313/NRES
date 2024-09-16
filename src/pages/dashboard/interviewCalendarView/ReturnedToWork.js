@@ -22,7 +22,11 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { STATES } from "../../../helpers/Constants";
 import { returnedToWorkSaveURL } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
-import { CookieNames, getCookieItem } from "../../../utils/cookies";
+import {
+  CookieNames,
+  getCookieItem,
+  isUpdateAccessExist,
+} from "../../../utils/cookies";
 import {
   returnToWorkValidationsSchema,
   isDateValid,
@@ -30,7 +34,7 @@ import {
 import { convertISOToMMDDYYYY } from "../../../helpers/utils";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
 
-function ReturnedToWork({ onCancel, event }) {
+function ReturnedToWork({ onCancel, event, onSubmitClose }) {
   const [errors, setErrors] = useState([]);
   const states = STATES;
 
@@ -89,14 +93,15 @@ function ReturnedToWork({ onCancel, event }) {
 
       try {
         await client.post(returnedToWorkSaveURL, payload);
-        onCancel();
+        onSubmitClose();
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
           `POST:${process.env.REACT_APP_RETURNED_TO_WORK_SAVE}`,
           errorResponse
         );
         setErrors(newErrMsgs);
-    }},
+      }
+    },
     validateOnChange: false,
     validateOnBlur: false,
   });
@@ -508,7 +513,7 @@ function ReturnedToWork({ onCancel, event }) {
             </Stack>
           )}
 
-          {errors?.length && (
+          {!!errors?.length && (
             <Stack mt={1} direction="column" useFlexGap flexWrap="wrap">
               {errors.map((x) => (
                 <div>
@@ -522,7 +527,12 @@ function ReturnedToWork({ onCancel, event }) {
             spacing={2}
             sx={{ display: "flex", justifyContent: "flex-end" }}
           >
-            <Button variant="contained" color="primary" type="submit">
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              disabled={!isUpdateAccessExist()}
+            >
               Submit
             </Button>
             <Button variant="outlined" onClick={onCancel}>

@@ -17,7 +17,7 @@ import {
   FormGroup,
   InputLabel,
   FormHelperText,
-  IconButton
+  IconButton,
 } from "@mui/material";
 import moment from "moment";
 import {
@@ -26,14 +26,23 @@ import {
   appointmentAvailableSaveURL,
 } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
-import { CookieNames, getCookieItem } from "../../../utils/cookies";
+import {
+  CookieNames,
+  getCookieItem,
+  getUserName,
+  isUpdateAccessExist,
+} from "../../../utils/cookies";
 import { availableEventSchema } from "../../../helpers/Validation";
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import { getMsgsFromErrorCode } from "../../../helpers/utils";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import {
+  getMsgsFromErrorCode,
+  sortAlphabetically,
+} from "../../../helpers/utils";
 
-function AvailableEvent({ event, onClose }) {
+function AvailableEvent({ event, onSubmitClose, onCancel }) {
   const [appointmentStaffList, setAppointmentStaffList] = useState([]);
   const [claimantsList, setClaimantsList] = useState([]);
+  // const [selectedClaimant, setSelectedClaimant] = useState("");
   const [convertedFormat, setConvertedFormat] = useState("");
   const [errors, setErrors] = useState([]);
 
@@ -52,19 +61,23 @@ function AvailableEvent({ event, onClose }) {
       status: "",
       informedConveyedBy: [],
       caseManagerId: "",
+      lateStaffNote: "",
     },
     validationSchema: availableEventSchema,
     onSubmit: async (values) => {
-      const payload = {
+      let payload = {
         eventId: event?.id,
-        claimId: values?.claimantId,
+        claimId: values?.claimantId?.id,
         informedCmtInd: values?.informedCmtInd,
         informedConveyedBy: values?.informedConveyedBy,
         staffNotes: values?.staffNotes,
       };
-          try {
+      if (values?.claimantId?.beyondReseaDeadline === "Y") {
+        payload = { ...payload, lateStaffNote: values?.lateStaffNote };
+      }
+      try {
         await client.post(appointmentAvailableSaveURL, payload);
-        onClose();
+        onSubmitClose();
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
           `POST:${process.env.REACT_APP_APPOINTMENT_SAVE}`,
@@ -80,11 +93,15 @@ function AvailableEvent({ event, onClose }) {
   useEffect(() => {
     async function fetchAppointmentStaffListData() {
       try {
-        const data = await client.post(appointmentStaffListURL);
-        setAppointmentStaffList(data);
+        const data =
+          process.env.REACT_APP_ENV === "mockserver"
+            ? await client.get(appointmentStaffListURL)
+            : await client.get(appointmentStaffListURL);
+        const sortedData = sortAlphabetically(data);
+        setAppointmentStaffList(sortedData);
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
-          `POST:${process.env.REACT_APP_APPOINTMENT_STAFF_LIST}`,
+          `GET:${process.env.REACT_APP_APPOINTMENT_STAFF_LIST}`,
           errorResponse
         );
         setErrors(newErrMsgs);
@@ -104,17 +121,18 @@ function AvailableEvent({ event, onClose }) {
         } else {
           userId = getCookieItem(CookieNames.USER_ID);
         }
+        userId = Number(userId);
         const payload = {
           eventId: event?.id,
           userId: formik?.values?.claimant === "Local Office" ? -1 : userId,
           status: formik?.values?.status,
         };
-        
         const data =
           process.env.REACT_APP_ENV === "mockserver"
             ? await client.get(appointmentAvailableURL)
             : await client.post(appointmentAvailableURL, payload);
-        setClaimantsList(data);
+        const sortedData = sortAlphabetically(data);
+        setClaimantsList(sortedData);
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
           `POST:${process.env.REACT_APP_APPOINTMENT_AVAILABLE}`,
@@ -142,7 +160,7 @@ function AvailableEvent({ event, onClose }) {
               <Typography className="label-text" sx={{ width: "30%" }}>
                 Case Manager:
               </Typography>
-              <Typography>Mary Peters</Typography>
+              <Typography>{getUserName()}</Typography>
             </Stack>
             <Stack direction={"row"} sx={{ width: "50%" }}>
               <Typography className="label-text" sx={{ width: "50%" }}>
@@ -165,9 +183,9 @@ function AvailableEvent({ event, onClose }) {
               onChange={(e) => setFieldValue("claimant", e.target.value)}
             >
               <FormControlLabel
-                value="Mary Peters"
+                value={getUserName()}
                 control={<Radio />}
-                label="Mary Peters"
+                label={getUserName()}
               />
               <FormControlLabel
                 value="Local Office"
@@ -220,7 +238,7 @@ function AvailableEvent({ event, onClose }) {
               {[
                 { name: "All pending scheduling", value: "ALL" },
                 { name: "Scheduled beyond 21 days", value: "ScheduleBeyond21" },
-                { name: "No Shows", value: "NoShow" },
+                { name: "No Shows", value: "NoShows" },
                 { name: "Scheduled", value: "Scheduled" },
                 { name: "Wait listed", value: "WaitListed" },
               ].map((status) => (
@@ -235,7 +253,7 @@ function AvailableEvent({ event, onClose }) {
             <IconButton
               onClick={() => formik.resetForm()}
               aria-label="reset"
-              sx={{ color: 'green' }}
+              sx={{ color: "green" }}
             >
               <RestartAltIcon />
             </IconButton>
@@ -252,7 +270,14 @@ function AvailableEvent({ event, onClose }) {
               onChange={(e) => setFieldValue("claimantId", e.target.value)}
             >
               {claimantsList.map((claimant) => (
-                <MenuItem key={claimant.id} value={claimant.id}>
+                <MenuItem
+                  key={claimant.id}
+                  value={claimant}
+                  // value={claimant.id}
+                  style={{
+                    color: claimant.beyondReseaDeadline === "Y" ? "red" : "",
+                  }}
+                >
                   {claimant.name}
                 </MenuItem>
               ))}
@@ -260,6 +285,29 @@ function AvailableEvent({ event, onClose }) {
           </FormControl>
           {formik.errors.claimantId && (
             <FormHelperText error>{formik.errors.claimantId}</FormHelperText>
+          )}
+
+          {formik?.values?.claimantId?.beyondReseaDeadline === "Y" && (
+            <Stack direction={"column"} spacing={2}>
+              <TextField
+                name="lateStaffNote"
+                label="*Late Staff Notes"
+                size="small"
+                value={formik.values.lateStaffNote}
+                onChange={formik.handleChange}
+                variant="outlined"
+                multiline
+                rows={3}
+                fullWidth
+                error={
+                  formik.touched.lateStaffNote &&
+                  Boolean(formik.errors.lateStaffNote)
+                }
+                helperText={
+                  formik.touched.lateStaffNote && formik.errors.lateStaffNote
+                }
+              />
+            </Stack>
           )}
 
           <TextField
@@ -335,7 +383,7 @@ function AvailableEvent({ event, onClose }) {
             </FormHelperText>
           )}
 
-          {errors?.length && (
+          {!!errors?.length && (
             <Stack mt={1} direction="column" useFlexGap flexWrap="wrap">
               {errors.map((x) => (
                 <div>
@@ -348,10 +396,15 @@ function AvailableEvent({ event, onClose }) {
       </DialogContent>
 
       <DialogActions sx={{ margin: 2 }}>
-        <Button type="submit" variant="contained" color="primary">
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          disabled={!isUpdateAccessExist()}
+        >
           Submit
         </Button>
-        <Button onClick={onClose} variant="outlined">
+        <Button onClick={onCancel} variant="outlined">
           Cancel
         </Button>
       </DialogActions>

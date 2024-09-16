@@ -3,52 +3,6 @@ export const MEETING_INVITE_SHOW_BUFFER_DURATION = 30;
 export const OTHER_ACTIONS_SELF_SCHEDULE = 10;
 
 // In your constants file (e.g., Constants.js)
-export const APPOINTMENT_DETAILS_FORM_DATA = {
-  102: false,
-  106: false,
-  107: false,
-  123: false,
-  153: false,
-  160: false,
-  179: false,
-  205: false,
-  209: false,
-  500: false,
-  addSelf: false,
-  jMSCaseNotes: false,
-  jMSRegistrationComplete: false,
-  jMSRegistrationIncomplete: false,
-  activeResume: false,
-  activeResumeDate: "",
-  activeRecruiter: false,
-  ActiveRecruiterDate: "",
-  wPACompleted: false,
-  wPASignatureSent: false,
-  sendIEP: false,
-  claimantsReview: [
-    {
-      isReviewed: false,
-      isNoIssues: false,
-      createdIssue: false,
-      createdIssueType: "",
-      createdSubIssue: "",
-    },
-  ],
-  createdIssues: [
-    {
-      createdIssue: false,
-      issueType: "",
-      issueSub: "",
-    },
-  ],
-  reviewdChapter: false,
-  assginedChapters: false,
-  chapter: "1-4",
-  physicallyVerified: false,
-  remindedClaiment: "",
-  claimentScheduleBy: "",
-  interviewerNotes: "",
-};
 
 export const STATES = [
   {
@@ -336,7 +290,7 @@ export const JMS_ITEMS_INITIAL = [
   },
   {
     label: "*Add Self as Case Manager",
-    value: "RsidJmsSelfCmInd",
+    value: "AddSelfCaseManager",
   },
   {
     label: "*JMS Case Notes",
@@ -351,16 +305,16 @@ export const JMS_ITEMS_INITIAL = [
     value: "JMSRegIncomplete",
   },
   {
-    label: "Active Resume - Expiration Date:",
+    label: "*Active Resume - Expiration Date:",
     value: "ActiveResume",
     date: true,
-    dateFieldName: "rsidJmsResumeExpDt",
+    dateFieldName: "jmsResumeExpDt",
   },
   {
-    label: "Active Virtual Recruiter - Expiration Date:",
+    label: "*Active Virtual Recruiter - Expiration Date:",
     value: "ActiveVirtualRecuiter",
     date: true,
-    dateFieldName: "rsidJmsVRecrtExpDt",
+    dateFieldName: "jmsVRExpDt",
   },
   {
     label: "*Wagner-Peyser Application Completed with Individual",
@@ -423,7 +377,7 @@ export const JMS_ITEMS_FIRST = [
   },
   {
     label: "*Add Self as Case Manager",
-    value: "RsidJmsSelfCmInd",
+    value: "AddSelfCaseManager",
   },
   {
     label: "*JMS Case Notes",
@@ -478,7 +432,7 @@ export const JMS_ITEMS_SECOND = [
   },
   {
     label: "*Add Self as Case Manager",
-    value: "RsidJmsSelfCmInd",
+    value: "AddSelfCaseManager",
   },
   {
     label: "*JMS Case Notes",
@@ -503,7 +457,7 @@ export const OTHER_ACTIONS_INITIAL = [
     label: "*Assigned My Reemployment Plan",
     value: "AssignedReEmpPlan",
     radio: true,
-    radioFieldName: "rsidMrpAssgnd",
+    radioFieldName: "assignedMrpChap",
   },
   {
     label: "*Physically verified claimant's ID",
@@ -513,7 +467,7 @@ export const OTHER_ACTIONS_INITIAL = [
     label: "*Reminded Claimant to Self-schedule by:",
     value: "RemindedSelfSchedule",
     date: true,
-    dateFieldName: "rsidSlfSchByDt",
+    dateFieldName: "selfSchByDt",
   },
 ];
 
@@ -526,7 +480,7 @@ export const OTHER_ACTIONS_FIRST = [
     label: "*Reviewed My Reemployment Plan",
     value: "ReviewedReEmpPlan",
     radio: true,
-    radioFieldName: "rsidMrpRvwd",
+    radioFieldName: "reviewedMrpChap",
   },
   {
     label: "*Checked Prior Job Referrals",
@@ -536,7 +490,7 @@ export const OTHER_ACTIONS_FIRST = [
     label: "*Reminded Claimant to Self-schedule by:",
     value: "RemindedSelfSchedule",
     date: true,
-    dateFieldName: "rsidSlfSchByDt",
+    dateFieldName: "selfSchByDt",
   },
   {
     label: "*Physically verified claimant's ID",
@@ -575,7 +529,7 @@ export const INITIAL_APPOINTMENT_DETAILS_INITIAL_VALUES = {
     DevelopIEP: false,
     ReferWIOATraining: false,
     JMSJobReferral: false,
-    RsidJmsSelfCmInd: false,
+    AddSelfCaseManager: false,
     JMSCaseNotes: false,
     JMSRegComplete: false,
     JMSRegIncomplete: false,
@@ -585,8 +539,8 @@ export const INITIAL_APPOINTMENT_DETAILS_INITIAL_VALUES = {
     WagnerPeyserApplSignature: false,
     IEPSignatureCopy: false,
   },
-  rsidJmsResumeExpDt: null,
-  rsidJmsVRecrtExpDt: null,
+  jmsResumeExpDt: null,
+  jmsVRExpDt: null,
   outsideWebReferral: [],
   jMSJobReferral: [],
   workSearchIssues: [],
@@ -605,10 +559,10 @@ export const INITIAL_APPOINTMENT_DETAILS_INITIAL_VALUES = {
     PhysicallyVerifiedID: false,
     RemindedSelfSchedule: false,
   },
-  rsidMrpAssgnd: "",
-  rsidSlfSchByDt: null,
+  assignedMrpChap: "",
+  selfSchByDt: null,
   staffNotes: "",
-  esConfirm: false,
+  empServicesConfirmInd: "N",
 };
 export const FIRST_APPOINTMENT_DETAILS_INITIAL_VALUES = {
   jmsItems: {
@@ -622,7 +576,7 @@ export const FIRST_APPOINTMENT_DETAILS_INITIAL_VALUES = {
     JMSJobReferral: false,
     ReferToVRorDHHS: false,
     IEPSignatureCopy: false,
-    RsidJmsSelfCmInd: false,
+    AddSelfCaseManager: false,
     JMSCaseNotes: false,
   },
   outsideWebReferral: [],
@@ -644,10 +598,10 @@ export const FIRST_APPOINTMENT_DETAILS_INITIAL_VALUES = {
     PhysicallyVerifiedID: false,
     RemindedSelfSchedule: false,
   },
-  rsidMrpRvwd: "",
-  rsidSlfSchByDt: null,
+  reviewedMrpChap: "",
+  selfSchByDt: null,
   staffNotes: "",
-  esConfirm: false,
+  empServicesConfirmInd: false,
 };
 export const SECOND_APPOINTMENT_DETAILS_INITIAL_VALUES = {
   jmsItems: {
@@ -661,7 +615,7 @@ export const SECOND_APPOINTMENT_DETAILS_INITIAL_VALUES = {
     JMSJobReferral: false,
     ReferToVRorDHHS: false,
     IEPSignatureCopy: false,
-    RsidJmsSelfCmInd: false,
+    AddSelfCaseManager: false,
     JMSCaseNotes: false,
     CloseGoals: false,
     JmsCloseIEP: false,
@@ -685,5 +639,5 @@ export const SECOND_APPOINTMENT_DETAILS_INITIAL_VALUES = {
     PhysicallyVerifiedID: false,
   },
   staffNotes: "",
-  esConfirm: false,
+  empServicesConfirmInd: false,
 };

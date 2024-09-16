@@ -16,7 +16,7 @@ import client from "../../../../helpers/Api";
 import { nmiListURL } from "../../../../helpers/Urls";
 import { getMsgsFromErrorCode } from "../../../../helpers/utils";
 
-function WorkSearchItems({ data, formik }) {
+function WorkSearchItems({ data, formik, disableForm }) {
   const { touched, values, errors, setFieldValue } = formik;
 
   const [rows, setRows] = useState([]);
@@ -174,6 +174,7 @@ function WorkSearchItems({ data, formik }) {
                   onChange={(event) => handleCheckboxChange(event, index)}
                   name={row.weekEndingDt}
                   sx={{ py: 0, pl: 0 }}
+                  disabled={disableForm}
                 />
               }
               label={`Week ending ${row.weekEndingDt}:`}
@@ -194,7 +195,7 @@ function WorkSearchItems({ data, formik }) {
                         getSelectedRadioOption(row.weekEndingDt) === "noIssues"
                       }
                       sx={{ py: 0 }}
-                      disabled={!isChecked(row.weekEndingDt)}
+                      disabled={!isChecked(row.weekEndingDt) || disableForm}
                     />
                   }
                   label="No Issues"
@@ -210,7 +211,7 @@ function WorkSearchItems({ data, formik }) {
                           "createIssue"
                         }
                         sx={{ py: 0 }}
-                        disabled={!isChecked(row.weekEndingDt)}
+                        disabled={!isChecked(row.weekEndingDt) || disableForm}
                       />
                     }
                     label="Create Issue: Actively Seeking Work -"
@@ -218,7 +219,9 @@ function WorkSearchItems({ data, formik }) {
                   <FormControl sx={{ width: 150 }} size="small">
                     <Select
                       size="small"
-                      disabled={!checkSelectDisabled(row.weekEndingDt)}
+                      disabled={
+                        !checkSelectDisabled(row.weekEndingDt) || disableForm
+                      }
                       value={getSelectedDropdownOption(row.weekEndingDt)}
                       onChange={handleSelectChange}
                       name={row.weekEndingDt}
@@ -273,7 +276,11 @@ function WorkSearchItems({ data, formik }) {
           justifyContent="end"
           sx={{ mt: "0px !important" }}
         >
-          <Button sx={{ paddingY: 0 }} onClick={handleRows}>
+          <Button
+            disabled={disableForm}
+            sx={{ paddingY: 0 }}
+            onClick={handleRows}
+          >
             {showMore ? "- Add less" : "+ Add more"}
           </Button>
         </Stack>

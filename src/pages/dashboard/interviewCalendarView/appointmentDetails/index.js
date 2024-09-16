@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import { useFormik } from "formik";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import moment from "moment";
 import {
   TextField,
   FormControlLabel,
@@ -20,7 +21,10 @@ import {
   firstAppointmentDetailsSchema,
   secondAppointmentDetailsSchema,
 } from "../../../../helpers/Validation";
-import { appointmentDetailsSubmissionURL } from "../../../../helpers/Urls";
+import {
+  appointmentDetailsGetURL,
+  appointmentDetailsSubmissionURL,
+} from "../../../../helpers/Urls";
 import {
   JMS_ITEMS_INITIAL,
   OTHER_ACTIONS_INITIAL,
@@ -33,36 +37,83 @@ import {
   SECOND_APPOINTMENT_DETAILS_INITIAL_VALUES,
 } from "../../../../helpers/Constants";
 import { getMsgsFromErrorCode } from "../../../../helpers/utils";
+import { isUpdateAccessExist } from "../../../../utils/cookies";
 
-function AppointmentDetails({ event, onCancel, caseDetails }) {
-  const [jmsItemsList, setJMSItemsList] = useState([]);
-  const [otherActionsList, setOtherActionsList] = useState([]);
-  const [initialValues, setInitialValues] = useState(
-    INITIAL_APPOINTMENT_DETAILS_INITIAL_VALUES
-  );
+const getInitialData = (event) => {
+  let jmsItemsList = [];
+  let otherActionsList = [];
+  let initialUnfilledValues = {};
+  if (event && event.eventTypeDesc === "In Use") {
+    if (event.usageDesc === "Initial Appointment") {
+      jmsItemsList = JMS_ITEMS_INITIAL;
+      otherActionsList = OTHER_ACTIONS_INITIAL;
+      initialUnfilledValues = INITIAL_APPOINTMENT_DETAILS_INITIAL_VALUES;
+    } else if (event.usageDesc === "1st Subsequent Appointment") {
+      jmsItemsList = JMS_ITEMS_FIRST;
+      otherActionsList = OTHER_ACTIONS_FIRST;
+      initialUnfilledValues = FIRST_APPOINTMENT_DETAILS_INITIAL_VALUES;
+    } else if (event.usageDesc === "2nd Subsequent Appointment") {
+      jmsItemsList = JMS_ITEMS_SECOND;
+      otherActionsList = OTHER_ACTIONS_SECOND;
+      initialUnfilledValues = SECOND_APPOINTMENT_DETAILS_INITIAL_VALUES;
+    }
+  }
+  return { jmsItemsList, otherActionsList, initialUnfilledValues };
+};
+
+function AppointmentDetails({ event, onCancel, caseDetails, onSubmitClose }) {
+  const { jmsItemsList, otherActionsList, initialUnfilledValues } =
+    getInitialData(event);
+  // const [jmsItemsList, setJMSItemsList] = useState([]);
+  // const [otherActionsList, setOtherActionsList] = useState([]);
+  const [initialValues, setInitialValues] = useState(initialUnfilledValues);
 
   const [showSuccessMsg, setShowSuccessMsg] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
   const [errorMessages, setErrorMessages] = useState([]);
+  const [disableForm, setDisableForm] = useState(false);
 
   useEffect(() => {
-    if (event && event.eventTypeDesc === "In Use") {
-      if (event.usageDesc === "Initial Appointment") {
-        setJMSItemsList(JMS_ITEMS_INITIAL);
-        setOtherActionsList(OTHER_ACTIONS_INITIAL);
-        setInitialValues(INITIAL_APPOINTMENT_DETAILS_INITIAL_VALUES);
-      } else if (event.usageDesc === "1st Subsequent Appointment") {
-        setJMSItemsList(JMS_ITEMS_FIRST);
-        setOtherActionsList(OTHER_ACTIONS_FIRST);
-        setInitialValues(FIRST_APPOINTMENT_DETAILS_INITIAL_VALUES);
-      } else if (event.usageDesc === "2nd Subsequent Appointment") {
-        setJMSItemsList(JMS_ITEMS_SECOND);
-        setOtherActionsList(OTHER_ACTIONS_SECOND);
-        setInitialValues(SECOND_APPOINTMENT_DETAILS_INITIAL_VALUES);
-      }
+    const appointmentDateTime = `${event.appointmentDt} ${event.endTime}`;
+    const isPastAppointment = moment().isAfter(appointmentDateTime);
+    const showViewOnlyAppointmentDetails =
+      isPastAppointment || event.eventSubmitted;
+    if (showViewOnlyAppointmentDetails) fetchAppointmentDetails();
+  }, []);
+
+  const fetchAppointmentDetails = async () => {
+    try {
+      setErrorMessages([]);
+      const response = await client.get(
+        appointmentDetailsGetURL + `/${event.eventId}`
+      );
+
+      /*
+
+      // todo for sitarm to update
+      response.jmsItems = response.itemsCompletedInJMS;
+      response.workSearchIssues.map((e) => {
+        if (e.status == "noIssue") e.status = "noIssues";
+      });
+      response.jMSJobReferral = response.jmsjobReferral;
+      //assignedMrpChap-> Chapter1To4, Chapter5To10
+      //based on app stage, pass field name correctly
+      response.assignedMrpChap = "Chapter1To4";
+      response.reviewedMrpChap = "Chapter1To4";
+      // response.empServicesConfirmInd = "Y";
+      */
+
+      setInitialValues(response);
+      setDisableForm(true);
+    } catch (errorResponse) {
+      const newErrMsgs = getMsgsFromErrorCode(
+        `GET:${process.env.REACT_APP_APPOINTMENT_DETAILS_GET}`,
+        errorResponse
+      );
+      setErrorMessages(newErrMsgs);
     }
-  }, [event]);
+  };
 
   const onSubmit = async (values) => {
     const jmsItems = Object.entries(values.jmsItems)
@@ -72,6 +123,8 @@ function AppointmentDetails({ event, onCancel, caseDetails }) {
     values.workSearchIssues.forEach((x) => {
       if (x.status === "createIssue") {
         workSearchIssues[x.weekEndingDt] = x.activelySeekingWork;
+      } else if (x.status === "noIssues") {
+        workSearchIssues[x.weekEndingDt] = 0;
       }
     });
 
@@ -96,14 +149,13 @@ function AppointmentDetails({ event, onCancel, caseDetails }) {
       otherIssues: otherIssues,
       actionTaken: actionTaken,
       staffNotes: values.staffNotes,
-      empServicesConfirmInd: "Y",
+      // empServicempServicesConfirmIndInd: "Y",
     };
-    if (values.rsidJmsResumeExpDt) {
-      payload["jmsResumeExpDt"] =
-        values.rsidJmsResumeExpDt?.format("MM/DD/YYYY");
+    if (values.jmsResumeExpDt) {
+      payload["jmsResumeExpDt"] = values.jmsResumeExpDt?.format("MM/DD/YYYY");
     }
-    if (values.rsidJmsVRecrtExpDt) {
-      payload["jmsVRExpDt"] = values.rsidJmsVRecrtExpDt?.format("MM/DD/YYYY");
+    if (values.jmsVRExpDt) {
+      payload["jmsVRExpDt"] = values.jmsVRExpDt?.format("MM/DD/YYYY");
     }
     if (values.outsideWebReferral?.length > 0) {
       payload["outsideWebReferral"] = values.outsideWebReferral;
@@ -111,25 +163,23 @@ function AppointmentDetails({ event, onCancel, caseDetails }) {
     if (values.jMSJobReferral?.length > 0) {
       payload["jMSJobReferral"] = values.jMSJobReferral;
     }
-    if (values.rsidMrpAssgnd) {
-      payload["assignedMrpChap"] = values.rsidMrpAssgnd;
+    if (values.assignedMrpChap) {
+      payload["assignedMrpChap"] = values.assignedMrpChap;
     }
-    if (values.rsidSlfSchByDt) {
-      payload["selfSchByDt"] = values.rsidSlfSchByDt?.format("MM/DD/YYYY");
+    if (values.selfSchByDt) {
+      payload["selfSchByDt"] = values.selfSchByDt?.format("MM/DD/YYYY");
     }
-    if (values.rsidMrpRvwd) {
-      payload["reviewedMrpChap"] = values.rsidMrpRvwd;
+    if (values.reviewedMrpChap) {
+      payload["reviewedMrpChap"] = values.reviewedMrpChap;
     }
-    if (values.esConfirm) {
-      payload["esConfirm"] = values.esConfirm;
+    if (values.empServicesConfirmInd) {
+      payload["empServicesConfirmInd"] = values.empServicesConfirmInd;
     }
-
-    console.log(payload);
 
     try {
       setErrorMessages([]);
       await client.post(appointmentDetailsSubmissionURL, payload);
-      onCancel();
+      onSubmitClose();
       setShowSuccessMsg(true);
       setSuccessMsg("Appointment Details updated successfully");
     } catch (errorResponse) {
@@ -165,14 +215,27 @@ function AppointmentDetails({ event, onCancel, caseDetails }) {
 
   return (
     <Stack spacing={0.5} noValidate component="form" onSubmit={handleSubmit}>
-      <JMSItems formik={formik} jmsItemsList={jmsItemsList} />
-      <WorkSearchItems data={caseDetails.workSearch} formik={formik} />
-      <Issues formik={formik} caseDetails={caseDetails} />
+      <JMSItems
+        formik={formik}
+        jmsItemsList={jmsItemsList}
+        disableForm={disableForm}
+      />
+      <WorkSearchItems
+        data={caseDetails.workSearch}
+        formik={formik}
+        disableForm={disableForm}
+      />
+      <Issues
+        formik={formik}
+        caseDetails={caseDetails}
+        disableForm={disableForm}
+      />
 
       <OtherActions
         formik={formik}
         otherActionsList={otherActionsList}
         event={event}
+        disableForm={disableForm}
       />
 
       <Stack direction="column" spacing={1} style={{ marginTop: "0.7rem" }}>
@@ -187,31 +250,37 @@ function AppointmentDetails({ event, onCancel, caseDetails }) {
           multiline
           rows={2}
           sx={{ width: "100%" }}
+          disabled={disableForm}
         />
       </Stack>
 
       <FormControlLabel
         control={
           <Checkbox
-            checked={values.esConfirm}
+            checked={values.empServicesConfirmInd == "Y"}
             sx={{ py: 0, pl: 0 }}
             onChange={(event) => {
               const { checked } = event.target;
-              setFieldValue(`esConfirm`, checked ? "Y" : "N");
+              setFieldValue(`empServicesConfirmInd`, checked ? "Y" : "N");
             }}
+            disabled={disableForm}
           />
         }
         label="I confirm that I have provided all necessary Employment Services to this claimant"
       />
 
-      {touched.esConfirm && errors.esConfirm && (
+      {touched.empServicesConfirmInd && errors.empServicesConfirmInd && (
         <FormHelperText style={{ color: "red" }}>
-          {errors.esConfirm}
+          {errors.empServicesConfirmInd}
         </FormHelperText>
       )}
 
       <Stack direction="row" justifyContent="flex-end" spacing={2}>
-        <Button variant="contained" type="submit">
+        <Button
+          variant="contained"
+          type="submit"
+          disabled={disableForm || !isUpdateAccessExist()}
+        >
           Submit
         </Button>
         <Button variant="outlined" onClick={onCancel}>

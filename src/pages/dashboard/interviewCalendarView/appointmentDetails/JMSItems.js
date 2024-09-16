@@ -21,7 +21,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import moment from "moment";
 
-function JMSItems({ formik, jmsItemsList }) {
+function JMSItems({ formik, jmsItemsList, disableForm }) {
   const { touched, values, errors, handleBlur, setFieldValue } = formik;
 
   const handleCheckboxChange = (event) => {
@@ -34,10 +34,10 @@ function JMSItems({ formik, jmsItemsList }) {
       setFieldValue("jMSJobReferral", []);
     }
     if (name === "ActiveVirtualRecuiter" && !checked) {
-      setFieldValue("rsidJmsVRecrtExpDt", null);
+      setFieldValue("jmsVRExpDt", null);
     }
     if (name === "ActiveResume" && !checked) {
-      setFieldValue("rsidJmsResumeExpDt", null);
+      setFieldValue("jmsResumeExpDt", null);
     }
 
     if (name === "JMSRegComplete") {
@@ -60,7 +60,7 @@ function JMSItems({ formik, jmsItemsList }) {
       : [
           {
             jobTitle: "",
-            employerName: "",
+            empName: "",
           },
         ];
     setFieldValue(name, value);
@@ -70,7 +70,7 @@ function JMSItems({ formik, jmsItemsList }) {
     const rows = values[name];
     rows.push({
       jobTitle: "",
-      employerName: "",
+      empName: "",
     });
     setFieldValue(name, rows);
   };
@@ -115,6 +115,7 @@ function JMSItems({ formik, jmsItemsList }) {
                       checked={values.jmsItems[item.value]}
                       onChange={handleCheckboxChange}
                       name={item.value}
+                      disabled={disableForm}
                     />
                   }
                   label={item.label}
@@ -126,7 +127,7 @@ function JMSItems({ formik, jmsItemsList }) {
                   <IconButton
                     size="small"
                     aria-label="close"
-                    disabled={!values.jmsItems[item.value]}
+                    disabled={!values.jmsItems[item.value] || disableForm}
                     onClick={() => {
                       handleShowEditChange(item.editFieldName);
                     }}
@@ -151,11 +152,15 @@ function JMSItems({ formik, jmsItemsList }) {
                           slotProps={{
                             textField: { size: "small" },
                           }}
-                          value={values[item.dateFieldName]}
+                          value={
+                            values[item.dateFieldName]
+                              ? moment(values[item.dateFieldName])
+                              : null
+                          }
                           onChange={(value) => {
                             handleDateValueChange(value, item.dateFieldName);
                           }}
-                          disabled={!values.jmsItems[item.value]}
+                          disabled={!values.jmsItems[item.value] || disableForm}
                           minDate={moment()}
                         />
                       </FormControl>
@@ -215,9 +220,9 @@ function JMSItems({ formik, jmsItemsList }) {
                                 type="text"
                                 variant="outlined"
                                 size="small"
-                                name="employerName"
+                                name="empName"
                                 label="Employer Name"
-                                value={row.employerName}
+                                value={row.empName}
                                 onChange={(event) =>
                                   handleTextChange(
                                     event,
@@ -228,10 +233,10 @@ function JMSItems({ formik, jmsItemsList }) {
                                 onBlur={handleBlur}
                                 error={
                                   touched[item.editFieldName]?.[index]
-                                    ?.employerName &&
-                                  errors[item.editFieldName]?.[index]
-                                    ?.employerName
+                                    ?.empName &&
+                                  errors[item.editFieldName]?.[index]?.empName
                                 }
+                                disabled={disableForm}
                               />
                             </FormControl>
                             <FormControl
@@ -258,6 +263,7 @@ function JMSItems({ formik, jmsItemsList }) {
                                     ?.jobTitle &&
                                   errors[item.editFieldName]?.[index]?.jobTitle
                                 }
+                                disabled={disableForm}
                               />
                             </FormControl>
                             <IconButton
@@ -269,7 +275,8 @@ function JMSItems({ formik, jmsItemsList }) {
                                 handleRemoveRow(index, item.editFieldName)
                               }
                               disabled={
-                                values[item.editFieldName]?.length === 1
+                                values[item.editFieldName]?.length === 1 ||
+                                disableForm
                               }
                             >
                               <RemoveCircleIcon
@@ -289,6 +296,7 @@ function JMSItems({ formik, jmsItemsList }) {
                           <Button
                             sx={{ paddingY: 0 }}
                             onClick={() => handleNewAddRow(item.editFieldName)}
+                            disabled={disableForm}
                           >
                             + Add more
                           </Button>

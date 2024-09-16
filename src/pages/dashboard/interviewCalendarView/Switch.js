@@ -15,12 +15,16 @@ import client from "../../../helpers/Api";
 import { useFormik } from "formik";
 import IssueSubIssueType from "../../../components/issueSubIssueType";
 import { v4 as uuidv4 } from "uuid";
-import { CookieNames, getCookieItem } from "../../../utils/cookies";
+import {
+  CookieNames,
+  getCookieItem,
+  isUpdateAccessExist,
+} from "../../../utils/cookies";
 import { convertISOToMMDDYYYY } from "../../../helpers/utils";
 import { switchValidationSchema } from "../../../helpers/Validation";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
 
-function Switch({ onCancel, event }) {
+function Switch({ onCancel, event, onSubmitClose }) {
   const [errors, setErrors] = useState([]);
   const [switchModeReasons, setSwitchReasons] = useState([]);
 
@@ -34,12 +38,16 @@ function Switch({ onCancel, event }) {
                 `${switchModeReasonsURL}?currentmeetingmode=${event?.appointmentType}`
               );
         setSwitchReasons(
-          data?.map((d) => ({ id: d.alvId, name: d.alvShortDecTxt }))
+          data?.map((d) => ({ id: d.constId, name: d.constShortDesc }))
         );
-      }  catch (errorResponse) {
-        const newErrMsgs = getMsgsFromErrorCode(`GET:${process.env.REACT_APP_SWITCH_MODE}`,errorResponse)
-        setErrors(newErrMsgs)
-    }}
+      } catch (errorResponse) {
+        const newErrMsgs = getMsgsFromErrorCode(
+          `GET:${process.env.REACT_APP_SWITCH_MODE}`,
+          errorResponse
+        );
+        setErrors(newErrMsgs);
+      }
+    }
     fetchSwitchModeReasons();
   }, []);
 
@@ -61,24 +69,26 @@ function Switch({ onCancel, event }) {
     validationSchema: switchValidationSchema,
     onSubmit: async (values) => {
       const userId = getCookieItem(CookieNames.USER_ID);
-      const issueDTOList = values.issues.map((issue) => ({
-        issueId: issue.issueType.issueId,
+
+      const issuesDTOList = values.issues.map((issue) => ({
+        issueId: issue.subIssueType.issueId,
         startDt: convertISOToMMDDYYYY(issue.issueStartDate),
         endDt: convertISOToMMDDYYYY(issue.issueEndDate),
       }));
+
       try {
         const payload = {
-          userId,
+          // userId,
           eventId: event?.id,
           currentMeetingMode: event?.appointmentType,
           reasonForSwitchMeetingMode: values?.reasonForSwitchMeetingMode,
           meetingModeChgReasonTxt: values?.meetingModeChgReasonTxt,
           staffNotes: values?.staffNotes,
-          issueDTOList,
+          issuesDTOList,
         };
 
         await client.post(switchModeSaveURL, payload);
-        onCancel();
+        onSubmitClose();
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
           `POST:${process.env.REACT_APP_SWITCH_SAVE}`,
@@ -90,6 +100,7 @@ function Switch({ onCancel, event }) {
     validateOnChange: false,
     validateOnBlur: false,
   });
+
   return (
     <form onSubmit={formik.handleSubmit}>
       <Stack spacing={2}>
@@ -160,18 +171,23 @@ function Switch({ onCancel, event }) {
             <IssueSubIssueType formik={formik} />
           </Stack>
 
-          {errors?.length && (
+          {!!errors?.length && (
             <Stack mt={1} direction="column" useFlexGap flexWrap="wrap">
-            {errors.map((x) => (
+              {errors.map((x) => (
                 <div>
-                 <span className="errorMsg">*{x}</span>
+                  <span className="errorMsg">*{x}</span>
                 </div>
               ))}
             </Stack>
           )}
 
           <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button variant="contained" color="primary" type="submit">
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              disabled={!isUpdateAccessExist()}
+            >
               Submit
             </Button>
             <Button variant="outlined" onClick={onCancel}>

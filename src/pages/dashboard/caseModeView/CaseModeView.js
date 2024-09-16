@@ -9,12 +9,18 @@ import {
   TableRow,
   Paper,
   styled,
+  Button,
+  DialogContent,
+  Typography,
   Stack,
 } from "@mui/material";
 import TablePagination from "@mui/material/TablePagination";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import { visuallyHidden } from "@mui/utils";
 import cloneDeep from "lodash/cloneDeep";
+import ReAssignCase from "./ReAssignCase";
+import CustomModal from "../../../components/customModal/CustomModal";
+import moment from "moment";
 
 import CaseModeTableRow from "./CaseModeTableRow";
 import { caseLoadSummaryURL } from "../../../helpers/Urls";
@@ -62,6 +68,9 @@ const COLUMNS = [
 const CaseModeView = ({ selectedStage, userId }) => {
   const [rows, setRows] = useState([]);
   const [errorMessages, setErrorMessages] = useState([]);
+  const [type, setType] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState([]);
 
   const [pagination, setPagination] = useState({
     pageNumber: 1,
@@ -80,10 +89,10 @@ const CaseModeView = ({ selectedStage, userId }) => {
     const payload = {
       metric: selectedStage,
       userId: userId,
-
       pagination: pagination,
       sortBy: sortBy,
     };
+
     if (selectedStage && userId) {
       getCaseLoadSummaryData(payload);
     }
@@ -168,70 +177,117 @@ const CaseModeView = ({ selectedStage, userId }) => {
       setErrorMessages(newErrMsgs);
     }
   };
+  const getTitle = () => {
+    if (type === "reassign") {
+      return `Case: ${"Frank Tiles"} - BYE: ${moment(new Date()).format(
+        "MM/DD/YYYY"
+      )}`;
+    }
+  };
 
   return (
-    <Box sx={{ paddingTop: 3, paddingBottom: 2 }}>
-      <TableContainer component={Paper}>
-        <Table
-          sx={{ minWidth: 750 }}
-          size="small"
-          aria-label="customized table"
-        >
-          <TableHead>
-            <TableRow>
-              <StyledTableCell></StyledTableCell>
-              {COLUMNS.map((column) => (
-                <StyledTableCell key={column.id}>
-                  {" "}
-                  <TableSortLabel
-                    active={sortBy.field === column.id}
-                    direction={
-                      sortBy.field === column.id ? sortBy.direction : "asc"
-                    }
-                    onClick={createSortHandler(column.id)}
-                  >
-                    {column.label}
-                    {sortBy.field === column.id ? (
-                      <Box component="span" sx={visuallyHidden}>
-                        {sortBy.direction === "desc"
-                          ? "sorted descending"
-                          : "sorted ascending"}
-                      </Box>
-                    ) : null}
-                  </TableSortLabel>
-                </StyledTableCell>
+    <>
+      <Box sx={{ paddingTop: 3, paddingBottom: 2 }}>
+        <TableContainer component={Paper}>
+          <Table
+            sx={{ minWidth: 750 }}
+            size="small"
+            aria-label="customized table"
+          >
+            <TableHead>
+              <TableRow>
+                <StyledTableCell></StyledTableCell>
+                {COLUMNS.map((column) => (
+                  <StyledTableCell key={column.id}>
+                    {" "}
+                    <TableSortLabel
+                      active={sortBy.field === column.id}
+                      direction={
+                        sortBy.field === column.id ? sortBy.direction : "asc"
+                      }
+                      onClick={createSortHandler(column.id)}
+                    >
+                      {column.label}
+                      {sortBy.field === column.id ? (
+                        <Box component="span" sx={visuallyHidden}>
+                          {sortBy.direction === "desc"
+                            ? "sorted descending"
+                            : "sorted ascending"}
+                        </Box>
+                      ) : null}
+                    </TableSortLabel>
+                  </StyledTableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows.map((row, index) => (
+                <CaseModeTableRow
+                  key={index}
+                  row={row}
+                  setSelectedRow={setSelectedRow}
+                />
               ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((row, index) => (
-              <CaseModeTableRow key={index} row={row} />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={totalCount}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
-      <Stack
-        spacing={{ xs: 1, sm: 2 }}
-        direction="row"
-        useFlexGap
-        flexWrap="wrap"
-      >
-        {errorMessages.map((x) => (
-          <div>
-            <span className="errorMsg">*{x}</span>
-          </div>
-        ))}
-      </Stack>
-    </Box>
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 100]}
+          component="div"
+          count={totalCount}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+        <Stack
+          spacing={{ xs: 1, sm: 2 }}
+          direction="row"
+          useFlexGap
+          flexWrap="wrap"
+        >
+          {errorMessages.map((x) => (
+            <div>
+              <span className="errorMsg">*{x}</span>
+            </div>
+          ))}
+        </Stack>
+      </Box>
+      <CustomModal title={getTitle()} open={open} maxWidth="md">
+        <DialogContent dividers sx={{ paddingBottom: 1 }}>
+          <Stack>
+            {type && (
+              <Stack mt={2}>
+                <Typography fontWeight={600} fontSize={"1rem"} color="primary">
+                  ReAssign Case
+                </Typography>
+              </Stack>
+            )}
+            {type === "reassign" && (
+              <Stack>
+                <ReAssignCase
+                  onCancel={() => setOpen(false)}
+                  caseNum={selectedRow?.caseNum}
+                />
+              </Stack>
+            )}
+          </Stack>
+        </DialogContent>
+      </CustomModal>
+
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            setOpen(true);
+            setType("reassign");
+          }}
+        >
+          Reassign Case
+        </Button>
+      </div>
+    </>
   );
 };
 

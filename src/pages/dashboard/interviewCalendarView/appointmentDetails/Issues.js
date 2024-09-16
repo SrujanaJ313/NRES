@@ -23,7 +23,7 @@ import client from "../../../../helpers/Api";
 import moment from "moment";
 import { getMsgsFromErrorCode } from "../../../../helpers/utils";
 
-function Issues({ formik, caseDetails }) {
+function Issues({ formik, caseDetails, disableForm }) {
   const { touched, values, errors, setFieldValue } = formik;
 
   const [issues, setIssues] = useState([]);
@@ -44,6 +44,14 @@ function Issues({ formik, caseDetails }) {
   useEffect(() => {
     fetchIssueList();
   }, []);
+
+  useEffect(() => {
+    if (disableForm) {
+      [...values.otherIssues].forEach((issue) => {
+        fetchSubIssuesList(issue.issueType);
+      });
+    }
+  }, [disableForm, values.otherIssues]);
 
   const fetchIssueList = async () => {
     try {
@@ -149,6 +157,7 @@ function Issues({ formik, caseDetails }) {
                   sx={{ py: 0 }}
                   checked={values.otherIssues[index].selected}
                   onChange={(event) => handleCheckboxChange(event, index)}
+                  disabled={disableForm}
                 />
               }
               sx={{
@@ -167,7 +176,9 @@ function Issues({ formik, caseDetails }) {
                     onChange={(event) =>
                       handleIssueTypeChange(event.target.value, index)
                     }
-                    disabled={!values.otherIssues?.[index].selected}
+                    disabled={
+                      !values.otherIssues?.[index].selected || disableForm
+                    }
                   >
                     {issues.map((issue) => (
                       <MenuItem key={issue.issueId} value={issue.issueId}>
@@ -193,7 +204,9 @@ function Issues({ formik, caseDetails }) {
                     onChange={(event) =>
                       handleIssueSubTypeChange(event.target.value, index)
                     }
-                    disabled={!values.otherIssues?.[index].selected}
+                    disabled={
+                      !values.otherIssues?.[index].selected || disableForm
+                    }
                   >
                     {subIssues[row.issueType]?.map((subIssue) => (
                       <MenuItem key={subIssue.issueId} value={subIssue.issueId}>
@@ -218,11 +231,13 @@ function Issues({ formik, caseDetails }) {
                       slotProps={{
                         textField: { size: "small" },
                       }}
-                      value={row.startDt}
+                      value={row.startDt ? moment(row.startDt) : null}
                       onChange={(value) => {
                         handleDateChange(value, index, "startDt");
                       }}
-                      disabled={!values.otherIssues[index].selected}
+                      disabled={
+                        !values.otherIssues[index].selected || disableForm
+                      }
                       minDate={moment()}
                       maxDate={moment(caseDetails.clmByDt)}
                     />
@@ -244,11 +259,13 @@ function Issues({ formik, caseDetails }) {
                         textField: { size: "small" },
                       }}
                       label="End Date"
-                      value={row.endDt}
+                      value={row.endDt ? moment(row.endDt) : null}
                       onChange={(value) => {
                         handleDateChange(value, index, "endDt");
                       }}
-                      disabled={!values.otherIssues[index].selected}
+                      disabled={
+                        !values.otherIssues[index].selected || disableForm
+                      }
                       minDate={moment(row.startDt)}
                     />
                   </FormControl>
@@ -263,7 +280,7 @@ function Issues({ formik, caseDetails }) {
               <IconButton
                 sx={{ padding: "0px", marginRight: "20px !important" }}
                 onClick={() => handleRemoveClick(index)}
-                disabled={values.otherIssues.length === 1}
+                disabled={values.otherIssues.length === 1 || disableForm}
               >
                 <RemoveCircleIcon fontSize="small" />
               </IconButton>
@@ -275,7 +292,11 @@ function Issues({ formik, caseDetails }) {
           justifyContent="end"
           sx={{ mt: "0px !important" }}
         >
-          <Button sx={{ paddingY: 0 }} onClick={addNewRow}>
+          <Button
+            sx={{ paddingY: 0 }}
+            onClick={addNewRow}
+            disabled={disableForm}
+          >
             + Add more
           </Button>
         </Stack>
@@ -297,3 +318,4 @@ function Issues({ formik, caseDetails }) {
 }
 
 export default Issues;
+
