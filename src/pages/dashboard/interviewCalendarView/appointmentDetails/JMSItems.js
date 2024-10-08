@@ -40,12 +40,12 @@ function JMSItems({ formik, jmsItemsList, disableForm }) {
       setFieldValue("jmsResumeExpDt", null);
     }
 
-    if (name === "JMSRegComplete") {
-      setFieldValue("jmsItems.JMSRegIncomplete", false);
-    }
-    if (name === "JMSRegIncomplete") {
-      setFieldValue("jmsItems.JMSRegComplete", false);
-    }
+    // if (name === "JMSRegComplete") {
+    //   setFieldValue("jmsItems.JMSRegIncomplete", false);
+    // }
+    // if (name === "JMSRegIncomplete") {
+    //   setFieldValue("jmsItems.JMSRegComplete", false);
+    // }
   };
 
   const handleDateValueChange = (value, name) => {

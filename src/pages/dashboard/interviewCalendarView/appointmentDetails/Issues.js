@@ -318,4 +318,3 @@ function Issues({ formik, caseDetails, disableForm }) {
 }
 
 export default Issues;
-

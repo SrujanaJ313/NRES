@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
+import LinearProgress from "@mui/material/LinearProgress";
 import { useFormik } from "formik";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
@@ -38,6 +39,11 @@ import {
 } from "../../../../helpers/Constants";
 import { getMsgsFromErrorCode } from "../../../../helpers/utils";
 import { isUpdateAccessExist } from "../../../../utils/cookies";
+import { useSnackbar } from "../../../../context/SnackbarContext";
+import {
+  getIsPastAppointment,
+  isCurrentAppointment,
+} from "../../../../helpers/utils";
 
 const getInitialData = (event) => {
   let jmsItemsList = [];
@@ -62,24 +68,39 @@ const getInitialData = (event) => {
 };
 
 function AppointmentDetails({ event, onCancel, caseDetails, onSubmitClose }) {
+  const showSnackbar = useSnackbar();
   const { jmsItemsList, otherActionsList, initialUnfilledValues } =
     getInitialData(event);
   // const [jmsItemsList, setJMSItemsList] = useState([]);
   // const [otherActionsList, setOtherActionsList] = useState([]);
-  const [initialValues, setInitialValues] = useState(initialUnfilledValues);
-
-  const [showSuccessMsg, setShowSuccessMsg] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
+  const [initialValues, setInitialValues] = useState({
+    ...initialUnfilledValues,
+    workSearchIssuesCount: caseDetails?.workSearch?.length || 0,
+  });
 
   const [errorMessages, setErrorMessages] = useState([]);
   const [disableForm, setDisableForm] = useState(false);
+  const [showEmptyAppointmentDetails, setShowEmptyAppointmentDetails] =
+    useState(false);
+  const [isMetaDataLoaded, setIsMetaDataLoaded] = useState(false);
 
   useEffect(() => {
-    const appointmentDateTime = `${event.appointmentDt} ${event.endTime}`;
-    const isPastAppointment = moment().isAfter(appointmentDateTime);
-    const showViewOnlyAppointmentDetails =
-      isPastAppointment || event.eventSubmitted;
-    if (showViewOnlyAppointmentDetails) fetchAppointmentDetails();
+    const isPastAppointment = getIsPastAppointment(event);
+    const isCurrent = isCurrentAppointment(event);
+
+    if (event.eventSubmitted) {
+      fetchAppointmentDetails();
+      return;
+    }
+
+    if (isCurrent) {
+      setIsMetaDataLoaded(true);
+      return;
+    }
+
+    if (isPastAppointment) {
+      fetchAppointmentDetails();
+    }
   }, []);
 
   const fetchAppointmentDetails = async () => {
@@ -104,9 +125,15 @@ function AppointmentDetails({ event, onCancel, caseDetails, onSubmitClose }) {
       // response.empServicesConfirmInd = "Y";
       */
 
-      setInitialValues(response);
-      setDisableForm(true);
+      if (response) {
+        setInitialValues(response);
+        setDisableForm(true);
+      } else {
+        setShowEmptyAppointmentDetails(true);
+      }
+      setIsMetaDataLoaded(true);
     } catch (errorResponse) {
+      setDisableForm(true);
       const newErrMsgs = getMsgsFromErrorCode(
         `GET:${process.env.REACT_APP_APPOINTMENT_DETAILS_GET}`,
         errorResponse
@@ -179,9 +206,8 @@ function AppointmentDetails({ event, onCancel, caseDetails, onSubmitClose }) {
     try {
       setErrorMessages([]);
       await client.post(appointmentDetailsSubmissionURL, payload);
+      showSnackbar("Your request has been recorded successfully.", 5000);
       onSubmitClose();
-      setShowSuccessMsg(true);
-      setSuccessMsg("Appointment Details updated successfully");
     } catch (errorResponse) {
       const newErrMsgs = getMsgsFromErrorCode(
         `POST:${process.env.REACT_APP_APPOINTMENT_DETAILS_SUBMISSION}`,
@@ -213,112 +239,115 @@ function AppointmentDetails({ event, onCancel, caseDetails, onSubmitClose }) {
     handleSubmit,
   } = formik;
 
-  return (
-    <Stack spacing={0.5} noValidate component="form" onSubmit={handleSubmit}>
-      <JMSItems
-        formik={formik}
-        jmsItemsList={jmsItemsList}
-        disableForm={disableForm}
-      />
-      <WorkSearchItems
-        data={caseDetails.workSearch}
-        formik={formik}
-        disableForm={disableForm}
-      />
-      <Issues
-        formik={formik}
-        caseDetails={caseDetails}
-        disableForm={disableForm}
-      />
-
-      <OtherActions
-        formik={formik}
-        otherActionsList={otherActionsList}
-        event={event}
-        disableForm={disableForm}
-      />
-
-      <Stack direction="column" spacing={1} style={{ marginTop: "0.7rem" }}>
-        <TextField
-          label="Staff Notes, if any"
-          size="small"
-          value={values.staffNotes}
-          name="staffNotes"
-          onBlur={handleBlur}
-          onChange={handleChange}
-          variant="outlined"
-          multiline
-          rows={2}
-          sx={{ width: "100%" }}
-          disabled={disableForm}
-        />
+  if (!isMetaDataLoaded) {
+    return (
+      <div>
+        <p>Loading appointment details...</p>
+        <LinearProgress />
+      </div>
+    );
+  } else if (showEmptyAppointmentDetails) {
+    return (
+      <Stack spacing={0.5} noValidate component="form" onSubmit={handleSubmit}>
+        <p>No Details for this appointment</p>
+        <Stack direction="row" justifyContent="flex-end" spacing={2}>
+          <Button variant="outlined" onClick={onCancel}>
+            Cancel
+          </Button>
+        </Stack>
       </Stack>
+    );
+  } else {
+    return (
+      <Stack spacing={0.5} noValidate component="form" onSubmit={handleSubmit}>
+        <JMSItems
+          formik={formik}
+          jmsItemsList={jmsItemsList}
+          disableForm={disableForm}
+        />
+        <WorkSearchItems
+          data={caseDetails.workSearch}
+          formik={formik}
+          disableForm={disableForm}
+        />
+        <Issues
+          formik={formik}
+          caseDetails={caseDetails}
+          disableForm={disableForm}
+        />
 
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={values.empServicesConfirmInd == "Y"}
-            sx={{ py: 0, pl: 0 }}
-            onChange={(event) => {
-              const { checked } = event.target;
-              setFieldValue(`empServicesConfirmInd`, checked ? "Y" : "N");
-            }}
+        <OtherActions
+          formik={formik}
+          otherActionsList={otherActionsList}
+          event={event}
+          disableForm={disableForm}
+        />
+
+        <Stack direction="column" spacing={1} style={{ marginTop: "0.7rem" }}>
+          <TextField
+            label="Staff Notes, if any"
+            size="small"
+            value={values.staffNotes}
+            name="staffNotes"
+            onBlur={handleBlur}
+            onChange={handleChange}
+            variant="outlined"
+            multiline
+            rows={2}
+            sx={{ width: "100%" }}
             disabled={disableForm}
           />
-        }
-        label="I confirm that I have provided all necessary Employment Services to this claimant"
-      />
+        </Stack>
 
-      {touched.empServicesConfirmInd && errors.empServicesConfirmInd && (
-        <FormHelperText style={{ color: "red" }}>
-          {errors.empServicesConfirmInd}
-        </FormHelperText>
-      )}
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={values.empServicesConfirmInd == "Y"}
+              sx={{ py: 0, pl: 0 }}
+              onChange={(event) => {
+                const { checked } = event.target;
+                setFieldValue(`empServicesConfirmInd`, checked ? "Y" : "N");
+              }}
+              disabled={disableForm}
+            />
+          }
+          label="I confirm that I have provided all necessary Employment Services to this claimant"
+        />
 
-      <Stack direction="row" justifyContent="flex-end" spacing={2}>
-        <Button
-          variant="contained"
-          type="submit"
-          disabled={disableForm || !isUpdateAccessExist()}
+        {touched.empServicesConfirmInd && errors.empServicesConfirmInd && (
+          <FormHelperText style={{ color: "red" }}>
+            {errors.empServicesConfirmInd}
+          </FormHelperText>
+        )}
+
+        <Stack direction="row" justifyContent="flex-end" spacing={2}>
+          <Button
+            variant="contained"
+            type="submit"
+            disabled={disableForm || !isUpdateAccessExist()}
+          >
+            Submit
+          </Button>
+          <Button variant="outlined" onClick={onCancel}>
+            Cancel
+          </Button>
+        </Stack>
+
+        <Stack
+          spacing={{ xs: 1, sm: 2 }}
+          direction="row"
+          useFlexGap
+          flexWrap="wrap"
         >
-          Submit
-        </Button>
-        <Button variant="outlined" onClick={onCancel}>
-          Cancel
-        </Button>
+          {errorMessages.map((x) => (
+            <div>
+              <span className="errorMsg">*{x}</span>
+            </div>
+          ))}
+        </Stack>
       </Stack>
-
-      <Stack
-        spacing={{ xs: 1, sm: 2 }}
-        direction="row"
-        useFlexGap
-        flexWrap="wrap"
-      >
-        {errorMessages.map((x) => (
-          <div>
-            <span className="errorMsg">*{x}</span>
-          </div>
-        ))}
-      </Stack>
-
-      <Snackbar
-        open={showSuccessMsg}
-        autoHideDuration={5000}
-        onClose={() => setShowSuccessMsg(false)}
-        message={successMsg}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => setShowSuccessMsg(false)}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {successMsg}
-        </Alert>
-      </Snackbar>
-    </Stack>
-  );
+    );
+  }
 }
 
 export default AppointmentDetails;
