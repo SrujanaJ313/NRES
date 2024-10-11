@@ -35,14 +35,17 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { rescheduleValidationSchema } from "../../../helpers/Validation";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
 import { useNavigate } from "react-router-dom";
+import MoreTimeIcon from "@mui/icons-material/MoreTime";
 
 import {
   convertISOToMMDDYYYY,
   // convertTimeToHoursMinutes,
 } from "../../../helpers/utils";
 import { isUpdateAccessExist } from "../../../utils/cookies";
+import { useSnackbar } from "../../../context/SnackbarContext";
 
 function RescheduleRequest({ onCancel, event, onSubmitClose }) {
+  const showSnackbar = useSnackbar();
   const [reasons, setReasons] = useState([{}]);
   const [rescheduleReasons, setRescheduleReasons] = useState([]);
   const [errors, setErrors] = useState([]);
@@ -100,7 +103,9 @@ function RescheduleRequest({ onCancel, event, onSubmitClose }) {
           issuesDTOList.push({
             issueId: issue.subIssueType.issueId,
             startDt: convertISOToMMDDYYYY(issue.issueStartDate),
-            endDt: convertISOToMMDDYYYY(issue.issueEndDate),
+            endDt: issue.issueEndDate
+              ? convertISOToMMDDYYYY(issue.issueEndDate)
+              : null,
           });
         }
       });
@@ -150,6 +155,7 @@ function RescheduleRequest({ onCancel, event, onSubmitClose }) {
         }
         handleNavigation("");
         await client.post(rescheduleSaveURL, payload);
+        showSnackbar("Your request has been recorded successfully.", 5000);
         onSubmitClose();
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
@@ -165,6 +171,7 @@ function RescheduleRequest({ onCancel, event, onSubmitClose }) {
   useEffect(() => {
     async function fetchRescheduleReasonsListData() {
       try {
+        setErrors([]);
         const data =
           process.env.REACT_APP_ENV === "mockserver"
             ? await client.get(reschedulingReasonsListURL)
@@ -195,6 +202,9 @@ function RescheduleRequest({ onCancel, event, onSubmitClose }) {
             ? "V"
             : "",
         };
+        if(!payload.meetingModeInperson && !payload.meetingModeVirtual){
+         return; 
+        }
         const data =
           process.env.REACT_APP_ENV === "mockserver"
             ? await client.get(reschedulingToURL)
@@ -215,6 +225,10 @@ function RescheduleRequest({ onCancel, event, onSubmitClose }) {
     formik.values.mode.selectedPrefMtgModeVirtual,
   ]);
 
+  useEffect(() => {
+    formik.setFieldValue("appointmentTime", null);
+  }, [formik.values.reasonForRescheduling]);
+
   const handleCheckboxChange = (event) => {
     const { checked, name } = event.target;
     if (name === "tempSuspendedInd") {
@@ -224,6 +238,7 @@ function RescheduleRequest({ onCancel, event, onSubmitClose }) {
       selectedModes[name] = checked;
       formik.setFieldValue("mode", selectedModes);
     }
+   
   };
 
   return (
@@ -306,7 +321,27 @@ function RescheduleRequest({ onCancel, event, onSubmitClose }) {
                           color: reason.nonComplianceInd === "Y" ? "red" : "",
                         }}
                       >
-                        {`${reason?.rsicCalEventDate}, ${reason?.rsicCalEventStartTime}- ${reason?.rsicCalEventEndTime}`}
+                        <span
+                          style={{
+                            width: "40ch",
+                            textAlign: "left",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {`${reason?.rsicCalEventDate}, ${reason?.rsicCalEventStartTime}- ${reason?.rsicCalEventEndTime} `}
+                        </span>
+                        {reason.nonComplianceInd === "Y" ? (
+                          <span style={{ color: "blue" }}>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <MoreTimeIcon
+                              style={{ color: "#364da2", fontSize: "small" }}
+                            />
+                          </span>
+                        ) : (
+                          ""
+                        )}
                       </MenuItem>
                     );
                   })}
@@ -378,7 +413,6 @@ function RescheduleRequest({ onCancel, event, onSubmitClose }) {
                     )}
                   />
                   {formik.touched.appointmentDate &&
-                    formik.errors.appointmentDate &&
                     formik.errors.appointmentDate && (
                       <FormHelperText error>
                         {formik.errors.appointmentDate}
@@ -393,16 +427,19 @@ function RescheduleRequest({ onCancel, event, onSubmitClose }) {
                     slotProps={{
                       textField: { size: "small" },
                     }}
-                    value={formik.values.appointmentTime}
-                    onChange={(value) =>
+                    value={
+                      formik.values.appointmentTime
+                        ? dayjs(formik.values.appointmentTime, "hh:mm A")
+                        : null
+                    }
+                    onChange={(value) => {
                       formik.setFieldValue(
                         "appointmentTime",
                         value ? dayjs(value).format("hh:mm A") : ""
-                      )
-                    }
+                      );
+                    }}
                     onBlur={formik.handleBlur}
                     name="appointmentTime"
-                    inputFormat="hh:mm a"
                     minutesStep={15}
                     renderInput={(params) => (
                       <TextField
@@ -518,16 +555,19 @@ function RescheduleRequest({ onCancel, event, onSubmitClose }) {
                     slotProps={{
                       textField: { size: "small" },
                     }}
-                    value={formik.values.appointmentTime}
-                    onChange={(value) =>
+                    value={
+                      formik.values.appointmentTime
+                        ? dayjs(formik.values.appointmentTime, "hh:mm A")
+                        : null
+                    }
+                    onChange={(value) => {
                       formik.setFieldValue(
                         "appointmentTime",
                         value ? dayjs(value).format("hh:mm A") : ""
-                      )
-                    }
+                      );
+                    }}
                     onBlur={formik.handleBlur}
                     name="appointmentTime"
-                    inputFormat="hh:mm a"
                     minutesStep={15}
                     renderInput={(params) => (
                       <TextField

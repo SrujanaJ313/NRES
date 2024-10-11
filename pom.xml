@@ -2,10 +2,10 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ssi.ui</groupId>
-    <artifactId>ssi-reacjs-frontend</artifactId>
+    <artifactId>ssi-staffresea-frontend</artifactId>
     <packaging>war</packaging>
     <version>0.0.8</version>
-    <name>ssi-reacjs-frontend</name>
+    <name>ssi-staffresea-frontend</name>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -13,11 +13,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <frontend.root>${project.basedir}</frontend.root>
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
-        <profile>production</profile>
     </properties>
 
     <build>
-        <finalName>resea-${project.version}</finalName>
+        <finalName>staffresea-${project.version}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
@@ -113,7 +112,7 @@
                 <artifactId>tomcat7-maven-plugin</artifactId>
                 <version>2.2</version>
                 <configuration>
-                    <path>/resea</path>
+                    <path>/staffresea</path>
                 </configuration>
             </plugin>
         </plugins>

@@ -90,7 +90,7 @@ function OtherActions({ formik, otherActionsList, event, disableForm }) {
                           }
                         />
                       }
-                      label="Chapter 1 to 4"
+                      label="Chapters 1 to 4"
                     />
                     <FormControlLabel
                       value="Chapter5To10"

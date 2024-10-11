@@ -16,7 +16,7 @@ import Stack from "@mui/material/Stack";
 
 const localizer = momentLocalizer(moment);
 
-function InterviewCalendarView({ userId }) {
+function InterviewCalendarView({ userId, userName }) {
   const [open, setOpen] = useState(false);
   const [event, setEvent] = useState();
   const [caseDetails, setCaseDetails] = useState();
@@ -168,8 +168,8 @@ function InterviewCalendarView({ userId }) {
   };
 
   const getTitle = () => {
-    if (event.label.toLowerCase() === "available") {
-      return "Available";
+    if (event?.eventTypeDesc?.toLowerCase() === "available") {
+      return `AVAILABLE ${event.usageDesc}: ${event.appointmentDt} from ${event.startTime} to ${event.endTime}`;
     } else {
       if (event.usageDesc === "Initial Appointment") {
         return `Initial Appointment: ${event.appointmentDt} from ${event.startTime} to ${event.endTime}`;
@@ -187,12 +187,15 @@ function InterviewCalendarView({ userId }) {
     ) : null;
   };
 
-  const onRangeChange = useCallback((range) => {
-    const start = moment(range[0]).format("MM/DD/YYYY");
-    const end = moment(range[range.length - 1]).format("MM/DD/YYYY");
-    setCurrentDateRange({ start, end });
-    getCalendarEvents(start, end);
-  }, []);
+  const onRangeChange = useCallback(
+    (range) => {
+      const start = moment(range[0]).format("MM/DD/YYYY");
+      const end = moment(range[range.length - 1]).format("MM/DD/YYYY");
+      setCurrentDateRange({ start, end });
+      getCalendarEvents(start, end);
+    },
+    [userId]
+  );
 
   const onSubmitModalClose = () => {
     setOpen(false);
@@ -223,6 +226,7 @@ function InterviewCalendarView({ userId }) {
       </Stack>
       <Calendar
         localizer={localizer}
+        tooltipAccessor={null}
         defaultDate={useMemo(
           () => ({
             defaultDate: new Date(),
@@ -271,6 +275,8 @@ function InterviewCalendarView({ userId }) {
             <>
               <AvailableEvent
                 event={event}
+                userName={userName}
+                userId={userId}
                 onSubmitClose={onSubmitModalClose}
                 onCancel={() => setOpen(false)}
               />

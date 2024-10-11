@@ -58,6 +58,8 @@ export const ERROR_CODES_MAPPER = {
     404: "Requested resource not found.",
     405: "Requested HTTP method is not supported.",
     500: "An error occurred while processing your request. Please try again or contact the administrator for assistance.",
+    default:
+      "An error occurred while processing your request. Please try again or contact the administrator for assistance.",
   },
 };
 
@@ -87,8 +89,13 @@ ERROR_CODES_MAPPER[`GET:${process.env.REACT_APP_CASE_HEADER}`] = {
 };
 
 ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_SWITCH_SAVE}`] = {
+  "createIssue.issueEndDt.invalid":
+    "End Date for a Create Issue should be after Start Date",
   "switchmeetingmode.reason.mandatory":
     "A reason for switching the meeting mode is mandatory.",
+  "createIssue.issueEndDt.priorToBye":
+    "End Date for a Create Issue should be prior to Current Benefit Year End Date.",
+
   "change.reason.text.exceeds_limit":
     "Reason for Switch Meeting Mode exceeds character limit, please limit your input to 1000 characters.",
   "currentmeetingmode.mandatory": "Current Meeting mode is mandatory",
@@ -97,6 +104,9 @@ ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_SWITCH_SAVE}`] = {
 };
 
 ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_RETURNED_TO_WORK_SAVE}`] = {
+  "workSchedule.invalid": "Work Schedule is invalid.",
+  "createActivity.failed":
+    "Request Processed. However, case activity could not created.  Please Contact WeCare.",
   "empStartDt.mandatory": "Employment Start Date is mandatory",
   "companyName.mandatory": "Company Name is mandatory",
   "jobTitle.mandatory": "Job Title is mandatory",
@@ -107,7 +117,7 @@ ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_RETURNED_TO_WORK_SAVE}`] = {
   "workMode.mandatory": "Work Mode is mandatory",
   "staffNotes.exceeds_limit":
     "Staff Notes exceeds character limit, please limit to 4000 characters",
-  "jms890IndAnjmsReferralInd.bothEmpty":
+  "jms890IndAndjmsReferralInd.bothEmpty":
     "Please select either 'Non-Direct placement Recorded in JMS' or 'JMS Referral Recorded in JMS'.",
   "jmsCompletedItems.checkedOff":
     "For a future start date, please ensure none of the JMS items are checked.",
@@ -116,6 +126,13 @@ ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_RETURNED_TO_WORK_SAVE}`] = {
 };
 
 ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_RESCHEDULE_SAVE}`] = {
+  "createIssue.issueEndDt.invalid":
+    "End Date for a Create Issue should be after Start Date",
+  "createIssue.issueEndDt.priorToBye":
+    "End Date for a Create Issue should be prior to Current Benefit Year End Date.",
+  "entityTeleNumber.invalid": "employer telephone number invalid",
+  "createActivity.failed":
+    "Request Processed. However, case activity could not created.  Please Contact WeCare.",
   "oldEventId.mandatory": "Previous event Id is mandatory ",
   "newEventId.mandatory": "New Event Id is Mandatory",
   "nonComplaince.indicator.mandatory": "Non Compliance Indicator is mandatory",
@@ -136,7 +153,11 @@ ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_RESCHEDULE_SAVE}`] = {
 };
 
 ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_APPOINTMENT_SAVE}`] = {
+  "createActivity.failed":
+    "Request Processed. However, case activity could not created.  Please Contact WeCare.",
   "eventId.notAvailable": "Appointment Slot is not Available",
+  "createIssue.issueEndDt.priorToBye":
+    "End Date for a Create Issue should be prior to Current Benefit Year End Date.",
 
   "for.lof.invalid": "User does not have access to For Local Office option",
   "for.mgr.invalid": "User does not have access to For Case Manager option",
@@ -153,8 +174,15 @@ ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_APPOINTMENT_SAVE}`] = {
 ERROR_CODES_MAPPER[
   `POST:${process.env.REACT_APP_APPOINTMENT_DETAILS_SUBMISSION}`
 ] = {
-  "OutsideWebReferral.jobReferral.invalid": "error in employer name",
+  "createIssue.issueEndDt.invalid":
+    "End Date for a Create Issue should be after Start Date",
+  "appointment.access.invalid":
+    "User doesnot have access to submit interview details for another case manager.",
   "InitialAssessment.mandatory": "102: Initial Assessment is mandatory",
+  "createIssue.issueEndDt.priorToBye":
+    "End Date for a Create Issue should be prior to Current Benefit Year End Date.",
+  "createActivity.failed":
+    "Request Processed. However, case activity could not created.  Please Contact WeCare.",
   "Eri1On1.mandatory": "106: Eri 1-on-1 is mandatory",
   "ELMIServices.mandatory": "107: ELMI Services is mandatory",
   "JobDevelopment.mandatory": "123: Job Development is mandatory",
@@ -166,6 +194,8 @@ ERROR_CODES_MAPPER[
     "209: Refer to WIOA state & local training  is mandatory",
   "ReferToVRorDHHS.mandatory": "Refer to VR or DHHS is mandatory",
   "JMSJobReferral.mandatory": "500+: JMS Job Referral is mandatory",
+  "jms890IndAndjmsReferralInd.bothEmpty":
+    "Please select either 'Non-Direct placement Recorded in JMS' or 'JMS Referral Recorded in JMS'.",
   "AddSelfCaseManager.mandatory": "Add Self as Case Manager is mandatory",
   "JMSCaseNotes.mandatory": "JMS Case Notes is mandatory",
   "CloseGoals.mandatory": "Close Goals is mandatory",
@@ -243,6 +273,8 @@ ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_REASSIGN_SAVE}`] = {
   "eventld.mandatory": "Event ID is mandatory",
 };
 ERROR_CODES_MAPPER[`POST:${process.env.REACT_APP_APPOINTMENT_AVAILABLE}`] = {
+  "createIssue.issueEndDt.priorToBye":
+    "End Date for a Create Issue should be prior to Current Benefit Year End Date.",
   "for.lof.invalid": "User does not have access to For Local Office option",
   "for.mgr.invalid": "User does not have access to For Case Manager option",
 };

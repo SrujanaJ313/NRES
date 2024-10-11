@@ -36,6 +36,7 @@ const reassignReasonsURL = `${baseApiUrl}${process.env.REACT_APP_REASSIGN_REASON
 const reassignCaseOfficeNameURL = `${baseApiUrl}${process.env.REACT_APP_REASSIGN_CASE_OFFICE_NAME}`;
 const reassignSaveURL = `${baseApiUrl}${process.env.REACT_APP_REASSIGN_SAVE}`;
 const appointmentDetailsGetURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENT_DETAILS_GET}`;
+const returnToWorkEditModeURL = `${baseApiUrl}${process.env.REACT_APP_RETURN_TO_WORK_GET}`;
 
 export {
   baseApiUrl,
@@ -69,4 +70,5 @@ export {
   reassignCaseOfficeNameURL,
   reassignSaveURL,
   appointmentDetailsGetURL,
+  returnToWorkEditModeURL,
 };

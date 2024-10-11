@@ -14,6 +14,8 @@ import Switch from "./Switch";
 import CaseHeader from "../../../components/caseHeader";
 import NoShowup from "./noShow";
 
+import { getIsPastAppointment } from "../../../helpers/utils";
+
 function ScheduleEvent({ caseDetails, event, onSubmitClose }) {
   const [type, setType] = useState("");
 
@@ -46,14 +48,14 @@ function ScheduleEvent({ caseDetails, event, onSubmitClose }) {
     return isFutureAppointment;
   };
 
-  const getIsPastAppointment = () => {
-    const appointmentDateTime = moment(
-      `${event.appointmentDt} ${event.endTime}`
-    );
-    const adjustedDateTime = appointmentDateTime.add(30, "minutes");
-    const isPastAppointment = moment().isAfter(adjustedDateTime);
-    return isPastAppointment;
-  };
+  // const getIsPastAppointment = () => {
+  //   const appointmentDateTime = moment(
+  //     `${event.appointmentDt} ${event.startTime}`
+  //   );
+  //   const adjustedDateTime = appointmentDateTime.subtract(30, "minutes");
+  //   const isPastAppointment = moment().isAfter(adjustedDateTime);
+  //   return isPastAppointment;
+  // };
 
   const isCurrentAppointment = () => {
     const appointmentStartTime = moment(
@@ -132,48 +134,52 @@ function ScheduleEvent({ caseDetails, event, onSubmitClose }) {
         </Stack>
       </DialogContent>
       <DialogActions sx={{ margin: 1 }}>
-        <Button
-          variant="contained"
-          onClick={() => setType("reschedule")}
-          size="small"
-          disabled={!getIsFutureAppointment()}
-        >
-          Reschedule
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() => setType("switch")}
-          size="small"
-          disabled={!getIsFutureAppointment()}
-        >
-          Switch Mode
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() => setType("returnToWork")}
-          size="small"
-        >
-          Returned to Work
-        </Button>
+        {!type && (
+          <>
+            <Button
+              variant="contained"
+              onClick={() => setType("reschedule")}
+              size="small"
+              disabled={!getIsFutureAppointment()}
+            >
+              Reschedule
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => setType("switch")}
+              size="small"
+              disabled={!getIsFutureAppointment()}
+            >
+              Switch Mode
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => setType("returnToWork")}
+              size="small"
+            >
+              Returned to Work
+            </Button>
 
-        <Button
-          variant="contained"
-          sx={{ height: "fit-content" }}
-          onClick={() => setType("appointmentDetails")}
-          size="small"
-          disabled={!getIsPastAppointment()}
-        >
-          Appointment Details
-        </Button>
-        <Button
-          variant="contained"
-          sx={{ height: "fit-content" }}
-          onClick={() => setType("noShow")}
-          size="small"
-          disabled={!isCurrentAppointment()}
-        >
-          No Show
-        </Button>
+            <Button
+              variant="contained"
+              sx={{ height: "fit-content" }}
+              onClick={() => setType("appointmentDetails")}
+              size="small"
+              disabled={!getIsPastAppointment(event)}
+            >
+              Appointment Details
+            </Button>
+            <Button
+              variant="contained"
+              sx={{ height: "fit-content" }}
+              onClick={() => setType("noShow")}
+              size="small"
+              disabled={!isCurrentAppointment()}
+            >
+              No Show
+            </Button>
+          </>
+        )}
       </DialogActions>
     </>
   );

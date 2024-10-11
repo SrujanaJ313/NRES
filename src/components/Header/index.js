@@ -25,6 +25,7 @@ import Divider from "@mui/material/Divider";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import { TreeItem } from "@mui/x-tree-view/TreeItem";
 import { useNavigate } from "react-router-dom";
+import { getGreeting } from "../../helpers/utils";
 
 const drawerWidth = 240;
 
@@ -156,7 +157,7 @@ export default function Header() {
             </Stack>
           </Stack>
           <Stack direction={"row"} alignItems={"center"}>
-            <Typography color="white">Good Morning, {getUserName()}</Typography>
+            <Typography color="white"> {getGreeting(getUserName())}</Typography>
             <IconButton
               color="inherit"
               onClick={handleOpenMenu}

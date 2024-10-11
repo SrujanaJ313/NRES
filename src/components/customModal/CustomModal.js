@@ -35,6 +35,11 @@ function CustomModal(props) {
 
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const handleClose = (event, reason) => {
+    if (reason && reason === "backdropClick") return;
+    onClose();
+  };
+
   return (
     <Dialog
       disableEnforceFocus
@@ -70,7 +75,7 @@ function CustomModal(props) {
         enter: theme.transitions.duration.enteringScreen,
         exit: 0,
       }}
-      onClose={onClose}
+      onClose={handleClose}
       PaperComponent={PaperComponent}
     >
       <DialogTitle

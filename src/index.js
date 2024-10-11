@@ -5,13 +5,16 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter as Router } from "react-router-dom";
 import "./assets/fonts/aptos/aptos.ttf";
+import { SnackbarProvider } from "./context/SnackbarContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <Router basename={"/staffresea"}>
-      <App />
-    </Router>
+    <SnackbarProvider>
+      <Router basename={"/staffresea"}>
+        <App />
+      </Router>
+    </SnackbarProvider>
   </React.StrictMode>
 );
 

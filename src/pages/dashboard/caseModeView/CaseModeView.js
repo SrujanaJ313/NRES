@@ -13,6 +13,8 @@ import {
   DialogContent,
   Typography,
   Stack,
+  Link,
+ 
 } from "@mui/material";
 import TablePagination from "@mui/material/TablePagination";
 import TableSortLabel from "@mui/material/TableSortLabel";
@@ -21,6 +23,7 @@ import cloneDeep from "lodash/cloneDeep";
 import ReAssignCase from "./ReAssignCase";
 import CustomModal from "../../../components/customModal/CustomModal";
 import moment from "moment";
+import { getUserName } from "../../../utils/cookies";
 
 import CaseModeTableRow from "./CaseModeTableRow";
 import { caseLoadSummaryURL } from "../../../helpers/Urls";
@@ -65,12 +68,13 @@ const COLUMNS = [
   },
 ];
 
-const CaseModeView = ({ selectedStage, userId }) => {
+const CaseModeView = ({ showCalendarView, onSwitchView,selectedStage, userId, userName }) => {
   const [rows, setRows] = useState([]);
   const [errorMessages, setErrorMessages] = useState([]);
   const [type, setType] = useState([]);
   const [open, setOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState([]);
+  const [selectedRow, setSelectedRow] = useState('');
+  const [reassignInd, setReassignInd] = useState(false);
 
   const [pagination, setPagination] = useState({
     pageNumber: 1,
@@ -167,6 +171,7 @@ const CaseModeView = ({ selectedStage, userId }) => {
     try {
       setErrorMessages([]);
       const response = await client.post(caseLoadSummaryURL, payload);
+      setReassignInd(response?.reassignInd);
       setRows(cloneDeep(response.caseLoadSummaryList));
       setTotalCount(response.pagination.totalItemCount);
     } catch (errorResponse) {
@@ -179,14 +184,45 @@ const CaseModeView = ({ selectedStage, userId }) => {
   };
   const getTitle = () => {
     if (type === "reassign") {
-      return `Case: ${"Frank Tiles"} - BYE: ${moment(new Date()).format(
-        "MM/DD/YYYY"
-      )}`;
+      return (
+        <>
+          <span style={{ paddingRight: "5%" }}>
+            Case: {selectedRow?.claimantName}
+          </span>
+          <span style={{ paddingRight: "5%" }}></span>
+          <span style={{ paddingRight: "10%" }}>
+            BYE: {moment(selectedRow?.bye).format("MM/DD/YYYY")}
+          </span>
+          <span style={{ paddingRight: "10%" }}>
+            Stage: {selectedRow?.stage}
+          </span>
+          <span>Case Manager : {userName}</span>
+        </>
+      );
     }
   };
 
   return (
     <>
+     <Box
+          sx={{
+            mt: "2px",
+            position: "absolute",
+            right: "24px",
+            zIndex: "10",
+          }}
+        >
+          <Link
+            href="#"
+            underline="always"
+            color="#183084"
+            onClick={onSwitchView}
+          >
+            {showCalendarView
+              ? "Switch to Caseload view"
+              : "Switch to Calendar View"}
+          </Link>
+        </Box> 
       <Box sx={{ paddingTop: 3, paddingBottom: 2 }}>
         <TableContainer component={Paper}>
           <Table
@@ -221,11 +257,12 @@ const CaseModeView = ({ selectedStage, userId }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row, index) => (
+                         {rows.map((row, index) => (
                 <CaseModeTableRow
                   key={index}
                   row={row}
                   setSelectedRow={setSelectedRow}
+                  selectedRow={selectedRow}
                 />
               ))}
             </TableBody>
@@ -259,7 +296,7 @@ const CaseModeView = ({ selectedStage, userId }) => {
             {type && (
               <Stack mt={2}>
                 <Typography fontWeight={600} fontSize={"1rem"} color="primary">
-                  ReAssign Case
+                  Reassign Case
                 </Typography>
               </Stack>
             )}
@@ -267,7 +304,7 @@ const CaseModeView = ({ selectedStage, userId }) => {
               <Stack>
                 <ReAssignCase
                   onCancel={() => setOpen(false)}
-                  caseNum={selectedRow?.caseNum}
+                  selectedRow={selectedRow}
                 />
               </Stack>
             )}
@@ -279,6 +316,7 @@ const CaseModeView = ({ selectedStage, userId }) => {
         <Button
           variant="contained"
           color="primary"
+          disabled={!reassignInd}
           onClick={() => {
             setOpen(true);
             setType("reassign");

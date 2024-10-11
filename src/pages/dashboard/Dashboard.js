@@ -4,12 +4,13 @@ import PerformanceMetrics from "./performancemetrics/PerformanceMetrics";
 import CaseloadMetrics from "./caseloadmetrics/CaseloadMetrics";
 import CaseModeView from "./caseModeView/CaseModeView";
 import InterviewCalendarView from "./interviewCalendarView";
-import { CookieNames, getCookieItem } from "../../utils/cookies";
+import { CookieNames, getCookieItem, getUserName } from "../../utils/cookies";
 
 const Dashboard = () => {
   const [isCalendarView, setIsCalendarView] = useState(true);
   const [stage, setStage] = useState("All");
   const [userId, setUserId] = useState(getCookieItem(CookieNames.USER_ID));
+  const [userName, setUserName] = useState(getUserName());
 
   const handleSwitchView = useCallback(() => {
     setIsCalendarView((prev) => !prev);
@@ -19,8 +20,10 @@ const Dashboard = () => {
     setStage(selectedStage);
   }, []);
 
-  const handleItemsSelection = (event) => {
+  const handleItemsSelection = (event, user) => {
+    setUserName(user.name);
     setUserId(event.target.value);
+    setStage("All");
   };
 
   return (
@@ -37,11 +40,18 @@ const Dashboard = () => {
               onChange={handleMetricChange}
               userId={userId}
               handleItemsSelection={handleItemsSelection}
+              stage={stage}
             />
             {isCalendarView ? (
-              <InterviewCalendarView userId={userId} />
+              <InterviewCalendarView userId={userId} userName={userName} />
             ) : (
-              <CaseModeView selectedStage={stage} userId={userId} />
+              <CaseModeView
+              showCalendarView={isCalendarView}
+              onSwitchView={handleSwitchView}
+                selectedStage={stage}
+                userId={userId}
+                userName={userName}
+              />
             )}
           </Box>
         </Grid>

@@ -75,7 +75,7 @@ function WorkSearchItems({ data, formik, disableForm }) {
         weekEndingDt: name,
         status: "",
         activelySeekingWork: "",
-        recentItemsCount: rows.length <= 2 ? rows.length + 1 : 3,
+        recentItemsCount: rows.length <= 2 ? rows.length : 3,
       });
     } else {
       const index = items.findIndex((x) => x.weekEndingDt === name);
@@ -94,7 +94,7 @@ function WorkSearchItems({ data, formik, disableForm }) {
       weekEndingDt: name,
       status: value,
       activelySeekingWork: "",
-      recentItemsCount: rows.length <= 2 ? rows.length + 1 : 3,
+      recentItemsCount: rows.length <= 2 ? rows.length : 3,
     };
     setFieldValue(`workSearchIssues`, [...items]);
   };
@@ -109,7 +109,7 @@ function WorkSearchItems({ data, formik, disableForm }) {
       weekEndingDt: name,
       status: "createIssue",
       activelySeekingWork: value,
-      recentItemsCount: rows.length <= 2 ? rows.length + 1 : 3,
+      recentItemsCount: rows.length <= 2 ? rows.length : 3,
     };
     setFieldValue(`workSearchIssues`, [...items]);
   };

@@ -30,7 +30,7 @@ function CaseHeader({ caseDetails, event }) {
           </Stack>
           <Stack direction={"row"} spacing={1}>
             <Typography className="label-text">Orientation Date:</Typography>
-            <Typography>{`${caseDetails.orientationDt || ""} (${caseDetails.orientatonRschCnt || ""} RSch)`}</Typography>
+            <Typography>{`${caseDetails.orientationDt || ""} (${caseDetails.orientatonRschCnt || 0} RSch)`}</Typography>
           </Stack>
         </Stack>
         <Stack direction="row" justifyContent="space-between" spacing={4}>
@@ -39,7 +39,7 @@ function CaseHeader({ caseDetails, event }) {
               <Typography className="label-text">
                 Initial Appointment Date:
               </Typography>
-              <Typography>{`${caseDetails.initialAppttDt} (${caseDetails.initialAppttRschCnt} RSch)`}</Typography>
+              <Typography>{`${caseDetails.initialAppttDt} (${caseDetails.initialAppttRschCnt || 0} RSch)`}</Typography>
             </Stack>
           )}
           {caseDetails.firstSubsequentApptDt && (
@@ -48,7 +48,7 @@ function CaseHeader({ caseDetails, event }) {
                 1st Sub Appt. Date:
               </Typography>
               <Typography>
-                {`${caseDetails.firstSubsequentApptDt} (${caseDetails.firstSubsequentApptRschCnt} RSch)`}
+                {`${caseDetails.firstSubsequentApptDt} (${caseDetails.firstSubsequentApptRschCnt || 0} RSch)`}
               </Typography>
             </Stack>
           )}
@@ -58,7 +58,7 @@ function CaseHeader({ caseDetails, event }) {
                 2nd Sub Appt. Date:
               </Typography>
               <Typography>
-                {`${caseDetails.secondSubsequentApptDt} (${caseDetails.secondSubsequentApptRschCnt} RSch)`}
+                {`${caseDetails.secondSubsequentApptDt} (${caseDetails.secondSubsequentApptRschCnt || 0} RSch)`}
               </Typography>
             </Stack>
           )}
