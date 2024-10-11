@@ -4,15 +4,13 @@ import Button from "@mui/material/Button";
 import { FormControlLabel, Checkbox } from "@mui/material";
 import client from "../../../../helpers/Api";
 import { appointmentNoShowURL } from "../../../../helpers/Urls";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
 import { getMsgsFromErrorCode } from "../../../../helpers/utils";
 import { isUpdateAccessExist } from "../../../../utils/cookies";
+import { useSnackbar } from "../../../../context/SnackbarContext";
 
 function NoShowup({ event, onCancel, onSubmitClose }) {
+  const showSnackbar = useSnackbar();
   const [checked, setChecked] = useState(false);
-  const [showSuccessMsg, setShowSuccessMsg] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
   const [errorMessages, setErrorMessages] = useState([]);
 
   const handleSubmit = async () => {
@@ -28,9 +26,8 @@ function NoShowup({ event, onCancel, onSubmitClose }) {
         appointmentNoShowURL + `/${event.eventId}`,
         payload
       );
+      showSnackbar("Your request has been recorded successfully.", 5000);
 
-      setShowSuccessMsg(true);
-      setSuccessMsg("Details updated successfully");
       onSubmitClose();
     } catch (errorResponse) {
       const newErrMsgs = getMsgsFromErrorCode(
@@ -70,22 +67,7 @@ function NoShowup({ event, onCancel, onSubmitClose }) {
           Cancel
         </Button>
       </Stack>
-      <Snackbar
-        open={showSuccessMsg}
-        autoHideDuration={5000}
-        onClose={() => setShowSuccessMsg(false)}
-        message={successMsg}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => setShowSuccessMsg(false)}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {successMsg}
-        </Alert>
-      </Snackbar>
+
       <Stack
         spacing={{ xs: 1, sm: 2 }}
         direction="row"

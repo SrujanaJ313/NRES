@@ -35,7 +35,13 @@ function MeetingDetails({ caseDetails, event }) {
         >
           <Stack direction="row" spacing={1}>
             <GroupIcon style={{ position: "relative", bottom: "4px" }} />
-            <Link href={caseDetails.meetingUrl}>{caseDetails.meetingUrl}</Link>
+            <Link
+              href={caseDetails.meetingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {caseDetails.meetingUrl}
+            </Link>
           </Stack>
 
           <Stack direction="row" spacing={2}>

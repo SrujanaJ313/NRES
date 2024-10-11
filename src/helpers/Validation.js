@@ -25,7 +25,7 @@ const initialAppointmentDetailsSchema = yup.object().shape({
     })
     .test(
       "one-and-only-one",
-      "JMS Registration Complete or JMS Registration Incomplete & Warning Issued must be selected",
+      "Only either JMS Registration Complete or JMS Registration Incomplete & Warning Issued should be selected",
       (value) => {
         const { JMSRegComplete, JMSRegIncomplete } = value;
         // Ensure exactly one checkbox is checked
@@ -109,9 +109,16 @@ const initialAppointmentDetailsSchema = yup.object().shape({
     .test(
       "recent-one",
       "Must check-off most recent three continued claim weeks as having been reviewed.",
-      (value) => {
-        const items = value.filter((x) => x.recent);
-        return value.length >= 1 && items.length === value[0].recentItemsCount;
+      function (value) {
+        if (this.parent.workSearchIssuesCount === 0) {
+          return true;
+        } else {
+          const items = value.filter((x) => x.recent);
+          return (
+            value.length >= 1 && items.length === value[0].recentItemsCount
+          );
+        }
+
         // const { JMSRegComplete, JMSRegIncomplete } = value;
         // // Ensure exactly one checkbox is checked
         // return (
@@ -272,7 +279,10 @@ const firstAppointmentDetailsSchema = yup.object().shape({
           "greater",
           "End Date should be greater than Start Date",
           function (value) {
-            return moment(this.parent.startDt) < moment(value);
+            if (value && this.parent.startDt) {
+              return moment(this.parent.startDt) < moment(value);
+            }
+            return true;
           }
         ),
     })
@@ -400,7 +410,10 @@ const secondAppointmentDetailsSchema = yup.object().shape({
           "greater",
           "End Date should be greater than Start Date",
           function (value) {
-            return moment(this.parent.startDt) < moment(value);
+            if (value && this.parent.startDt) {
+              return moment(this.parent.startDt) < moment(value);
+            }
+            return true;
           }
         ),
       // .when("selected", {
@@ -434,9 +447,7 @@ const returnToWorkValidationsSchema = (values) => {
   const errors = {};
   if (!values.empName) {
     errors.empName =
-      "Employer Name is required. Please enter your employer's name.";
-  } else if (!/^[a-zA-Z0-9 ]*$/.test(values.empName)) {
-    errors.empName = "Job title should not contain special characters.";
+      "Company Name is required. Please enter your Company name.";
   }
 
   if (!values.empWorkLocState) {
@@ -467,7 +478,9 @@ const returnToWorkValidationsSchema = (values) => {
       "Hourly pay rate is required. Please enter the hourly pay rate.";
   } else if (!/^\d+(\.\d{1,2})?$/.test(values.hourlyPayRate)) {
     errors.hourlyPayRate =
-      "Hourly pay rate must have at most two decimal places.";
+      "Hourly pay rate must be a number with at most two decimal places.";
+  } else if (isNaN(Number(values.hourlyPayRate))) {
+    errors.hourlyPayRate = "Hourly pay rate must be a valid number.";
   } else if (Number(values.hourlyPayRate) > 999.99) {
     errors.hourlyPayRate =
       "Hourly pay rate must be less than or equal to 999.99.";
@@ -501,7 +514,7 @@ const returnToWorkValidationsSchema = (values) => {
 
     if (values.jms890Ind === "N" && values.jmsReferralInd === "N") {
       errors.jms890Ind = errors.jmsReferralInd =
-        "One of jms890Ind or jmsReferralInd must be checked";
+        "Either the non-direct placement or the JMS referral must be checked";
     }
   }
 
@@ -591,8 +604,8 @@ const rescheduleValidationSchema = yup.object({
   }),
   issues: yup.array().of(
     yup.object().shape({
-      issueType: yup.object().required("Issue Type is required"),
-      subIssueType: yup.object().required("Sub Issue Type is required"),
+      issueType: yup.object(),
+      subIssueType: yup.object(),
       issueStartDate: yup
         .date()
         .nullable()
@@ -603,17 +616,6 @@ const rescheduleValidationSchema = yup.object({
             );
           },
           then: () => yup.date().required("Start Date is required"),
-        }),
-      issueEndDate: yup
-        .date()
-        .nullable()
-        .when(["issueType", "subIssueType"], {
-          is: (issueType, subIssueType) => {
-            return (
-              Object.keys(issueType)?.length && Object.keys(subIssueType).length
-            );
-          },
-          then: () => yup.date().required("End Date is required"),
         }),
     })
   ),
@@ -632,7 +634,10 @@ const availableEventSchema = yup.object().shape({
   staffNotes: yup.string().optional(),
   lateStaffNote: yup.string().when("claimantId", {
     is: (claimantId) => claimantId.beyondReseaDeadline === "Y",
-    then: () => yup.string().required("lateStaffNote is required"),
+    then: () =>
+      yup
+        .string()
+        .required("Please enter reason for sheduling beyond 21 daysS"),
   }),
   informedCmtInd: yup
     .string()
@@ -659,10 +664,19 @@ const switchValidationSchema = yup.object({
   }),
   issues: yup.array().of(
     yup.object().shape({
-      issueType: yup.object().required("Issue Type is required"),
-      subIssueType: yup.object().required("Sub Issue Type is required"),
-      issueStartDate: yup.date().required("Start Date is required"),
-      issueEndDate: yup.date().required("End Date is required"),
+      issueType: yup.object(),
+      subIssueType: yup.object(),
+      issueStartDate: yup
+        .date()
+        .nullable()
+        .when(["issueType", "subIssueType"], {
+          is: (issueType, subIssueType) => {
+            return (
+              Object.keys(issueType)?.length && Object.keys(subIssueType).length
+            );
+          },
+          then: () => yup.date().required("Start Date is required"),
+        }),
     })
   ),
 });

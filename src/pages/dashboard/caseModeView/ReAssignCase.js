@@ -24,14 +24,16 @@ import { useFormik } from "formik";
 import { reAssignPageValidationSchema } from "../../../helpers/Validation";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
 import { isUpdateAccessExist } from "../../../utils/cookies";
+import { useSnackbar } from "../../../context/SnackbarContext";
+import MoreTimeIcon from "@mui/icons-material/MoreTime";
 
-function ReAssignCase({ onCancel, event, caseNum }) {
-  console.log("CaseNumber", caseNum);
+function ReAssignCase({ onCancel, selectedRow }) {
+  const showSnackbar = useSnackbar();
+
   const [errors, setErrors] = useState([]);
   const [caseMgrAvl, setCaseMgrAvl] = useState([]);
   const [reassignReasons, setReassignReasons] = useState([]);
   const [caseOfficeName, setCaseOfficeName] = useState("");
-  // const caseNum = 162;
   const formik = useFormik({
     initialValues: {
       reassignReasonCd: "",
@@ -45,14 +47,14 @@ function ReAssignCase({ onCancel, event, caseNum }) {
         const { reassignReasonCd, staffNotes, localOffice, caseManagerAvl } =
           values;
         const payload = {
-          caseId: caseNum,
+          caseId: selectedRow.caseNum,
           eventId: caseManagerAvl,
           reassignReasonCd,
           caseOffice: localOffice,
           staffNotes,
         };
-        console.log("Form payload", payload);
         await client.post(reassignSaveURL, payload);
+        showSnackbar("Your request has been recorded successfully.", 5000);
         onCancel();
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
@@ -62,7 +64,7 @@ function ReAssignCase({ onCancel, event, caseNum }) {
         setErrors(newErrMsgs);
       }
     },
-    validateOnChange: true,
+    validateOnChange: false,
     validateOnBlur: false,
   });
 
@@ -73,9 +75,15 @@ function ReAssignCase({ onCancel, event, caseNum }) {
           process.env.REACT_APP_ENV === "mockserver"
             ? await client.get(caseManagerAvailabilityURL)
             : await client.get(
-                `${caseManagerAvailabilityURL}${caseNum}/${formik.values.localOffice}`
+                `${caseManagerAvailabilityURL}${selectedRow.caseNum}/${formik.values.localOffice}`
               );
-        setCaseMgrAvl(data);
+
+        // setCaseMgrAvl(data);
+        const result = data.map((item) => {
+          const [name, office, dateTime, caseLoad] = item.name.split(" - ");
+          return { ...item, nameList: { name, office, dateTime, caseLoad } };
+        });
+        setCaseMgrAvl(result);
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
           `GET:${process.env.REACT_APP_REASSIGN_CASE_MANAGER_AVAILABILITY}`,
@@ -116,7 +124,9 @@ function ReAssignCase({ onCancel, event, caseNum }) {
         const data =
           process.env.REACT_APP_ENV === "mockserver"
             ? await client.get(reassignCaseOfficeNameURL)
-            : await client.get(`${reassignCaseOfficeNameURL}${caseNum}`);
+            : await client.get(
+                `${reassignCaseOfficeNameURL}${selectedRow.caseNum}`
+              );
         setCaseOfficeName(data);
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
@@ -176,7 +186,7 @@ function ReAssignCase({ onCancel, event, caseNum }) {
               <Typography
                 sx={{
                   alignSelf: "center",
-                  color: "orange",
+                  color: "#ab0c0c",
                   marginLeft: 1,
                 }}
               >
@@ -203,8 +213,68 @@ function ReAssignCase({ onCancel, event, caseNum }) {
                 sx={{ width: "70%" }}
               >
                 {caseMgrAvl?.map((reason) => (
-                  <MenuItem key={reason.id} value={reason.id}>
-                    {reason.name}
+                  <MenuItem
+                    key={reason.id}
+                    value={reason.id}
+                    style={{
+                      color: reason.beyondReseaDeadline === "Y" ? "red" : "",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "20ch",
+                        textAlign: "left",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {reason.nameList.name}
+                    </span>
+                    <span
+                      style={{
+                        width: "25ch",
+                        textAlign: "left",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {reason.nameList.office}
+                    </span>
+                    <span
+                      style={{
+                        width: "25ch",
+                        textAlign: "left",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {reason.nameList.dateTime}
+                    </span>
+                    <span
+                      style={{
+                        width: "20ch",
+                        textAlign: "left",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {reason.nameList.caseLoad}
+                    </span>
+
+                    {reason.beyondReseaDeadline === "Y" && (
+                      <span style={{ color: "blue", marginLeft: "auto" }}>
+                        <MoreTimeIcon
+                          style={{ color: "#364da2", fontSize: "small" }}
+                        />
+                      </span>
+                    )}
                   </MenuItem>
                 ))}
               </Select>

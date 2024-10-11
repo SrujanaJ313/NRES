@@ -23,8 +23,11 @@ import {
 import { convertISOToMMDDYYYY } from "../../../helpers/utils";
 import { switchValidationSchema } from "../../../helpers/Validation";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
+import { useSnackbar } from "../../../context/SnackbarContext";
 
 function Switch({ onCancel, event, onSubmitClose }) {
+  const showSnackbar = useSnackbar();
+
   const [errors, setErrors] = useState([]);
   const [switchModeReasons, setSwitchReasons] = useState([]);
 
@@ -59,8 +62,8 @@ function Switch({ onCancel, event, onSubmitClose }) {
       issues: [
         {
           id: uuidv4(),
-          issueType: "",
-          subIssueType: "",
+          issueType: {},
+          subIssueType: {},
           issueStartDate: null,
           issueEndDate: null,
         },
@@ -68,26 +71,37 @@ function Switch({ onCancel, event, onSubmitClose }) {
     },
     validationSchema: switchValidationSchema,
     onSubmit: async (values) => {
+      const issuesDTOList = [];
       const userId = getCookieItem(CookieNames.USER_ID);
 
-      const issuesDTOList = values.issues.map((issue) => ({
-        issueId: issue.subIssueType.issueId,
-        startDt: convertISOToMMDDYYYY(issue.issueStartDate),
-        endDt: convertISOToMMDDYYYY(issue.issueEndDate),
-      }));
+      values.issues.forEach((issue) => {
+        if (issue?.subIssueType?.issueId) {
+          issuesDTOList.push({
+            issueId: issue.subIssueType.issueId,
+            startDt: convertISOToMMDDYYYY(issue.issueStartDate),
+            endDt: issue.issueEndDate
+              ? convertISOToMMDDYYYY(issue.issueEndDate)
+              : null,
+          });
+        }
+      });
 
       try {
-        const payload = {
+        let payload = {
           // userId,
           eventId: event?.id,
           currentMeetingMode: event?.appointmentType,
           reasonForSwitchMeetingMode: values?.reasonForSwitchMeetingMode,
           meetingModeChgReasonTxt: values?.meetingModeChgReasonTxt,
           staffNotes: values?.staffNotes,
-          issuesDTOList,
         };
 
+        if (issuesDTOList?.length) {
+          payload = { ...payload, issuesDTOList };
+        }
+
         await client.post(switchModeSaveURL, payload);
+        showSnackbar("Your request has been recorded successfully.", 5000);
         onSubmitClose();
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
@@ -97,7 +111,7 @@ function Switch({ onCancel, event, onSubmitClose }) {
         setErrors(newErrMsgs);
       }
     },
-    validateOnChange: false,
+    validateOnChange: true,
     validateOnBlur: false,
   });
 
@@ -106,12 +120,13 @@ function Switch({ onCancel, event, onSubmitClose }) {
       <Stack spacing={2}>
         <Stack direction={"column"} spacing={2}>
           <Stack direction={"column"} justifyContent={"space-between"}>
-            <FormControl size="small" fullWidth>
+            <FormControl size="small" fullWidth sx={{ marginTop: "20px" }}>
               <InputLabel id="reschedule-request-dropdown">
                 *Reason for switching meeting mode
               </InputLabel>
               <Select
-                label="*Reschedule to"
+                labelId="reschedule-request-dropdown"
+                label="*Reason for switching meeting mode"
                 value={formik.values.reasonForSwitchMeetingMode}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}

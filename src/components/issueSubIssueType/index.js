@@ -111,11 +111,6 @@ const IssueSubIssueType = ({ formik }) => {
                     </MenuItem>
                   ))}
                 </Select>
-                {formik.errors.issues?.[index]?.issueType && (
-                  <FormHelperText error>
-                    {formik.errors.issues[index].issueType}
-                  </FormHelperText>
-                )}
               </FormControl>
 
               <FormControl
@@ -140,18 +135,12 @@ const IssueSubIssueType = ({ formik }) => {
                     </MenuItem>
                   ))}
                 </Select>
-                {formik.errors.issues?.[index]?.subIssueType && (
-                  <FormHelperText error>
-                    {formik.errors.issues[index].subIssueType}
-                  </FormHelperText>
-                )}
               </FormControl>
 
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <Stack spacing={1}>
                   <DatePicker
                     label="Start Date"
-                    disablePast
                     slotProps={{
                       textField: { size: "small" },
                     }}
@@ -176,7 +165,6 @@ const IssueSubIssueType = ({ formik }) => {
                 <Stack spacing={1}>
                   <DatePicker
                     label="End Date"
-                    disablePast
                     slotProps={{
                       textField: { size: "small" },
                     }}
@@ -188,12 +176,6 @@ const IssueSubIssueType = ({ formik }) => {
                       <TextField {...params} size="small" variant="outlined" />
                     )}
                   />
-                  {formik.touched.issues?.[index]?.issueEndDate &&
-                    formik.errors.issues?.[index]?.issueEndDate && (
-                      <FormHelperText error>
-                        {formik.errors.issues[index].issueEndDate}
-                      </FormHelperText>
-                    )}
                 </Stack>
               </LocalizationProvider>
 

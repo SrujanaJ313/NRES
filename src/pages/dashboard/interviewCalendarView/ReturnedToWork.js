@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import {
   TextField,
@@ -19,12 +19,15 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { STATES } from "../../../helpers/Constants";
 import { returnedToWorkSaveURL } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
 import { Label } from "@mui/icons-material";
 import { useSnackbar } from "../../../context/SnackbarContext";
+import { returnToWorkEditModeURL } from "../../../helpers/Urls";
+import dayjs from "dayjs";
+
 
 import {
   CookieNames,
@@ -43,27 +46,30 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
 
   const [errors, setErrors] = useState([]);
   const states = STATES;
+  const [initialValues, setInitialValues] = useState({
+    employmentStartDt: null,
+    empName: "",
+    exactJobTitle: "",
+    partFullTimeInd: "",
+    hourlyPayRate: "",
+    empWorkLocState: "",
+    empWorkLocCity: "",
+    workMode: "",
+    staffNotes: "",
+    jms890Ind: "N",
+    jmsReferralInd: "N",
+    jmsCloseGoalsInd: "N",
+    jmsCloseIEPInd: "N",
+    jmsCaseNotesInd: "N",
+    jmsResumeOffInd: "N",
+    epChecklistUploadInd: "N",
+  });
+  const [isViewMode, setIsViewMode] = useState(false);
 
   const formik = useFormik({
-    initialValues: {
-      employmentStartDt: null,
-      empName: "",
-      exactJobTitle: "",
-      partFullTimeInd: "",
-      hourlyPayRate: "",
-      empWorkLocState: "",
-      empWorkLocCity: "",
-      workMode: "",
-      staffNotes: "",
-      jms890Ind: "N",
-      jmsReferralInd: "N",
-      jmsCloseGoalsInd: "N",
-      jmsCloseIEPInd: "N",
-      jmsCaseNotesInd: "N",
-      jmsResumeOffInd: "N",
-      epChecklistUploadInd: "N",
-    },
+    initialValues: initialValues,
     validate: (values) => returnToWorkValidationsSchema(values),
+    enableReinitialize: true,
     onSubmit: async (values) => {
       let payload = {};
       const isFutureDate = isDateValid(values.employmentStartDt);
@@ -113,6 +119,44 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
     validateOnBlur: false,
   });
 
+  useEffect(() => {
+    async function fetchReturnToWorkEditModeData() {
+      try {
+        const data =
+          process.env.REACT_APP_ENV === "mockserver"
+            ? await client.get(returnToWorkEditModeURL)
+            : await client.get(`${returnToWorkEditModeURL}${event.id}`);
+        if(data.rtwMode === "View"){
+          setInitialValues({
+            empName: data.empName || "",
+            employmentStartDt:dayjs(data.employmentStartDt),
+            exactJobTitle: data.exactJobTitle || "",
+            partFullTimeInd: data.partFullTimeInd || "",
+            hourlyPayRate: data.hourlyPayRate || "",
+            empWorkLocState: data.empWorkLocState || "",
+            empWorkLocCity: data.empWorkLocCity || "",
+            workMode: data.workMode || "",
+            jms890Ind: data.jms890Ind || "",
+            jmsReferralInd: data.jmsReferralInd || "",
+            jmsCloseGoalsInd: data.jmsCloseGoalsInd || "",
+            jmsCloseIEPInd: data.jmsCloseIEPInd || "",
+            jmsCaseNotesInd: data.jmsCaseNotesInd || "",
+            jmsResumeOffInd: data.jmsResumeOffInd || "",
+            epChecklistUploadInd: data.epChecklistUploadInd || "",
+          });
+        }
+        setIsViewMode(data.rtwMode === "View");
+      } catch (errorResponse) {
+        const newErrMsgs = getMsgsFromErrorCode(
+          `GET:${process.env.REACT_APP_RETURN_TO_WORK_GET}`,
+          errorResponse
+        );
+        setErrors(newErrMsgs);
+      }
+    }
+    fetchReturnToWorkEditModeData();
+  }, []);
+
   return (
     <form onSubmit={formik.handleSubmit}>
       <Stack spacing={2} sx={{ marginTop: "20px" }}>
@@ -128,8 +172,9 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
             onBlur={formik.handleBlur}
             error={formik.touched.empName && Boolean(formik.errors.empName)}
             helperText={formik.touched.empName && formik.errors.empName}
+            disabled={isViewMode}
           />
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
             <FormControl>
               <DatePicker
                 label="*Start Date"
@@ -142,6 +187,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
                 onChange={(date) =>
                   formik.setFieldValue("employmentStartDt", date)
                 }
+                disabled={isViewMode}
                 renderInput={(params) => {
                   return (
                     <TextField
@@ -187,6 +233,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
               formik.touched.empWorkLocCity && formik.errors.empWorkLocCity
             }
             fullWidth
+            disabled={isViewMode}
           />
           <FormControl
             fullWidth
@@ -224,6 +271,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
                 }
               }}
               autoHighlight={true}
+              disabled={isViewMode}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -271,6 +319,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
               formik.touched.exactJobTitle && formik.errors.exactJobTitle
             }
             sx={{ width: "49%" }}
+            disabled={isViewMode}
           />
           <TextField
             label="*Hourly Pay Rate"
@@ -278,7 +327,9 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
             variant="outlined"
             InputProps={{
               startAdornment: (
-                <InputAdornment position="start">$</InputAdornment>
+                <InputAdornment position="start">
+                  <Typography sx={{  color:isViewMode?'gray':'' }}>$</Typography>
+                </InputAdornment>
               ),
             }}
             sx={{ width: "160px" }}
@@ -287,6 +338,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
             type="number"
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
+            disabled={isViewMode}
             // error={
             //   formik.touched.hourlyPayRate &&
             //   Boolean(formik.errors.hourlyPayRate)
@@ -320,6 +372,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
               sx={{
                 width: "30%",
                 alignSelf: "center",
+                color:isViewMode?'gray':''
               }}
             >
               *Work Schedule:
@@ -334,11 +387,13 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
                 value="F"
                 control={<Radio />}
                 label="Full time"
+                disabled={isViewMode}
               />
               <FormControlLabel
                 value="P"
                 control={<Radio />}
                 label="Part time"
+                disabled={isViewMode}
               />
             </RadioGroup>
           </FormControl>
@@ -361,6 +416,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
               sx={{
                 width: "30%",
                 alignSelf: "center",
+                color:isViewMode?'gray':''
               }}
             >
               *Work Mode:
@@ -375,16 +431,19 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
                 value="5650"
                 control={<Radio />}
                 label="Onsite"
+                disabled={isViewMode}
               />
               <FormControlLabel
                 value="5649"
                 control={<Radio />}
                 label="Remote"
+                disabled={isViewMode}
               />
               <FormControlLabel
                 value="5651"
                 control={<Radio />}
                 label="Hybrid"
+                disabled={isViewMode}
               />
             </RadioGroup>
           </FormControl>
@@ -393,7 +452,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
           )}
         </Stack>
         <Stack direction="row" spacing={2}>
-          <Typography sx={{ width: "15%" }}>Staff notes, if any:</Typography>
+          <Typography sx={{ width: "15%", color:isViewMode?'gray':'' }}>Staff notes, if any:</Typography>
           <TextField
             label="Staff Notes"
             size="small"
@@ -405,6 +464,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
             fullWidth
             multiline
             rows={4}
+            disabled={isViewMode}
           />
         </Stack>
         {isDateValid(formik.values.employmentStartDt) && (
@@ -416,6 +476,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
                 <FormControlLabel
                   control={
                     <Checkbox
+                      disabled={isViewMode}
                       checked={formik.values.jms890Ind === "Y"}
                       onChange={() =>
                         formik.setFieldValue(
@@ -437,6 +498,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
                 <FormControlLabel
                   control={
                     <Checkbox
+                      disabled={isViewMode}
                       checked={formik.values.jmsReferralInd === "Y"}
                       onChange={() =>
                         formik.setFieldValue(
@@ -461,6 +523,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
                 <FormControlLabel
                   control={
                     <Checkbox
+                      disabled={isViewMode}
                       checked={formik.values.jmsCloseGoalsInd === "Y"}
                       onChange={() =>
                         formik.setFieldValue(
@@ -482,6 +545,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
                 <FormControlLabel
                   control={
                     <Checkbox
+                      disabled={isViewMode}
                       checked={formik.values.jmsCloseIEPInd === "Y"}
                       onChange={() =>
                         formik.setFieldValue(
@@ -506,6 +570,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
                 <FormControlLabel
                   control={
                     <Checkbox
+                      disabled={isViewMode}
                       checked={formik.values.jmsCaseNotesInd === "Y"}
                       onChange={() =>
                         formik.setFieldValue(
@@ -527,6 +592,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
                 <FormControlLabel
                   control={
                     <Checkbox
+                      disabled={isViewMode}
                       checked={formik.values.jmsResumeOffInd === "Y"}
                       onChange={() =>
                         formik.setFieldValue(
@@ -550,6 +616,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
                 <FormControlLabel
                   control={
                     <Checkbox
+                      disabled={isViewMode}
                       checked={formik.values.epChecklistUploadInd === "Y"}
                       onChange={() =>
                         formik.setFieldValue(
@@ -589,7 +656,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
             variant="contained"
             color="primary"
             type="submit"
-            disabled={!isUpdateAccessExist()}
+            disabled={!isUpdateAccessExist() || isViewMode}
           >
             Submit
           </Button>

@@ -40,6 +40,21 @@ const STAGES = [
   "delayed",
   "All",
 ];
+const labels = {
+  "Initial Appointment": "Initial Appointment",
+  "1st Subsequent Appointment": "1st Subsequent Appointment",
+  "2nd Subsequent Appointment": "2nd Subsequent Appointment",
+  followUp: <Typography className="label-text">Follow-up required </Typography>,
+  hiPriority: (
+    <Typography className="label-text"> HI Priority cases</Typography>
+  ),
+  failed: (
+    <Typography className="label-text">Failed last appointment</Typography>
+  ),
+  delayed: (
+    <Typography className="label-text">Beyond 21 days appointments</Typography>
+  ),
+};
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -71,8 +86,9 @@ const CaseloadMetrics = React.memo(
     onChange,
     userId,
     handleItemsSelection,
+    stage,
   }) => {
-    const [selectedStage, setSelectedStage] = useState(STAGES[0]);
+    // const [selectedStage, setSelectedStage] = useState('All');
     const [caseloadMetrics, setCaseloadMetrics] = useState({});
     const [metricLabels, setMetricLabels] = useState([]);
     const [metricValues, setMetricValues] = useState([]);
@@ -87,7 +103,7 @@ const CaseloadMetrics = React.memo(
       "Follow-up": "followUp",
       "HI Priority": "hiPriority",
       Failed: "failed",
-      Delayed: "delayed",
+      "Beyond 21 days": "delayed",
     };
 
     useEffect(() => {
@@ -141,10 +157,11 @@ const CaseloadMetrics = React.memo(
     const handleCellClick = (index) => {
       const stage = STAGES[index] || STAGES[0];
 
-      setSelectedStage(stage);
+      // setSelectedStage(stage);
 
       onChange(stage);
     };
+
     return (
       <Box sx={{ paddingBottom: 0, paddingTop: 0.5 }}>
         <Stack direction="row" spacing={2}>
@@ -160,7 +177,13 @@ const CaseloadMetrics = React.memo(
                 labelId="select-source-label"
                 size="small"
                 value={userId}
-                onChange={handleItemsSelection}
+                onChange={(e) => {
+                  const userName = appointmentStaffList.find(
+                    (s) => s.id === Number(e.target.value)
+                  );
+
+                  handleItemsSelection(e, userName);
+                }}
                 label="Items Assigned To"
               >
                 {appointmentStaffList.map((staff) => (
@@ -183,11 +206,11 @@ const CaseloadMetrics = React.memo(
                     <StyledTableCell key={index}>
                       {label === "1stSub" ? (
                         <>
-                          1<sup>st</sup>Sub
+                          1<sup>st</sup>&nbsp;&nbsp;Sub
                         </>
                       ) : label === "2ndSub" ? (
                         <>
-                          2<sup>nd</sup>Sub
+                          2<sup>nd</sup>&nbsp;&nbsp;Sub
                         </>
                       ) : (
                         label
@@ -205,7 +228,7 @@ const CaseloadMetrics = React.memo(
                     } else if (index === metricValues.length - 1) {
                       cellColor = "red";
                     }
-
+ 
                     return (
                       <ContentCell key={index} sx={{ color: cellColor }}>
                         <ButtonBase onClick={() => handleCellClick(index)}>
@@ -224,7 +247,7 @@ const CaseloadMetrics = React.memo(
           sx={{
             mt: "21px",
             position: "absolute",
-            right: "8px",
+            right: "24px",
             zIndex: "10",
           }}
         >
@@ -235,8 +258,8 @@ const CaseloadMetrics = React.memo(
             onClick={handleSwitchView}
           >
             {showCalendarView
-              ? "Switch Caseload mode view"
-              : "Switch to Interview Calendar View"}
+              ? "Switch to Caseload View"
+              : "Switch to Calendar View"}
           </Link>
         </Box>
         {!!errors?.length && (
@@ -251,8 +274,15 @@ const CaseloadMetrics = React.memo(
 
         {!showCalendarView && (
           <Stack direction="row" justifyContent="flex-start" spacing={1}>
-            <Typography className="label-text">Stage:</Typography>
-            <Typography>{selectedStage}</Typography>
+            {stage !== "All" &&
+              [
+                "Initial Appointment",
+                "1st Subsequent Appointment",
+                "2nd Subsequent Appointment",
+              ].includes(stage) && (
+                <Typography className="label-text">Stage:</Typography>
+              )}{" "}
+            <Typography>{labels[stage]}</Typography>{" "}
           </Stack>
         )}
       </Box>

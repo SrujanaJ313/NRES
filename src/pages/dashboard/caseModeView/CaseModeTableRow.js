@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   TableCell,
   TableRow,
@@ -6,6 +6,7 @@ import {
   Stack,
   Typography,
   Tooltip,
+  FormControlLabel ,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
@@ -21,27 +22,29 @@ const indicatorColors = {
   WL: "#f36d6d",
 };
 
-const CaseModeTableRow = ({ row, setSelectedRow }) => {
+const CaseModeTableRow = ({ row,selectedRow,setSelectedRow }) => {
   return (
-    <TableRow>
-      <StyledTableCell padding="checkbox" sx={{ width: "10px", padding: 0 }}>
-        <Radio size="small" onClick={() => setSelectedRow(row)} />
-      </StyledTableCell>
-      <StyledTableCell>
-        <Stack spacing={1.5} direction="row">
-          <Typography>{`${row.claimantName}`}</Typography>
-          {row.partailSsn && (
-            <Tooltip title={row.partailSsn} placement="right-start">
-              <MoreHorizIcon />
-            </Tooltip>
-          )}
-        </Stack>
-      </StyledTableCell>
+    <TableRow key={row?.caseNum}>
+    <StyledTableCell padding="checkbox">
+      <FormControlLabel
+        value={row?.caseNum}
+        control={<Radio />}
+        label=""
+        checked={row?.caseNum === selectedRow.caseNum}
+        onChange={() => {
+          // const row = rows?.find((r) => r.caseNum === Number(e.target.value));
+          setSelectedRow(row);
+        }}
+      />
+    </StyledTableCell>
+      <StyledTableCell>{row.claimantName}</StyledTableCell>
       <StyledTableCell>{row.byeDt}</StyledTableCell>
       <StyledTableCell>{row.stage}</StyledTableCell>
       <StyledTableCell>
         <Stack spacing={1.5} direction="row">
-          {`${row.status}`}
+          {row.status}
+          &nbsp; &nbsp; &nbsp;
+          {row.statusDt || ""}
         </Stack>
       </StyledTableCell>
       <StyledTableCell>{row.ccaWeeks}</StyledTableCell>
@@ -50,7 +53,7 @@ const CaseModeTableRow = ({ row, setSelectedRow }) => {
         style={{ color: row.indicatorColor }}
         indicator={row.indicator}
       >
-        {row.indicator}
+        {row.indicator === "LATE"?">21":row.indicator}
       </StyledTableCell>
     </TableRow>
   );

@@ -12,6 +12,7 @@ import {
   TableFooter,
   Button,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 
 const StyledHeaderTableCell = styled(TableCell)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -68,7 +69,7 @@ const WorkSearch = ({ data }) => {
             {rows.map((row, index) => (
               <TableRow key={index}>
                 <StyledRowTableCell sx={{ textAlign: "center" }}>
-                  {row.weekEndingDt}
+                  <Link to={row?.viewCertifiedCCFUrl} target="_blank">{row?.weekEndingDt}</Link>
                 </StyledRowTableCell>
                 <StyledRowTableCell sx={{ textAlign: "end" }}>
                   {row.wsContacts}

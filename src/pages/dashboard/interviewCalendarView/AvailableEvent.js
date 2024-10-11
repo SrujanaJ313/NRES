@@ -38,8 +38,11 @@ import {
   getMsgsFromErrorCode,
   sortAlphabetically,
 } from "../../../helpers/utils";
+import { useSnackbar } from "../../../context/SnackbarContext";
+import MoreTimeIcon from "@mui/icons-material/MoreTime";
 
-function AvailableEvent({ event, onSubmitClose, onCancel }) {
+function AvailableEvent({ event, userName, userId, onSubmitClose, onCancel }) {
+  const showSnackbar = useSnackbar();
   const [appointmentStaffList, setAppointmentStaffList] = useState([]);
   const [claimantsList, setClaimantsList] = useState([]);
   // const [selectedClaimant, setSelectedClaimant] = useState("");
@@ -77,6 +80,7 @@ function AvailableEvent({ event, onSubmitClose, onCancel }) {
       }
       try {
         await client.post(appointmentAvailableSaveURL, payload);
+        showSnackbar("Your request has been recorded successfully.", 5000);
         onSubmitClose();
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
@@ -113,18 +117,19 @@ function AvailableEvent({ event, onSubmitClose, onCancel }) {
   useEffect(() => {
     async function fetchClaimantListData() {
       try {
-        let userId;
+        let payLoadUserId;
         if (formik?.values?.claimant === "Local Office") {
-          userId = -1;
+          payLoadUserId = -1;
         } else if (formik?.values?.claimant === "Case Manager") {
-          userId = formik?.values?.caseManagerId;
+          payLoadUserId = formik?.values?.caseManagerId;
         } else {
-          userId = getCookieItem(CookieNames.USER_ID);
+          payLoadUserId = userId;
         }
-        userId = Number(userId);
+        payLoadUserId = Number(payLoadUserId);
         const payload = {
           eventId: event?.id,
-          userId: formik?.values?.claimant === "Local Office" ? -1 : userId,
+          userId:
+            formik?.values?.claimant === "Local Office" ? -1 : payLoadUserId,
           status: formik?.values?.status,
         };
         const data =
@@ -160,11 +165,11 @@ function AvailableEvent({ event, onSubmitClose, onCancel }) {
               <Typography className="label-text" sx={{ width: "30%" }}>
                 Case Manager:
               </Typography>
-              <Typography>{getUserName()}</Typography>
+              <Typography>{userName}</Typography>
             </Stack>
             <Stack direction={"row"} sx={{ width: "50%" }}>
               <Typography className="label-text" sx={{ width: "50%" }}>
-                Initial Appointment TimeSlot:
+                {event?.usageDesc}:
               </Typography>
               <Typography>{convertedFormat}</Typography>
             </Stack>
@@ -183,9 +188,9 @@ function AvailableEvent({ event, onSubmitClose, onCancel }) {
               onChange={(e) => setFieldValue("claimant", e.target.value)}
             >
               <FormControlLabel
-                value={getUserName()}
+                value={userName}
                 control={<Radio />}
-                label={getUserName()}
+                label={userName}
               />
               <FormControlLabel
                 value="Local Office"
@@ -239,7 +244,7 @@ function AvailableEvent({ event, onSubmitClose, onCancel }) {
                 { name: "All pending scheduling", value: "ALL" },
                 { name: "Scheduled beyond 21 days", value: "ScheduleBeyond21" },
                 { name: "No Shows", value: "NoShows" },
-                { name: "Scheduled", value: "Scheduled" },
+                { name: "Not Scheduled", value: "NotScheduled" },
                 { name: "Wait listed", value: "WaitListed" },
               ].map((status) => (
                 <FormControlLabel
@@ -278,7 +283,27 @@ function AvailableEvent({ event, onSubmitClose, onCancel }) {
                     color: claimant.beyondReseaDeadline === "Y" ? "red" : "",
                   }}
                 >
-                  {claimant.name}
+                  <span
+                    style={{
+                      width: "25ch",
+                      textAlign: "left",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {claimant.name}
+                  </span>
+                  {claimant.beyondReseaDeadline === "Y" ? (
+                    <span style={{ color: "blue" }}>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <MoreTimeIcon
+                        style={{ color: "#364da2", fontSize: "small" }}
+                      />
+                    </span>
+                  ) : (
+                    ""
+                  )}
                 </MenuItem>
               ))}
             </Select>
@@ -291,7 +316,7 @@ function AvailableEvent({ event, onSubmitClose, onCancel }) {
             <Stack direction={"column"} spacing={2}>
               <TextField
                 name="lateStaffNote"
-                label="*Late Staff Notes"
+                label="*Reason for Scheduling beyond 21 days"
                 size="small"
                 value={formik.values.lateStaffNote}
                 onChange={formik.handleChange}

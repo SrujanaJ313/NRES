@@ -443,7 +443,7 @@ export const JMS_ITEMS_SECOND = [
     value: "CloseGoals",
   },
   {
-    label: "*Close IEP if npt being case managed by a Partner",
+    label: "*Close IEP if not being case managed by a Partner",
     value: "JmsCloseIEP",
   },
 ];
