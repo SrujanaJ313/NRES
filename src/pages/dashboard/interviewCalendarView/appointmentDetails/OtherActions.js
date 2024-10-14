@@ -131,8 +131,13 @@ function OtherActions({ formik, otherActionsList, event, disableForm }) {
                         value={
                           values[item.dateFieldName]
                             ? moment(values[item.dateFieldName])
-                            : null
+                            : values?.selfSchByDt
                         }
+                        // value={
+                        //   values[item.dateFieldName]
+                        //     ? moment(values[item.dateFieldName])
+                        //     : null
+                        // }
                         onChange={(value) => {
                           handleDateValueChange(value, item.dateFieldName);
                         }}
