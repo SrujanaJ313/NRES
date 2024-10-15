@@ -120,7 +120,18 @@ function OtherActions({ formik, otherActionsList, event, disableForm }) {
 
               {item.date && (
                 <Stack justifyContent="flex-start" alignItems="baseline">
-                  <LocalizationProvider dateAdapter={AdapterMoment}>
+                  <Typography
+                    sx={{
+                      color:
+                        !values.actionTaken[item.value] || disableForm
+                          ? "#00000061"
+                          : "",
+                        marginTop:"3px"
+                    }}
+                  >
+                    {values?.selfSchByDt}
+                  </Typography>
+                  {/* <LocalizationProvider dateAdapter={AdapterMoment}>
                     <FormControl style={{ width: "9rem", marginLeft: 10 }}>
                       <DatePicker
                         name={item.value}
@@ -131,13 +142,8 @@ function OtherActions({ formik, otherActionsList, event, disableForm }) {
                         value={
                           values[item.dateFieldName]
                             ? moment(values[item.dateFieldName])
-                            : values?.selfSchByDt
+                            : null
                         }
-                        // value={
-                        //   values[item.dateFieldName]
-                        //     ? moment(values[item.dateFieldName])
-                        //     : null
-                        // }
                         onChange={(value) => {
                           handleDateValueChange(value, item.dateFieldName);
                         }}
@@ -157,7 +163,7 @@ function OtherActions({ formik, otherActionsList, event, disableForm }) {
                           {errors[item.dateFieldName]}
                         </FormHelperText>
                       )}
-                  </LocalizationProvider>
+                  </LocalizationProvider> */}
                 </Stack>
               )}
             </Stack>
@@ -175,3 +181,4 @@ function OtherActions({ formik, otherActionsList, event, disableForm }) {
 }
 
 export default OtherActions;
+
