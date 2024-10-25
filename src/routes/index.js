@@ -24,6 +24,7 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import Reminders from "../pages/reminders/Reminders";
 import WorkSchedule from "../pages/workschedule/WorkSchedule";
 import Preferences from "../pages/preferences/Preferences";
+import Appointments from "../pages/dashboard/Appointments";
 
 const PrivateRoute = () => {
   const [loading, setLoading] = useState(false);
@@ -84,7 +85,7 @@ const PrivateRoute = () => {
         </Grid>
       </Grid>
     </>
-  ) : hasAccess === true ? (
+  ) : hasAccess !== true ? (
     <>
       <Header />
       <Outlet />
@@ -111,6 +112,8 @@ function AppRoutes() {
           <Route element={<WorkSchedule />} path="/workSchedule" />
           <Route element={<Preferences />} path="/preferences" />
         </Route>
+
+        <Route element={<Appointments />} path="//appointments-appointments" />
         <Route element={<UnAuthorised />} path="/unAuthorised" />
         <Route element={<Navigate replace to="/dashboard" />} path="/" />
       </Routes>
