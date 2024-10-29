@@ -75,7 +75,7 @@ function Appointments() {
   return (
     <Box display="flex" height="100vh">
       <Box width="35%" bgcolor="#FFFFFF" p={0} borderRight="2px solid #3b5998">
-        <Typography sx={{backgroundColor:"#183084", color:"#FFFFFF", paddingLeft:"10px"}} variant="h6" gutterBottom>
+        <Typography sx={{backgroundColor:"#183084", color:"#FFFFFF", padding:"10px"}} variant="h6" gutterBottom>
           Lookup Appointments
         </Typography>
 
