@@ -23,6 +23,7 @@ const reschedulingSubIssueListURL = `${baseApiUrl}${process.env.REACT_APP_RESCHE
 const reschedulingToURL = `${baseApiUrl}${process.env.REACT_APP_RESCHEDULING_TO}`;
 const rescheduleSaveURL = `${baseApiUrl}${process.env.REACT_APP_RESCHEDULE_SAVE}`;
 const nmiListURL = `${baseApiUrl}${process.env.REACT_APP_NMI_LIST}`;
+const subnmiListURL = `${baseApiUrl}${process.env.REACT_APP_SUB_NMI_LIST}`;
 const appointmentDetailsSubmissionURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENT_DETAILS_SUBMISSION}`;
 const reschedulingIssueListURL = `${baseApiUrl}${process.env.REACT_APP_RESCHEDULING_ISSUE_LIST}`;
 const switchModeReasonsURL = `${baseApiUrl}${process.env.REACT_APP_SWITCH_MODE}`;
@@ -71,4 +72,5 @@ export {
   reassignSaveURL,
   appointmentDetailsGetURL,
   returnToWorkEditModeURL,
+  subnmiListURL
 };

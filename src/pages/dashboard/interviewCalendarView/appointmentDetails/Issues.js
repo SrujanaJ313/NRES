@@ -18,7 +18,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { nmiListURL } from "../../../../helpers/Urls";
+import { nmiListURL,subnmiListURL } from "../../../../helpers/Urls";
 import client from "../../../../helpers/Api";
 import moment from "moment";
 import { getMsgsFromErrorCode } from "../../../../helpers/utils";
@@ -46,6 +46,7 @@ function Issues({ formik, caseDetails, disableForm }) {
   }, []);
 
   useEffect(() => {
+    console.log('values.otherIssues-->', values.otherIssues);
     if (disableForm) {
       [...values.otherIssues].forEach((issue) => {
         fetchSubIssuesList(issue.issueType);
@@ -61,7 +62,10 @@ function Issues({ formik, caseDetails, disableForm }) {
         module: "resea",
         page: "appointmentDetails",
       };
-      const response = await client.post(nmiListURL, body);
+      const response =
+        process.env.REACT_APP_ENV === "mockserver"
+          ? await client.get(nmiListURL)
+          : await client.post(nmiListURL, body);
       setIssues(response);
     } catch (errorResponse) {
       const newErrMsgs = getMsgsFromErrorCode(
@@ -81,7 +85,10 @@ function Issues({ formik, caseDetails, disableForm }) {
           module: "resea",
           page: "appointmentDetails",
         };
-        const response = await client.post(nmiListURL, body);
+        const response =
+          process.env.REACT_APP_ENV === "mockserver"
+            ? await client.get(subnmiListURL)
+            : await client.post(nmiListURL, body);
         const subTypes = { ...subIssues };
         subTypes[issueTypeId] = response;
         setSubIssues(subTypes);
@@ -133,7 +140,6 @@ function Issues({ formik, caseDetails, disableForm }) {
     rowData.splice(index, 1);
     setFieldValue(`otherIssues`, rowData);
   };
-
   return (
     <Stack>
       <Typography className="label-text">
@@ -142,7 +148,9 @@ function Issues({ formik, caseDetails, disableForm }) {
       </Typography>
 
       <Stack mt={1.2}>
-        {values.otherIssues?.map((row, index) => (
+        {values.otherIssues?.map((row, index) => {
+           console.log('row.issueSubType value-->', row.issueSubType, typeof row.issueSubType);
+        return (
           <Stack
             key={index}
             direction="row"
@@ -195,7 +203,7 @@ function Issues({ formik, caseDetails, disableForm }) {
                   )}
               </Stack>
               <Stack>
-                <FormControl sx={{ width: "13rem" }} size="small">
+                <FormControl sx={{ width: "13rem" }} size="small" key={row.issueSubType}>
                   <InputLabel>Issue Sub Type</InputLabel>
                   <Select
                     size="small"
@@ -208,11 +216,14 @@ function Issues({ formik, caseDetails, disableForm }) {
                       !values.otherIssues?.[index].selected || disableForm
                     }
                   >
-                    {subIssues[row.issueType]?.map((subIssue) => (
+                    {subIssues[row.issueType]?.map((subIssue) => {
+                      console.log('type of row', typeof row.issueSubType);
+                      console.log('type of subIssue', typeof subIssue.issueId);
+                      return (
                       <MenuItem key={subIssue.issueId} value={subIssue.issueId}>
                         {subIssue.issueDesc}
                       </MenuItem>
-                    ))}
+                    )})}
                   </Select>
                 </FormControl>
                 {touched.otherIssues?.[index]?.issueSubType &&
@@ -239,7 +250,7 @@ function Issues({ formik, caseDetails, disableForm }) {
                         !values.otherIssues[index].selected || disableForm
                       }
                       minDate={moment()}
-                      maxDate={moment(caseDetails.clmByDt)}
+                      // maxDate={moment(caseDetails.clmByDt)}
                     />
                   </FormControl>
                 </LocalizationProvider>
@@ -286,7 +297,7 @@ function Issues({ formik, caseDetails, disableForm }) {
               </IconButton>
             </Stack>
           </Stack>
-        ))}
+        )})}
         <Stack
           direction="row"
           justifyContent="end"
@@ -318,3 +329,4 @@ function Issues({ formik, caseDetails, disableForm }) {
 }
 
 export default Issues;
+

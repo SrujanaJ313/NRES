@@ -113,7 +113,7 @@ function AppRoutes() {
           <Route element={<Preferences />} path="/preferences" />
         </Route>
 
-        <Route element={<Appointments />} path="//appointments-appointments" />
+        <Route element={<Appointments />} path="/appointments-appointments" />
         <Route element={<UnAuthorised />} path="/unAuthorised" />
         <Route element={<Navigate replace to="/dashboard" />} path="/" />
       </Routes>

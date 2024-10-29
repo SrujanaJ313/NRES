@@ -43,7 +43,11 @@ function InterviewCalendarView({ userId, userName }) {
     ) {
       try {
         setErrorMessages([]);
-        const response = await client.get(`${caseHeaderURL}/${event.eventId}`);
+        const response =
+          process.env.REACT_APP_ENV === "mockserver"
+            ? await client.get(caseHeaderURL)
+            : await client.get(`${caseHeaderURL}/${event.eventId}`);
+        console.log("response--->", response);
         setCaseDetails(response);
         setEvent(event);
         setOpen(true);
@@ -70,7 +74,11 @@ function InterviewCalendarView({ userId, userName }) {
         startDt: start,
         endDt: end,
       };
-      const response = await client.post(calendarDetailsURL, payload);
+      const response =
+        process.env.REACT_APP_ENV === "mockserver"
+          ? await client.get(calendarDetailsURL)
+          : await client.post(calendarDetailsURL, payload);
+      console.log("response-->", response);
       const data = response.map((event) => {
         const startDate = moment(
           `${event.appointmentDt} ${event.startTime}`,
@@ -250,7 +258,7 @@ function InterviewCalendarView({ userId, userName }) {
           work_week: true,
           day: false,
           agenda: false,
-        }}
+        }}   
       />
 
       {open && event && (

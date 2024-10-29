@@ -106,9 +106,10 @@ function AppointmentDetails({ event, onCancel, caseDetails, onSubmitClose }) {
   const fetchAppointmentDetails = async () => {
     try {
       setErrorMessages([]);
-      const response = await client.get(
-        appointmentDetailsGetURL + `/${event.eventId}`
-      );
+      const response =
+        process.env.REACT_APP_ENV === "mockserver"
+          ? await client.get(appointmentDetailsGetURL)
+          : await client.get(appointmentDetailsGetURL + `/${event.eventId}`);
 
       /*
 
@@ -265,11 +266,11 @@ function AppointmentDetails({ event, onCancel, caseDetails, onSubmitClose }) {
           jmsItemsList={jmsItemsList}
           disableForm={disableForm}
         />
-        <WorkSearchItems
+        {/* <WorkSearchItems
           data={caseDetails.workSearch}
           formik={formik}
           disableForm={disableForm}
-        />
+        /> */}
         <Issues
           formik={formik}
           caseDetails={caseDetails}
@@ -351,3 +352,4 @@ function AppointmentDetails({ event, onCancel, caseDetails, onSubmitClose }) {
 }
 
 export default AppointmentDetails;
+

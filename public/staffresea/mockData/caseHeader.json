@@ -1,0 +1,86 @@
+{
+  "claimant": "JESSICA FUDALA",
+  "weeksFiled": 24,
+  "orientationDt": "Conversion",
+  "clmByDt": "04/05/2025",
+  "initialAppttDt": "09/20/2024",
+  "firstSubsequentApptDt": "10/10/2024",
+  "selfScheduleDt": "10/20/2024",
+  "orientatonRschCnt": 0,
+  "initialAppttRschCnt": 0,
+  "meetingUrl": "https://us02web.zoom.us/j/81155351285",
+  "meetingId": "811 5535 1285",
+  "telephoneNum1": "Dial by your location +1 646 876 9923 US (New York) +1 301 715 8592 US (Washington DC)",
+  "workSearch": [
+    {
+      "weekEndingDt": "09/21/2024",
+      "wsContacts": 4,
+      "goldActivities": 0,
+      "bronzeActivities": 0,
+      "minWorkSrchReq": 4,
+      "inadequateWorkSrch": "No",
+      "ccaId": 17113702,
+      "viewCertifiedCCFUrl": "https://sit1.nhuis.nh.gov/staffcmt/contdClmViewCertifiedCCF/17113702"
+    },
+    {
+      "weekEndingDt": "09/14/2024",
+      "wsContacts": 4,
+      "goldActivities": 0,
+      "bronzeActivities": 0,
+      "minWorkSrchReq": 4,
+      "inadequateWorkSrch": "No",
+      "ccaId": 17110542,
+      "viewCertifiedCCFUrl": "https://sit1.nhuis.nh.gov/staffcmt/contdClmViewCertifiedCCF/17110542"
+    },
+    {
+      "weekEndingDt": "09/07/2024",
+      "wsContacts": 5,
+      "goldActivities": 0,
+      "bronzeActivities": 0,
+      "minWorkSrchReq": 4,
+      "inadequateWorkSrch": "No",
+      "ccaId": 17107089,
+      "viewCertifiedCCFUrl": "https://sit1.nhuis.nh.gov/staffcmt/contdClmViewCertifiedCCF/17107089"
+    },
+    {
+      "weekEndingDt": "08/31/2024",
+      "wsContacts": 3,
+      "goldActivities": 0,
+      "bronzeActivities": 0,
+      "minWorkSrchReq": 2,
+      "inadequateWorkSrch": "No",
+      "ccaId": 17104293,
+      "viewCertifiedCCFUrl": "https://sit1.nhuis.nh.gov/staffcmt/contdClmViewCertifiedCCF/17104293"
+    }
+  ],
+
+  "issues": [
+    {
+      "issueType": "Deductible Income",
+      "issueSubType": "Deductible Income",
+      "startDt": "04/09/2024",
+      "endDt": "05/04/2024",
+      "createdOn": "04/24/2024",
+      "decStatus": "Deny",
+      "decDecision": "Deny",
+      "createdBy": "Other"
+    },
+    {
+      "issueType": "Availability",
+      "issueSubType": "Personal reasons",
+      "startDt": "08/04/2024",
+      "endDt": "08/24/2024",
+      "createdOn": "08/21/2024",
+      "decStatus": "Deny",
+      "decDecision": "Deny",
+      "createdBy": "Other"
+    }
+  ],
+  "jobReferrals": [],
+  "rescheduleAccess": "N",
+  "switchModeAccess": "N",
+  "returnToWorkAccess": "Y",
+  "appointmentAccess": "Y",
+  "noShowAccess": "V",
+  "reopenAccess": "Y"
+}

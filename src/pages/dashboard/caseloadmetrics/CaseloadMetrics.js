@@ -132,7 +132,11 @@ const CaseloadMetrics = React.memo(
     useEffect(() => {
       async function fetchAppointmentStaffListData() {
         try {
-          const data = await client.get(appointmentStaffListURL);
+          const data =
+            process.env.REACT_APP_ENV === "mockserver"
+              ? await client.get(appointmentStaffListURL)
+              : await client.get(appointmentStaffListURL);
+          console.log('REACT_APP_APPOINTMENT_STAFF_LIST-->', data);
           const sortedData = sortAlphabetically(data);
           setAppointmentStaffList(sortedData);
         } catch (errorResponse) {
@@ -228,7 +232,7 @@ const CaseloadMetrics = React.memo(
                     } else if (index === metricValues.length - 1) {
                       cellColor = "red";
                     }
- 
+
                     return (
                       <ContentCell key={index} sx={{ color: cellColor }}>
                         <ButtonBase onClick={() => handleCellClick(index)}>
@@ -291,3 +295,4 @@ const CaseloadMetrics = React.memo(
 );
 
 export default CaseloadMetrics;
+

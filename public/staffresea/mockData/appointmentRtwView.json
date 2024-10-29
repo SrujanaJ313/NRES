@@ -1,0 +1,18 @@
+{
+    "employmentStartDt": "10/23/2024",
+    "empName": "Macys",
+    "exactJobTitle": "Dev",
+    "partFullTimeInd": "P",
+    "hourlyPayRate": 100.99,
+    "empWorkLocState": "CA",
+    "empWorkLocCity": "Milford",
+    "workMode": 5649,
+    "jms890Ind": "N",
+    "jmsReferralInd": "N",
+    "jmsCloseGoalsInd": "N",
+    "jmsCloseIEPInd": "N",
+    "jmsCaseNotesInd": "N",
+    "jmsResumeOffInd": "N",
+    "epChecklistUploadInd": "N",
+    "rtwMode": "View"
+}

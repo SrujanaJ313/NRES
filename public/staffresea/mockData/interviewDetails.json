@@ -1,0 +1,72 @@
+{
+  "eventId": 1701,
+  "jmsItems": {
+    "JMSRegIncomplete": false,
+    "ActiveResume": false,
+    "IEPSignatureCopy": true,
+    "JMSJobReferral": false,
+    "AddSelfCaseManager": true,
+    "Eri1On1": true,
+    "DevelopIEP": true,
+    "WagnerPeyserApplSignature": false,
+    "WagnerPeyserApplComplete": false,
+    "ReferToVRorDHHS": true,
+    "JobDevelopment": true,
+    "InitialAssessment": false,
+    "ELMIServices": false,
+    "CaseManagement": true,
+    "JMSCaseNotes": true,
+    "CloseGoals": false,
+    "OutsideWebReferral": true,
+    "ActiveVirtualRecuiter": false,
+    "JmsCloseIEP": false,
+    "ReferWIOATraining": true,
+    "AttendedRESEA": true,
+    "JMSRegComplete": false
+  },
+  "outsideWebReferral": [
+    {
+      "empName": "ddsfsfsdfsd",
+      "jobTitle": "dfsdfsfds"
+    }
+  ],
+  "workSearchIssues": [
+    {
+      "recent": true,
+      "status": "createIssue",
+      "activelySeekingWork": 2094,
+      "weekEndingDt": "09/28/2024"
+    },
+    {
+      "recent": true,
+      "status": "noIssues",
+      "weekEndingDt": "09/21/2024"
+    },
+    {
+      "recent": true,
+      "status": "noIssues",
+      "weekEndingDt": "09/14/2024"
+    }
+  ],
+  "otherIssues": [
+    {
+      "selected": true,
+      "issueType": 2,
+      "issueSubType": 2226,
+      "startDt": "10/09/2024",
+      "endDt": "10/19/2024"
+    }
+  ],
+  "actionTaken": {
+    "EPandCheckListUpld": false,
+    "ReviewedReEmpPlan": true,
+    "AssignedReEmpPlan": true,
+    "RemindedSelfSchedule": true,
+    "PhysicallyVerifiedID": true,
+    "CheckedPriorJobReferrals": true
+  },
+  "assignedMrpChap": "Chapter1To4",
+  "selfSchByDt": "10/09/2024",
+  "staffNotes": "fsdsdss",
+  "empServicesConfirmInd": "Y"
+}

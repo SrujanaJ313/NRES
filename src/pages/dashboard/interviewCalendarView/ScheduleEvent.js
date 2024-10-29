@@ -165,6 +165,7 @@ function ScheduleEvent({ caseDetails, event, onSubmitClose }) {
               variant="contained"
               onClick={() => setType("returnToWork")}
               size="small"
+              disabled={caseDetails?.returnToWorkAccess === "N"}
             >
               Returned to Work
             </Button>
