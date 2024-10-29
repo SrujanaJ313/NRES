@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -9,7 +9,7 @@ import {
   Button,
   Typography,
   Stack,
-  FormControlLabel,
+  CircularProgress,
 } from "@mui/material";
 
 const validationSchema = Yup.object().shape({
@@ -53,208 +53,347 @@ function Appointments() {
     },
   });
 
+  const [checkboxStates, setCheckboxStates] = useState({
+    localOffice: false,
+    caseManager: false,
+    appointmentDate: false,
+    timeslotType: false,
+    timeslotUsage: false,
+    meetingStatus: false,
+    beyond21Days: false,
+    hiPriority: false,
+    scheduledBy: false,
+    claimantName: false,
+    ssn: false,
+    byeDate: false,
+  });
+
+  const handleCheckboxChange = (field) => (event) => {
+    setCheckboxStates({ ...checkboxStates, [field]: event.target.checked });
+  };
+
   return (
     <Box display="flex" height="100vh">
-      {/* Left Panel */}
-      <Box width="35%" bgcolor="#e9f0fb" p={2}>
-        <Typography color="primary" variant="h6" gutterBottom>
-          Look Up Appointments
+      <Box width="35%" bgcolor="#FFFFFF" p={0} borderRight="2px solid #3b5998">
+        <Typography sx={{backgroundColor:"#183084", color:"#FFFFFF", paddingLeft:"10px"}} variant="h6" gutterBottom>
+          Lookup Appointments
         </Typography>
 
         <form onSubmit={formik.handleSubmit}>
-          <Stack spacing={2}>
-            <TextField
-              id="localOffice"
-              name="localOffice"
-              label="Local Office"
-              value={formik.values.localOffice}
-              onChange={formik.handleChange}
-              error={
-                formik.touched.localOffice && Boolean(formik.errors.localOffice)
-              }
-              helperText={
-                formik.touched.localOffice && formik.errors.localOffice
-              }
-              select
-              fullWidth
-              size="small"
-            >
-              <MenuItem value="Office1">Office1</MenuItem>
-              <MenuItem value="Office2">Office2</MenuItem>
-            </TextField>
-
-            <TextField
-              id="caseManager"
-              name="caseManager"
-              label="Case Manager"
-              value={formik.values.caseManager}
-              onChange={formik.handleChange}
-              error={
-                formik.touched.caseManager && Boolean(formik.errors.caseManager)
-              }
-              helperText={
-                formik.touched.caseManager && formik.errors.caseManager
-              }
-              select
-              fullWidth
-              size="small"
-            >
-              <MenuItem value="Manager1">Manager1</MenuItem>
-              <MenuItem value="Manager2">Manager2</MenuItem>
-            </TextField>
-
-            <TextField
-              id="appointmentDateFrom"
-              name="appointmentDateFrom"
-              label="Appointment Date From"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              value={formik.values.appointmentDateFrom}
-              onChange={formik.handleChange}
-              fullWidth
-              size="small"
-            />
-
-            <TextField
-              id="appointmentDateTo"
-              name="appointmentDateTo"
-              label="Appointment Date To"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              value={formik.values.appointmentDateTo}
-              onChange={formik.handleChange}
-              fullWidth
-              size="small"
-            />
-
-            <TextField
-              id="timeslotType"
-              name="timeslotType"
-              label="TimeSlot Type"
-              type="time"
-              InputLabelProps={{ shrink: true }}
-              value={formik.values.timeslotType}
-              onChange={formik.handleChange}
-              fullWidth
-              size="small"
-            />
-            <TextField
-              id="timeslotUsage"
-              name="timeslotUsage"
-              label="TimeSlot Usage"
-              type="time"
-              InputLabelProps={{ shrink: true }}
-              value={formik.values.timeslotUsage}
-              onChange={formik.handleChange}
-              fullWidth
-              size="small"
-            />
-            <TextField
-              id="meetingStatus"
-              name="meetingStatus"
-              label="Meeting Status"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              value={formik.values.meetingStatus}
-              onChange={formik.handleChange}
-              fullWidth
-              size="small"
-            />
-
-            <FormControlLabel
-              control={
-                <Checkbox
-                  id="beyond21Days"
-                  name="beyond21Days"
-                  checked={formik.values.beyond21Days}
-                  onChange={formik.handleChange}
-                />
-              }
-              label="Beyond 21 days"
-            />
-
-            <FormControlLabel
-              control={
-                <Checkbox
-                  id="hiPriority"
-                  name="hiPriority"
-                  checked={formik.values.hiPriority}
-                  onChange={formik.handleChange}
-                />
-              }
-              label="High Priority"
-            />
-
-<TextField
-              id="scheduledBy"
-              name="scheduledBy"
-              label="Scheduled By"
-              value={formik.values.scheduledBy}
-              onChange={formik.handleChange}
-              error={
-                formik.touched.scheduledBy && Boolean(formik.errors.scheduledBy)
-              }
-              helperText={
-                formik.touched.scheduledBy && formik.errors.scheduledBy
-              }
-              select
-              fullWidth
-              size="small"
-            >
-              <MenuItem value="Scheduler1">Scheduler1</MenuItem>
-              <MenuItem value="Scheduler2">Scheduler1</MenuItem>
-            </TextField>
-
-            <TextField
-              id="claimantName"
-              name="claimantName"
-              label="Claimant Name"
-              value={formik.values.claimantName}
-              onChange={formik.handleChange}
-              fullWidth
-              size="small"
-            />
-
-            <TextField
-              id="ssn"
-              name="ssn"
-              label="Last 4 of SSN"
-              value={formik.values.ssn}
-              onChange={formik.handleChange}
-              fullWidth
-              size="small"
-            />
-
-            <Stack direction="row" spacing={2}>
+          <Stack spacing={1}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                checked={checkboxStates.localOffice}
+                onChange={handleCheckboxChange("localOffice")}
+              />
               <TextField
-                id="byeFrom"
-                name="byeFrom"
-                label="BYE From"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={formik.values.byeFrom}
+                id="localOffice"
+                name="localOffice"
+                label="Local Office"
+                value={formik.values.localOffice}
+                onChange={formik.handleChange}
+                select
+                fullWidth
+                size="small"
+                sx={{
+                  width: "80%",
+                  // backgroundColor: checkboxStates.localOffice
+                  //   ? "white"
+                  //   : "lightgrey",
+                }}
+                //disabled={!checkboxStates.localOffice}
+              >
+                <MenuItem value="Office1">Office1</MenuItem>
+                <MenuItem value="Office2">Office2</MenuItem>
+              </TextField>
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                checked={checkboxStates.caseManager}
+                onChange={handleCheckboxChange("caseManager")}
+              />
+              <TextField
+                id="caseManager"
+                name="caseManager"
+                label="Case Manager"
+                value={formik.values.caseManager}
+                onChange={formik.handleChange}
+                select
+                fullWidth
+                size="small"
+                sx={{
+                  width: "80%",
+                  // backgroundColor: checkboxStates.caseManager
+                  //   ? "white"
+                  //   : "lightgrey",
+                }}
+                //disabled={!checkboxStates.caseManager}
+              >
+                <MenuItem value="Manager1">Manager1</MenuItem>
+                <MenuItem value="Manager2">Manager2</MenuItem>
+              </TextField>
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                checked={checkboxStates.appointmentDate}
+                onChange={handleCheckboxChange("appointmentDate")}
+              />
+              <Stack direction="row" spacing={1} sx={{ width: "80%" }}>
+                <TextField
+                  id="appointmentDateFrom"
+                  name="appointmentDateFrom"
+                  label="Appointment Date From"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={formik.values.appointmentDateFrom}
+                  onChange={formik.handleChange}
+                  size="small"
+                  fullWidth
+                  sx={{
+                    // backgroundColor: checkboxStates.appointmentDate
+                    //   ? "white"
+                    //   : "lightgrey",
+                  }}
+                  //disabled={!checkboxStates.appointmentDate}
+                />
+                <TextField
+                  id="appointmentDateTo"
+                  name="appointmentDateTo"
+                  label="Appointment Date To"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={formik.values.appointmentDateTo}
+                  onChange={formik.handleChange}
+                  size="small"
+                  fullWidth
+                  sx={{
+                    // backgroundColor: checkboxStates.appointmentDate
+                    //   ? "white"
+                    //   : "lightgrey",
+                  }}
+                  //disabled={!checkboxStates.appointmentDate}
+                />
+              </Stack>
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                checked={checkboxStates.timeslotType}
+                onChange={handleCheckboxChange("timeslotType")}
+              />
+              <TextField
+                id="timeslotType"
+                name="timeslotType"
+                label="Timeslot Type"
+                value={formik.values.timeslotType}
+                onChange={formik.handleChange}
+                select
+                fullWidth
+                size="small"
+                sx={{
+                  width: "80%",
+                  // backgroundColor: checkboxStates.timeslotType
+                  //   ? "white"
+                  //   : "lightgrey",
+                }}
+                //disabled={!checkboxStates.timeslotType}
+              >
+                <MenuItem value="Type1">Type1</MenuItem>
+                <MenuItem value="Type2">Type2</MenuItem>
+              </TextField>
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                checked={checkboxStates.timeslotUsage}
+                onChange={handleCheckboxChange("timeslotUsage")}
+              />
+              <TextField
+                id="timeslotUsage"
+                name="timeslotUsage"
+                label="Timeslot Usage"
+                value={formik.values.timeslotUsage}
+                onChange={formik.handleChange}
+                select
+                fullWidth
+                size="small"
+                sx={{
+                  width: "80%",
+                  // backgroundColor: checkboxStates.timeslotUsage
+                  //   ? "white"
+                  //   : "lightgrey",
+                }}
+                //disabled={!checkboxStates.timeslotUsage}
+              >
+                <MenuItem value="Type1">Type1</MenuItem>
+                <MenuItem value="Type2">Type2</MenuItem>
+              </TextField>
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                checked={checkboxStates.meetingStatus}
+                onChange={handleCheckboxChange("meetingStatus")}
+              />
+              <TextField
+                id="meetingStatus"
+                name="meetingStatus"
+                label="Meeting Status"
+                value={formik.values.meetingStatus}
+                onChange={formik.handleChange}
+                select
+                fullWidth
+                size="small"
+                sx={{
+                  width: "80%",
+                  // backgroundColor: checkboxStates.meetingStatus
+                  //   ? "white"
+                  //   : "lightgrey",
+                }}
+                //disabled={!checkboxStates.meetingStatus}
+              >
+                <MenuItem value="Type1">Type1</MenuItem>
+                <MenuItem value="Type2">Type2</MenuItem>
+              </TextField>
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                checked={checkboxStates.beyond21Days}
+                onChange={handleCheckboxChange("beyond21Days")}
+              />
+              <Typography>Beyond 21 Days</Typography>
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                checked={checkboxStates.hiPriority}
+                onChange={handleCheckboxChange("hiPriority")}
+              />
+              <Typography>High Priority</Typography>
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                checked={checkboxStates.scheduledBy}
+                onChange={handleCheckboxChange("scheduledBy")}
+              />
+              <TextField
+                id="scheduledBy"
+                name="scheduledBy"
+                label="Scheduled By "
+                value={formik.values.scheduledBy}
+                onChange={formik.handleChange}
+                select
+                fullWidth
+                size="small"
+                sx={{
+                  width: "80%",
+                  // backgroundColor: checkboxStates.scheduledBy
+                  //   ? "white"
+                  //   : "lightgrey",
+                }}
+                //disabled={!checkboxStates.scheduledBy}
+              >
+                <MenuItem value="Type1">Type1</MenuItem>
+                <MenuItem value="Type2">Type2</MenuItem>
+              </TextField>
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                checked={checkboxStates.claimantName}
+                onChange={handleCheckboxChange("claimantName")}
+              />
+              <TextField
+                id="claimantName"
+                name="claimantName"
+                label="Claimant Name"
+                value={formik.values.claimantName}
                 onChange={formik.handleChange}
                 fullWidth
                 size="small"
+                sx={{
+                  width: "80%",
+                  // backgroundColor: checkboxStates.claimantName
+                  //   ? "white"
+                  //   : "lightgrey",
+                }}
+                //disabled={!checkboxStates.claimantName}
+              />
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                checked={checkboxStates.ssn}
+                onChange={handleCheckboxChange("claimantName")}
               />
               <TextField
-                id="byeTo"
-                name="byeTo"
-                label="BYE To"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={formik.values.byeTo}
+                id="ssn"
+                name="ssn"
+                label="Last 4 of SSN"
+                value={formik.values.ssn}
                 onChange={formik.handleChange}
                 fullWidth
                 size="small"
+                sx={{
+                  width: "80%",
+                  // backgroundColor: checkboxStates.ssn ? "white" : "lightgrey",
+                }}
+                //disabled={!checkboxStates.ssn}
               />
-            </Stack>
+            </Box>
 
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox
+                checked={checkboxStates.byeDate}
+                onChange={handleCheckboxChange("byeDate")}
+              />
+              <Stack direction="row" spacing={1} sx={{ width: "80%" }}>
+                <TextField
+                  id="byeFrom"
+                  name="byeFrom"
+                  label="BYE From"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={formik.values.byeFrom}
+                  onChange={formik.handleChange}
+                  size="small"
+                  fullWidth
+                  sx={{
+                    // backgroundColor: checkboxStates.byeDate
+                    //   ? "white"
+                    //   : "lightgrey",
+                  }}
+                  //disabled={!checkboxStates.byeDate}
+                />
+                <TextField
+                  id="byeTo"
+                  name="byeTo"
+                  label="BYE To"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={formik.values.byeTo}
+                  onChange={formik.handleChange}
+                  size="small"
+                  fullWidth
+                  sx={{
+                    // backgroundColor: checkboxStates.byeDate
+                    //   ? "white"
+                    //   : "lightgrey",
+                  }}
+                  //disabled={!checkboxStates.byeDate}
+                />
+              </Stack>
+            </Box>
+            
             <Button
               color="primary"
               variant="contained"
               type="submit"
-              sx={{ alignSelf: "flex-end", width: "50%" }}
+              sx={{ alignSelf: "center", width: "50%" }}
             >
               Search
             </Button>
@@ -267,12 +406,7 @@ function Appointments() {
         <Typography variant="h6" gutterBottom>
           Appointment Details
         </Typography>
-        <Stack spacing={2}>
-          <Typography>
-            Local Office | Case Manager | Event Date & Time | Type | Usage |
-            Status | Claimant | BYE | Indicators
-          </Typography>
-        </Stack>
+        {/* Content for the right panel */}
       </Box>
     </Box>
   );
