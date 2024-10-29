@@ -264,7 +264,7 @@ function Appointments() {
                 checked={checkboxStates.beyond21Days}
                 onChange={handleCheckboxChange("beyond21Days")}
               />
-              <Typography>Beyond 21 Days</Typography>
+              <Typography>Beyond 21 days</Typography>
             </Box>
 
             <Box display="flex" alignItems="center" gap={1}>
@@ -272,7 +272,7 @@ function Appointments() {
                 checked={checkboxStates.hiPriority}
                 onChange={handleCheckboxChange("hiPriority")}
               />
-              <Typography>High Priority</Typography>
+              <Typography>HI Priority</Typography>
             </Box>
 
             <Box display="flex" alignItems="center" gap={1}>
@@ -283,7 +283,7 @@ function Appointments() {
               <TextField
                 id="scheduledBy"
                 name="scheduledBy"
-                label="Scheduled By "
+                label="Scheduled by "
                 value={formik.values.scheduledBy}
                 onChange={formik.handleChange}
                 select
@@ -310,7 +310,7 @@ function Appointments() {
               <TextField
                 id="claimantName"
                 name="claimantName"
-                label="Claimant Name"
+                label="Claimant name"
                 value={formik.values.claimantName}
                 onChange={formik.handleChange}
                 fullWidth
