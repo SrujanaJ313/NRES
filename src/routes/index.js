@@ -111,9 +111,9 @@ function AppRoutes() {
           <Route element={<Reminders />} path="/reminders" />
           <Route element={<WorkSchedule />} path="/workSchedule" />
           <Route element={<Preferences />} path="/preferences" />
+          <Route element={<Appointments />} path="/appointments-appointments" />
         </Route>
 
-        <Route element={<Appointments />} path="/appointments-appointments" />
         <Route element={<UnAuthorised />} path="/unAuthorised" />
         <Route element={<Navigate replace to="/dashboard" />} path="/" />
       </Routes>
@@ -122,3 +122,4 @@ function AppRoutes() {
 }
 
 export default AppRoutes;
+

@@ -39,6 +39,13 @@ const reassignSaveURL = `${baseApiUrl}${process.env.REACT_APP_REASSIGN_SAVE}`;
 const appointmentDetailsGetURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENT_DETAILS_GET}`;
 const returnToWorkEditModeURL = `${baseApiUrl}${process.env.REACT_APP_RETURN_TO_WORK_GET}`;
 
+const appointmentsLocalOfficeURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENTS_LOCAL_OFFICE}`;
+const appointmentsCaseManagerURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENTS_CASE_MANAGER}`;
+const appointmentsScheduledByURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENTS_SCHEDULED_BY}`;
+const appointmentsTimeSlotTypeURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENTS_TIME_SLOT_TYPE}`;
+const appointmentsTimeUsageURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENTS_TIME_USAGE}`;
+const appointmentsMeetingStatusURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENTS_MEETING_STATUS}`;
+
 export {
   baseApiUrl,
   validateJWTURL,
@@ -72,5 +79,14 @@ export {
   reassignSaveURL,
   appointmentDetailsGetURL,
   returnToWorkEditModeURL,
-  subnmiListURL
+  subnmiListURL,
+
+  
+  appointmentsLocalOfficeURL,
+  appointmentsCaseManagerURL,
+  appointmentsScheduledByURL,
+  appointmentsTimeSlotTypeURL,
+  appointmentsTimeUsageURL,
+  appointmentsMeetingStatusURL,
 };
+
