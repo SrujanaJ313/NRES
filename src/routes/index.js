@@ -24,7 +24,7 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import Reminders from "../pages/reminders/Reminders";
 import WorkSchedule from "../pages/workschedule/WorkSchedule";
 import Preferences from "../pages/preferences/Preferences";
-import Appointments from "../pages/dashboard/Appointments";
+import Appointments from "../pages/dashboard/appointments/Appointments";
 
 const PrivateRoute = () => {
   const [loading, setLoading] = useState(false);

@@ -45,6 +45,7 @@ const appointmentsScheduledByURL = `${baseApiUrl}${process.env.REACT_APP_APPOINT
 const appointmentsTimeSlotTypeURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENTS_TIME_SLOT_TYPE}`;
 const appointmentsTimeUsageURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENTS_TIME_USAGE}`;
 const appointmentsMeetingStatusURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENTS_MEETING_STATUS}`;
+const appointmentsLookUpSummaryURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENTS_LOOK_UP_SUMMARY}`;
 
 export {
   baseApiUrl,
@@ -88,5 +89,6 @@ export {
   appointmentsTimeSlotTypeURL,
   appointmentsTimeUsageURL,
   appointmentsMeetingStatusURL,
+  appointmentsLookUpSummaryURL
 };
 

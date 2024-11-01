@@ -694,6 +694,23 @@ const reAssignPageValidationSchema = yup.object({
     .required("Look Up Case Manager Availability is required"),
 });
 
+const lookUpAppointmentsValidationSchema = yup.object().shape({
+  localOffice: yup.array(),
+  caseManager: yup.string(),
+  appointmentDateFrom: yup.date(),
+  appointmentDateTo: yup.date(),
+  timeslotType: yup.string(),
+  timeslotUsage: yup.string(),
+  meetingStatus: yup.array(),
+  beyond21Days: yup.string(),
+  hiPriority: yup.string(),
+  scheduledBy: yup.array(),
+  claimantName: yup.string(),
+  ssn: yup.string(),
+  byeFrom: yup.date(),
+  byeTo: yup.date(),
+});
+
 export {
   initialAppointmentDetailsSchema,
   firstAppointmentDetailsSchema,
@@ -704,4 +721,7 @@ export {
   switchValidationSchema,
   availableEventSchema,
   reAssignPageValidationSchema,
+
+  lookUpAppointmentsValidationSchema
 };
+
