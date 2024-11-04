@@ -83,7 +83,6 @@ function Appointments() {
           return;
         }
         console.log("submited payload-->\n", payload);
-        return;
         await client.post(appointmentsLookUpSummaryURL, payload);
         showSnackbar("Request has been submitted successfully.", 5000);
       } catch (errorResponse) {
