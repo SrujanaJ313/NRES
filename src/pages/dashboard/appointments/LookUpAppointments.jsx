@@ -8,6 +8,7 @@ import {
   Typography,
   Stack,
   ListItemText,
+  FormHelperText,
 } from "@mui/material";
 import client from "../../../helpers/Api";
 
@@ -20,51 +21,57 @@ import {
   appointmentsMeetingStatusURL,
 } from "../../../helpers/Urls";
 
-function LookUpAppointments({ formik }) {
-  const [checkboxStates, setCheckboxStates] = useState({
-    localOfficeCheckbox: false,
-    caseManagerCheckbox: false,
-    appointmentDateCheckbox: false,
-    timeslotTypeCheckbox: false,
-    timeslotUsageCheckbox: false,
-    meetingStatusCheckbox: false,
-    scheduledByCheckbox: false,
-    claimantNameCheckbox: false,
-    ssnCheckbox: false,
-    byeDateCheckbox: false,
-  });
+function LookUpAppointments({
+  formik,
+  checkboxStates,
+  errorMessages,
+  setCheckboxStates,
+  setErrorMessages,
+}) {
+  // const [checkboxStates, setCheckboxStates] = useState({
+  //   officeNumCheckbox: false,
+  //   caseManagerIdCheckbox: false,
+  //   appointmentDateCheckbox: false,
+  //   timeslotTypeCdCheckbox: false,
+  //   timeslotUsageCdCheckbox: false,
+  //   meetingStatusCdCheckbox: false,
+  //   scheduledByCheckbox: false,
+  //   claimantNameCheckbox: false,
+  //   ssnCheckbox: false,
+  //   byeDateCheckbox: false,
+  // });
 
   const [dropdownOptions, setDropdownOptions] = useState({
-    localOfficeOptions: [],
-    caseManagerOptions: [],
-    timeslotTypeOptions: [],
-    timeslotUsageOptions: [],
-    meetingStatusOptions: [],
+    officeNumOptions: [],
+    caseManagerIdOptions: [],
+    timeslotTypeCdOptions: [],
+    timeslotUsageCdOptions: [],
+    meetingStatusCdOptions: [],
     scheduledByOptions: [],
   });
 
   const fieldNameUrls = {
-    localOfficeCheckbox: appointmentsLocalOfficeURL,
-    caseManagerCheckbox: appointmentsCaseManagerURL,
-    timeslotTypeCheckbox: appointmentsTimeSlotTypeURL,
-    timeslotUsageCheckbox: appointmentsTimeUsageURL,
-    meetingStatusCheckbox: appointmentsMeetingStatusURL,
+    officeNumCheckbox: appointmentsLocalOfficeURL,
+    caseManagerIdCheckbox: appointmentsCaseManagerURL,
+    timeslotTypeCdCheckbox: appointmentsTimeSlotTypeURL,
+    timeslotUsageCdCheckbox: appointmentsTimeUsageURL,
+    meetingStatusCdCheckbox: appointmentsMeetingStatusURL,
     scheduledByCheckbox: appointmentsScheduledByURL,
   };
 
+  const resettableFields = ["appointmentDate", "byeDate"];
+
+  const ignoredFields = [
+    "appointmentDate",
+    "beyond21DaysInd",
+    "hiPriorityInd",
+    "claimantName",
+    "ssn",
+    "byeDate",
+  ];
+
   const handleCheckboxChange = (field) => (event) => {
-    if (
-      ![
-        "appointmentDate",
-        "beyond21Days",
-        "hiPriority",
-        "claimantName",
-        "ssn",
-        "byeDate",
-      ].includes(field)
-    ) {
-      handleCheckBoxData(field, event.target.checked);
-    }
+    handleCheckBoxData(field, event.target.checked);
     setCheckboxStates({
       ...checkboxStates,
       [`${field}Checkbox`]: event.target.checked,
@@ -73,20 +80,60 @@ function LookUpAppointments({ formik }) {
 
   async function handleCheckBoxData(fieldName, fieldValue) {
     if (!fieldValue) {
-      setDropdownOptions({ ...dropdownOptions, [`${fieldName}Options`]: [] });
+      if (resettableFields.includes(fieldName)) {
+        const dateFieldMap = {
+          appointmentDate: ["apptStartDt", "apptEndDt"],
+          byeDate: ["clmByeStartDt", "clmByeEndDt"],
+        };
+
+        dateFieldMap[fieldName]?.forEach((dateField) =>
+          formik.setFieldValue(dateField, formik.initialValues[dateField])
+        );
+        return;
+      }
+      if (`${fieldName}Options` in dropdownOptions) {
+        setDropdownOptions({ ...dropdownOptions, [`${fieldName}Options`]: [] });
+      }
+
+      formik.setFieldValue(fieldName, formik.initialValues[fieldName]);
+      formik.setFieldTouched(fieldName, false);
+      return;
+    }
+
+    setErrorMessages([]);
+    if (ignoredFields.includes(fieldName)) {
       return;
     }
     try {
-      const data =
-        process.env.REACT_APP_ENV === "mockserver"
-          ? await client.get(fieldNameUrls[`${fieldName}Checkbox`])
-          : await client.get(fieldNameUrls[`${fieldName}Checkbox`]);
+      const data = await client.get(fieldNameUrls[`${fieldName}Checkbox`]);
       setDropdownOptions({ ...dropdownOptions, [`${fieldName}Options`]: data });
     } catch (errorResponse) {
-      console.error("Error in fetchIssueTypes", errorResponse);
+      console.error("Error in handleCheckBoxData", errorResponse);
     }
   }
- 
+
+  const ErrorMessage = (fieldName) => {
+    return (
+      <>
+        {formik.touched[fieldName] && formik.errors[fieldName] && (
+          <span style={{ marginLeft: "10%", marginTop: "0" }}>
+            <FormHelperText
+              sx={{
+                color: "red",
+                display: "flex",
+                justifyContent: "flex-start",
+                width: "60%",
+                // backgroundColor: "pink",
+              }}
+            >
+              {formik.errors[fieldName]}
+            </FormHelperText>
+          </span>
+        )}
+      </>
+    );
+  };
+
   return (
     <Box width="35%" bgcolor="#FFFFFF" p={0} borderRight="2px solid #3b5998">
       <Typography
@@ -104,6 +151,13 @@ function LookUpAppointments({ formik }) {
 
       <form onSubmit={formik.handleSubmit}>
         <Stack spacing={1}>
+          <Box display="flex" justifyContent="center">
+            {errorMessages.map((x) => (
+              <div key={x}>
+                <span className="errorMsg">*{x}</span>
+              </div>
+            ))}
+          </Box>
           <Box
             display="flex"
             marginTop="10px"
@@ -111,55 +165,56 @@ function LookUpAppointments({ formik }) {
             width="89.5%"
           >
             <Checkbox
-              checked={checkboxStates.localOfficeCheckbox}
-              onChange={handleCheckboxChange("localOffice")}
+              checked={checkboxStates.officeNumCheckbox}
+              onChange={handleCheckboxChange("officeNum")}
             />
             <TextField
-              id="localOffice"
-              name="localOffice"
+              id="officeNum"
+              name="officeNum"
               label="Local Office"
-              value={formik.values.localOffice}
+              value={formik.values.officeNum}
               onChange={(e) =>
-                formik.setFieldValue("localOffice", e.target.value)
+                formik.setFieldValue("officeNum", e.target.value)
               }
               select
               fullWidth
               size="small"
-              disabled={!checkboxStates.localOfficeCheckbox}
+              disabled={!checkboxStates.officeNumCheckbox}
               SelectProps={{
                 multiple: true,
                 renderValue: (selected) =>
                   selected
                     .map(
                       (officeNum) =>
-                        dropdownOptions.localOfficeOptions.find(
+                        dropdownOptions.officeNumOptions.find(
                           (ofc) => ofc.officeNum === officeNum
                         )?.officeName
                     )
                     .join(", "),
               }}
             >
-              {dropdownOptions.localOfficeOptions.map((ofc) => (
+              {dropdownOptions.officeNumOptions.map((ofc) => (
                 <MenuItem key={ofc.officeNum} value={ofc.officeNum}>
                   <Checkbox
-                    checked={formik.values.localOffice.includes(ofc.officeNum)}
+                    checked={formik.values.officeNum.includes(ofc.officeNum)}
                   />
                   <ListItemText primary={ofc.officeName} />
                 </MenuItem>
               ))}
             </TextField>
           </Box>
+          {ErrorMessage("officeNum")}
 
           <Box display="flex" alignItems="center">
             <Checkbox
-              checked={checkboxStates.caseManagerCheckbox}
-              onChange={handleCheckboxChange("caseManager")}
+              checked={checkboxStates.caseManagerIdCheckbox}
+              onChange={handleCheckboxChange("caseManagerId")}
             />
             <TextField
-              id="caseManager"
-              name="caseManager"
+              id="caseManagerId"
+              name="caseManagerId"
               label="Case Manager"
-              value={formik.values.caseManager}
+              value={formik.values.caseManagerId}
               onChange={formik.handleChange}
               select
               fullWidth
@@ -167,15 +222,16 @@ function LookUpAppointments({ formik }) {
               sx={{
                 width: "80%",
               }}
-              disabled={!checkboxStates.caseManagerCheckbox}
+              disabled={!checkboxStates.caseManagerIdCheckbox}
             >
-              {dropdownOptions?.caseManagerOptions?.map((caseManager) => (
-                <MenuItem key={caseManager?.id} value={caseManager?.id}>
-                  {caseManager?.name}
+              {dropdownOptions?.caseManagerIdOptions?.map((cm) => (
+                <MenuItem key={cm?.id} value={cm?.id}>
+                  {cm?.name}
                 </MenuItem>
               ))}
             </TextField>
           </Box>
+          {ErrorMessage("caseManagerId")}
 
           <Box display="flex" alignItems="center">
             <Checkbox
@@ -184,71 +240,73 @@ function LookUpAppointments({ formik }) {
             />
             <Stack direction="row" spacing={1} sx={{ width: "80%" }}>
               <TextField
-                id="appointmentDateFrom"
-                name="appointmentDateFrom"
+                id="apptStartDt"
+                name="apptStartDt"
                 label="Appointment Date From"
                 type="date"
                 InputLabelProps={{ shrink: true }}
-                value={formik.values.appointmentDateFrom}
+                value={formik.values.apptStartDt}
                 onChange={formik.handleChange}
                 size="small"
                 fullWidth
                 disabled={!checkboxStates.appointmentDateCheckbox}
               />
               <TextField
-                id="appointmentDateTo"
-                name="appointmentDateTo"
+                id="apptEndDt"
+                name="apptEndDt"
                 label="Appointment Date To"
                 type="date"
                 InputLabelProps={{ shrink: true }}
-                value={formik.values.appointmentDateTo}
+                value={formik.values.apptEndDt}
                 onChange={formik.handleChange}
                 size="small"
                 fullWidth
                 inputProps={{
-                  min: formik.values.appointmentDateFrom,
+                  min: formik.values.apptStartDt,
                 }}
-                disabled={!checkboxStates.appointmentDateCheckbox}
+                disabled={!checkboxStates.appointmentDateCheckbox || !formik.values.apptStartDt}
               />
             </Stack>
           </Box>
+          {ErrorMessage("apptStartDt")}
 
           <Box display="flex" alignItems="center">
             <Checkbox
-              checked={checkboxStates.timeslotTypeCheckbox}
-              onChange={handleCheckboxChange("timeslotType")}
+              checked={checkboxStates.timeslotTypeCdCheckbox}
+              onChange={handleCheckboxChange("timeslotTypeCd")}
             />
             <TextField
-              id="timeslotType"
-              name="timeslotType"
+              id="timeslotTypeCd"
+              name="timeslotTypeCd"
               label="Timeslot Type"
-              value={formik.values.timeslotType}
+              value={formik.values.timeslotTypeCd}
               onChange={formik.handleChange}
               select
               size="small"
               sx={{
                 width: "80%",
               }}
-              disabled={!checkboxStates.timeslotTypeCheckbox}
+              disabled={!checkboxStates.timeslotTypeCdCheckbox}
             >
-              {dropdownOptions?.timeslotTypeOptions?.map((timeslotType) => (
-                <MenuItem key={timeslotType?.id} value={timeslotType?.id}>
-                  {timeslotType?.desc}
+              {dropdownOptions?.timeslotTypeCdOptions?.map((tst) => (
+                <MenuItem key={tst?.id} value={tst?.id}>
+                  {tst?.desc}
                 </MenuItem>
               ))}
             </TextField>
           </Box>
+          {ErrorMessage("timeslotTypeCd")}
 
           <Box display="flex" alignItems="center">
             <Checkbox
-              checked={checkboxStates.timeslotUsageCheckbox}
-              onChange={handleCheckboxChange("timeslotUsage")}
+              checked={checkboxStates.timeslotUsageCdCheckbox}
+              onChange={handleCheckboxChange("timeslotUsageCd")}
             />
             <TextField
-              id="timeslotUsage"
-              name="timeslotUsage"
+              id="timeslotUsageCd"
+              name="timeslotUsageCd"
               label="Timeslot Usage"
-              value={formik.values.timeslotUsage}
+              value={formik.values.timeslotUsageCd}
               onChange={formik.handleChange}
               select
               fullWidth
@@ -256,15 +314,16 @@ function LookUpAppointments({ formik }) {
               sx={{
                 width: "80%",
               }}
-              disabled={!checkboxStates.timeslotUsageCheckbox}
+              disabled={!checkboxStates.timeslotUsageCdCheckbox}
             >
-              {dropdownOptions?.timeslotUsageOptions?.map((timeslotUsage) => (
-                <MenuItem key={timeslotUsage?.id} value={timeslotUsage?.id}>
-                  {timeslotUsage?.desc}
+              {dropdownOptions?.timeslotUsageCdOptions?.map((tsu) => (
+                <MenuItem key={tsu?.id} value={tsu?.id}>
+                  {tsu?.desc}
                 </MenuItem>
               ))}
             </TextField>
           </Box>
+          {ErrorMessage("timeslotUsageCd")}
 
           <Box
             display="flex"
@@ -273,57 +332,61 @@ function LookUpAppointments({ formik }) {
             width="89.5%"
           >
             <Checkbox
-              checked={checkboxStates.meetingStatusCheckbox}
-              onChange={handleCheckboxChange("meetingStatus")}
+              checked={checkboxStates.meetingStatusCdCheckbox}
+              onChange={handleCheckboxChange("meetingStatusCd")}
             />
             <TextField
-              id="meetingStatus"
-              name="meetingStatus"
+              id="meetingStatusCd"
+              name="meetingStatusCd"
               label="Meeting Status"
-              value={formik.values.meetingStatus}
+              value={formik.values.meetingStatusCd}
               onChange={(e) =>
-                formik.setFieldValue("meetingStatus", e.target.value)
+                formik.setFieldValue("meetingStatusCd", e.target.value)
               }
               select
               fullWidth
               size="small"
-              disabled={!checkboxStates.meetingStatusCheckbox}
+              disabled={!checkboxStates.meetingStatusCdCheckbox}
               SelectProps={{
                 multiple: true,
                 renderValue: (selected) =>
                   selected
                     .map(
                       (id) =>
-                        dropdownOptions.meetingStatusOptions.find(
+                        dropdownOptions.meetingStatusCdOptions.find(
                           (m) => m.id === id
                         )?.desc
                     )
                     .join(", "),
               }}
             >
-              {dropdownOptions?.meetingStatusOptions?.map((meeting) => (
+              {dropdownOptions?.meetingStatusCdOptions?.map((meeting) => (
                 <MenuItem key={meeting.id} value={meeting.id}>
                   <Checkbox
-                    checked={formik.values.meetingStatus.includes(meeting.id)}
+                    checked={formik.values.meetingStatusCd.includes(meeting.id)}
                   />
                   <ListItemText primary={meeting.desc} />
                 </MenuItem>
               ))}
             </TextField>
           </Box>
+          {ErrorMessage("meetingStatusCd")}
 
           <Box display="flex" alignItems="center">
             <Checkbox
-              checked={formik.values.beyond21Days === "Y"}
+              checked={formik.values.beyond21DaysInd === "Y"}
               onChange={(event) => {
                 formik.setFieldValue(
-                  "beyond21Days",
+                  "beyond21DaysInd",
                   event.target.checked ? "Y" : "N"
                 );
+                setErrorMessages([]);
               }}
             />
             <Typography
-              sx={{ color: formik.values.beyond21Days === "Y" ? "black" : "gray" }}
+              sx={{
+                color: formik.values.beyond21DaysInd === "Y" ? "black" : "gray",
+              }}
             >
               Beyond 21 days
             </Typography>
@@ -331,15 +394,22 @@ function LookUpAppointments({ formik }) {
 
           <Box display="flex" alignItems="center">
             <Checkbox
-              checked={formik.values.hiPriority === "Y"}
+              checked={formik.values.hiPriorityInd === "Y"}
               onChange={(event) => {
                 formik.setFieldValue(
-                  "hiPriority",
+                  "hiPriorityInd",
                   event.target.checked ? "Y" : "N"
                 );
+                setErrorMessages([]);
               }}
             />
-            <Typography sx={{ color: formik.values.hiPriority === "Y" ? "black" : "gray" }}>HI Priority</Typography>
+            <Typography
+              sx={{
+                color: formik.values.hiPriorityInd === "Y" ? "black" : "gray",
+              }}
+            >
+              HI Priority
+            </Typography>
           </Box>
 
           <Box
@@ -387,6 +457,7 @@ function LookUpAppointments({ formik }) {
               ))}
             </TextField>
           </Box>
+          {ErrorMessage("scheduledBy")}
 
           <Box display="flex" alignItems="center">
             <Checkbox
@@ -407,6 +478,7 @@ function LookUpAppointments({ formik }) {
               disabled={!checkboxStates.claimantNameCheckbox}
             />
           </Box>
+          {ErrorMessage("claimantName")}
 
           <Box display="flex" alignItems="center">
             <Checkbox
@@ -436,6 +508,7 @@ function LookUpAppointments({ formik }) {
               disabled={!checkboxStates.ssnCheckbox}
             />
           </Box>
+          {ErrorMessage("ssn")}
 
           <Box display="flex" alignItems="center">
             <Checkbox
@@ -444,35 +517,35 @@ function LookUpAppointments({ formik }) {
             />
             <Stack direction="row" spacing={1} sx={{ width: "80%" }}>
               <TextField
-                id="byeFrom"
-                name="byeFrom"
+                id="clmByeStartDt"
+                name="clmByeStartDt"
                 label="BYE From"
                 type="date"
                 InputLabelProps={{ shrink: true }}
-                value={formik.values.byeFrom}
+                value={formik.values.clmByeStartDt}
                 onChange={formik.handleChange}
                 size="small"
                 fullWidth
                 disabled={!checkboxStates.byeDateCheckbox}
               />
               <TextField
-                id="byeTo"
-                name="byeTo"
+                id="clmByeEndDt"
+                name="clmByeEndDt"
                 label="BYE To"
                 type="date"
                 InputLabelProps={{ shrink: true }}
-                value={formik.values.byeTo}
+                value={formik.values.clmByeEndDt}
                 onChange={formik.handleChange}
                 size="small"
                 fullWidth
                 inputProps={{
-                  min: formik.values.byeFrom,
+                  min: formik.values.clmByeStartDt,
                 }}
-                disabled={!checkboxStates.byeDateCheckbox}
+                disabled={!checkboxStates.byeDateCheckbox || !formik.values.clmByeStartDt}
               />
             </Stack>
           </Box>
-
+          {ErrorMessage("clmByeStartDt")}
           <Button
             color="primary"
             variant="contained"

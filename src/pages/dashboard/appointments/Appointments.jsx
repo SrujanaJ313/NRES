@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Typography, Stack } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import LookUpAppointments from "./LookUpAppointments";
 import client from "../../../helpers/Api";
@@ -14,61 +14,76 @@ import { useSnackbar } from "../../../context/SnackbarContext";
 function Appointments() {
   const [errorMessages, setErrorMessages] = useState([]);
   const showSnackbar = useSnackbar();
+  const [checkboxStates, setCheckboxStates] = useState({
+    officeNumCheckbox: false,
+    caseManagerIdCheckbox: false,
+    appointmentDateCheckbox: false,
+    timeslotTypeCdCheckbox: false,
+    timeslotUsageCdCheckbox: false,
+    meetingStatusCdCheckbox: false,
+    scheduledByCheckbox: false,
+    claimantNameCheckbox: false,
+    ssnCheckbox: false,
+    byeDateCheckbox: false,
+  });
 
   const formik = useFormik({
     initialValues: {
-      localOffice: [],
-      caseManager: "",
-      appointmentDateFrom: "",
-      appointmentDateTo: "",
-      timeslotType: "",
-      timeslotUsage: "",
-      meetingStatus: [],
-      beyond21Days: "N",
-      hiPriority: "N",
+      officeNum: [],
+      caseManagerId: "",
+      apptStartDt: "",
+      apptEndDt: "",
+      timeslotTypeCd: "",
+      timeslotUsageCd: "",
+      meetingStatusCd: [],
+      beyond21DaysInd: "N",
+      hiPriorityInd: "N",
       scheduledBy: [],
       claimantName: "",
       ssn: "",
-      byeFrom: "",
-      byeTo: "",
+      clmByeStartDt: "",
+      clmByeEndDt: "",
     },
-    validationSchema: lookUpAppointmentsValidationSchema,
+    validationSchema: () => lookUpAppointmentsValidationSchema(checkboxStates),
     onSubmit: async (values) => {
+      const dateFields = [
+        "apptStartDt",
+        "apptEndDt",
+        "clmByeStartDt",
+        "clmByeEndDt",
+      ];
       try {
-        const payload = {
-          officeNum: values?.localOffice,
-          caseManagerId: values?.caseManager,
-          apptStartDt: values?.appointmentDateFrom
-            ? convertISOToMMDDYYYY(values?.appointmentDateFrom)
-            : null,
-          apptEndDt: values?.appointmentDateTo
-            ? convertISOToMMDDYYYY(values?.appointmentDateTo)
-            : null,
-          timeslotTypeCd: values?.timeslotType,
-          timeslotUsageCd: values?.timeslotUsage,
-          meetingStatusCd: values?.meetingStatus,
-          beyond21DaysInd: values?.beyond21Days,
-          hiPriorityInd: values?.hiPriority,
-          scheduledBy: values?.scheduledBy,
-          claimantName: values?.claimantName,
-          ssn: values?.ssn?.toString(),
-          clmByeStartDt: values?.byeFrom
-            ? convertISOToMMDDYYYY(values?.byeFrom)
-            : null,
-          clmByeEndDt: values?.byeTo
-            ? convertISOToMMDDYYYY(values?.byeTo)
-            : null,
-          pagination: {
-            pageNumber: 1,
-            pageSize: 10,
-            needTotalCount: true,
-          },
-          sortBy: {
-            field: "eventDateTime",
-            direction: "ASC",
-          },
+        let payload = {
+          // pagination: {
+          //   pageNumber: 1,
+          //   pageSize: 10,
+          //   needTotalCount: true,
+          // },
+          // sortBy: {
+          //   field: "eventDateTime",
+          //   direction: "ASC",
+          // },
         };
+        for (const key in values) {
+          if (
+            !values[key] ||
+            (Array.isArray(values[key]) && !values[key]?.length) ||
+            values[key] === "N"
+          ) {
+            continue;
+          } else if (dateFields.includes(key)) {
+            payload[key] = convertISOToMMDDYYYY(values[key]);
+          } else {
+            payload[key] = values[key];
+          }
+        }
+
+        if (!Object.keys(payload).length) {
+          setErrorMessages(["Atleast one field needs to be selected"]);
+          return;
+        }
         console.log("submited payload-->\n", payload);
+        return;
         await client.post(appointmentsLookUpSummaryURL, payload);
         showSnackbar("Request has been submitted successfully.", 5000);
       } catch (errorResponse) {
@@ -85,19 +100,14 @@ function Appointments() {
   return (
     <Box display="flex" height="100vh">
       {/* Left Panel */}
-      <LookUpAppointments formik={formik} />
-      <Stack
-        spacing={{ xs: 1, sm: 2 }}
-        direction="row"
-        useFlexGap
-        flexWrap="wrap"
-      >
-        {errorMessages.map((x) => (
-          <div>
-            <span className="errorMsg">*{x}</span>
-          </div>
-        ))}
-      </Stack>
+      <LookUpAppointments
+        formik={formik}
+        checkboxStates={checkboxStates}
+        errorMessages={errorMessages}
+        setCheckboxStates={setCheckboxStates}
+        setErrorMessages={setErrorMessages}
+      />
+
       {/* Right Panel */}
       <Box width="65%" bgcolor="#f1f3f8" p={2}>
         <Typography variant="h6" gutterBottom>
