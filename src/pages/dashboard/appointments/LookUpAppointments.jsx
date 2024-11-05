@@ -29,7 +29,7 @@ import {
 } from "../../../helpers/Urls";
 import { useSnackbar } from "../../../context/SnackbarContext";
 
-function LookUpAppointments() {
+function LookUpAppointments({setLookUpSummary}) {
   const [errorMessages, setErrorMessages] = useState([]);
   const showSnackbar = useSnackbar();
   const [checkboxStates, setCheckboxStates] = useState({
@@ -91,7 +91,8 @@ function LookUpAppointments() {
           return;
         }
         console.log("submited payload-->\n", payload);
-        await client.post(appointmentsLookUpSummaryURL, payload);
+        const result = await client.post(appointmentsLookUpSummaryURL, payload);
+        setLookUpSummary(result)
         showSnackbar("Request has been submitted successfully.", 5000);
       } catch (errorResponse) {
         console.log("errorResponse-->\n", errorResponse);
