@@ -10,6 +10,7 @@ import MeetingDetails from "../meetingDetails";
 import WorkSearch from "./WorkSearch";
 import IssuesCreatedData from "./IssuesCreatedData";
 import JobReferrals from "./JobReferrals";
+import Tooltip from "@mui/material/Tooltip";
 
 function CaseHeader({ caseDetails, event }) {
   return (
@@ -18,7 +19,9 @@ function CaseHeader({ caseDetails, event }) {
         <Stack direction="row" justifyContent="space-between" spacing={4}>
           <Stack direction={"row"} spacing={1}>
             <Typography className="label-text">Claimant:</Typography>
-            <Typography>{caseDetails.claimant}</Typography>
+            <Tooltip title={<>{caseDetails?.phone}<br />{caseDetails?.email}</>} arrow>
+              <Typography>{caseDetails.claimant}</Typography>
+            </Tooltip>
           </Stack>
           <Stack direction={"row"} spacing={1}>
             <Typography className="label-text">BYE:</Typography>
@@ -106,3 +109,4 @@ function CaseHeader({ caseDetails, event }) {
 }
 
 export default CaseHeader;
+
