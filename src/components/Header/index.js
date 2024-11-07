@@ -247,8 +247,8 @@ export default function Header() {
           <TreeItem itemId="cases" label="Cases">
             <TreeItem
               itemId="cases-dashboard"
-              label="Dashboard"
-              onClick={() => handleNavigation("cases-dashboard")}
+              label="CaseLookUp"
+              onClick={() => handleNavigation("caselookup")}
             />
             <TreeItem
               itemId="cases-reminders"

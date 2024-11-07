@@ -47,6 +47,11 @@ const appointmentsTimeUsageURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTME
 const appointmentsMeetingStatusURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENTS_MEETING_STATUS}`;
 const appointmentsLookUpSummaryURL = `${baseApiUrl}${process.env.REACT_APP_APPOINTMENTS_LOOK_UP_SUMMARY}`;
 
+const caseStatusURL = `${baseApiUrl}${process.env.REACT_APP_CASE_STATUS}`;
+const caseStageURL = `${baseApiUrl}${process.env.REACT_APP_CASE_STAGE}`;
+const caseTerminationReasonURL = `${baseApiUrl}${process.env.REACT_APP_CASE_TERMINATION_REASON}`;
+const caseLookUpSummaryURL = `${baseApiUrl}${process.env.REACT_APP_CASE_LOOK_UP_SUMMARY}`;
+
 export {
   baseApiUrl,
   validateJWTURL,
@@ -81,14 +86,16 @@ export {
   appointmentDetailsGetURL,
   returnToWorkEditModeURL,
   subnmiListURL,
-
-  
   appointmentsLocalOfficeURL,
   appointmentsCaseManagerURL,
   appointmentsScheduledByURL,
   appointmentsTimeSlotTypeURL,
   appointmentsTimeUsageURL,
   appointmentsMeetingStatusURL,
-  appointmentsLookUpSummaryURL
+  appointmentsLookUpSummaryURL,
+  caseStatusURL,
+  caseStageURL,
+  caseTerminationReasonURL,
+  caseLookUpSummaryURL,
 };
 

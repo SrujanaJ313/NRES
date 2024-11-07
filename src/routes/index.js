@@ -25,6 +25,7 @@ import Reminders from "../pages/reminders/Reminders";
 import WorkSchedule from "../pages/workschedule/WorkSchedule";
 import Preferences from "../pages/preferences/Preferences";
 import Appointments from "../pages/dashboard/appointments/Appointments";
+import CaseLookUp from "../pages/dashboard/cases/CaseLookUp";
 
 const PrivateRoute = () => {
   const [loading, setLoading] = useState(false);
@@ -112,6 +113,7 @@ function AppRoutes() {
           <Route element={<WorkSchedule />} path="/workSchedule" />
           <Route element={<Preferences />} path="/preferences" />
           <Route element={<Appointments />} path="/appointments-appointments" />
+          <Route element={<CaseLookUp />} path="/caselookup" />
         </Route>
 
         <Route element={<UnAuthorised />} path="/unAuthorised" />
