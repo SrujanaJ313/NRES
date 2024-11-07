@@ -114,7 +114,6 @@ function LookupCases({ setLookUpSummary }) {
           return;
         }
         console.log("submited payload-->\n", payload);
-        return;
         const result = await client.post(caseLookUpSummaryURL, payload);
         setLookUpSummary(result);
         showSnackbar("Request has been submitted successfully.", 5000);
@@ -145,10 +144,17 @@ function LookupCases({ setLookUpSummary }) {
     terminationReasonCheckbox: caseTerminationReasonURL,
   };
 
-  const resettableFields = ["appointmentDate", "byeDate"];
+  const resettableFields = [
+    "orientationDate",
+    "intialAppointmentDate",
+    "recentAppointmentDate",
+    "byeDate",
+  ];
 
   const ignoredFields = [
-    "appointmentDate",
+    "orientationDate",
+    "intialAppointmentDate",
+    "recentAppointmentDate",
     "waitlisted",
     "hiPriorityInd",
     "claimantName",
@@ -198,7 +204,7 @@ function LookupCases({ setLookUpSummary }) {
     }
   }
 
-  console.log('formik errors--->', formik.errors);
+  console.log("formik errors--->", formik.errors);
 
   const ErrorMessage = (fieldName) => {
     return (
