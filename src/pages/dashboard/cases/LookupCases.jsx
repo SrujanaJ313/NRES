@@ -83,6 +83,12 @@ function LookupCases({ setLookUpSummary }) {
         "clmByeStartDt",
         "clmByeEndDt",
       ];
+      const IntegerTypeFields = [
+        "rtwDaysMin",
+        "rtwDaysMax",
+        "caseScoreMin",
+        "caseScoreMax",
+      ];
       try {
         let payload = {
           pagination: {
@@ -104,12 +110,14 @@ function LookupCases({ setLookUpSummary }) {
             continue;
           } else if (dateFields.includes(key)) {
             payload[key] = convertISOToMMDDYYYY(values[key]);
+          } else if (IntegerTypeFields.includes(key)) {
+            payload[key] = Number(values[key]);
           } else {
             payload[key] = values[key];
           }
         }
 
-        if (!Object.keys(payload).length) {
+        if (Object.keys(payload).length === 2) {
           setErrorMessages(["Atleast one field needs to be selected"]);
           return;
         }
@@ -151,6 +159,8 @@ function LookupCases({ setLookUpSummary }) {
     "byeDate",
   ];
 
+  const rangeFields = ["caseScoreRange", "rtwDaysRange"];
+
   const ignoredFields = [
     "orientationDate",
     "intialAppointmentDate",
@@ -160,6 +170,8 @@ function LookupCases({ setLookUpSummary }) {
     "claimantName",
     "ssn",
     "byeDate",
+    "caseScoreRange",
+    "rtwDaysRange",
   ];
 
   const handleCheckboxChange = (field) => (event) => {
@@ -174,7 +186,9 @@ function LookupCases({ setLookUpSummary }) {
     if (!fieldValue) {
       if (resettableFields.includes(fieldName)) {
         const dateFieldMap = {
-          appointmentDate: ["apptStartDt", "apptEndDt"],
+          orientationDate: ["orientationStartDt", "orientationEndDt"],
+          intialAppointmentDate: ["initialApptStartDt", "initialApptEndDt"],
+          recentAppointmentDate: ["recentApptStartDt", "recentApptEndDt"],
           byeDate: ["clmByeStartDt", "clmByeEndDt"],
         };
 
@@ -183,6 +197,18 @@ function LookupCases({ setLookUpSummary }) {
         );
         return;
       }
+
+      if (rangeFields.includes(fieldName)) {
+        const rangeFieldsMap = {
+          rtwDaysRange: ["rtwDaysMin", "rtwDaysMax"],
+          caseScoreRange: ["caseScoreMin", "caseScoreMax"],
+        };
+        rangeFieldsMap[fieldName]?.forEach((rangeField) =>
+          formik.setFieldValue(rangeField, formik.initialValues[rangeField])
+        );
+        return;
+      }
+
       if (`${fieldName}Options` in dropdownOptions) {
         setDropdownOptions({ ...dropdownOptions, [`${fieldName}Options`]: [] });
       }
@@ -204,7 +230,7 @@ function LookupCases({ setLookUpSummary }) {
     }
   }
 
-  console.log("formik errors--->", formik.errors);
+  // console.log("formik errors--->", formik.errors);
 
   const ErrorMessage = (fieldName) => {
     return (
@@ -244,7 +270,7 @@ function LookupCases({ setLookUpSummary }) {
       </Typography>
 
       <form onSubmit={formik.handleSubmit}>
-        <Stack spacing={1}>
+        <Stack spacing={0.5}>
           <Box display="flex" justifyContent="center">
             {errorMessages.map((x) => (
               <div key={x}>
@@ -516,7 +542,7 @@ function LookupCases({ setLookUpSummary }) {
           </Box>
           {ErrorMessage("rtwDaysMax")}
 
-          <Box display="flex" alignItems="center">
+          {/* <Box display="flex" alignItems="center">
             <Checkbox
               checked={checkboxStates.caseScoreRange}
               onChange={handleCheckboxChange("caseScoreRange")}
@@ -568,8 +594,65 @@ function LookupCases({ setLookUpSummary }) {
                 disabled={!checkboxStates.caseScoreRangeCheckbox}
               />
             </Stack>
+          </Box> */}
+          <Box display="flex" alignItems="center">
+            <Checkbox
+              checked={checkboxStates.caseScoreRange}
+              onChange={handleCheckboxChange("caseScoreRange")}
+            />
+            <Stack direction="row" spacing={1} sx={{ width: "80%" }}>
+              <TextField
+                id="caseScoreMin"
+                name="caseScoreMin"
+                label="Score range From"
+                type="text"
+                value={formik.values.caseScoreMin}
+                onChange={(event) => {
+                  const newValue = event.target.value;
+                  // Allow empty input to clear the field
+                  if (
+                    newValue === "" ||
+                    /^(0(\.\d{0,10})?|1(\.0{0,10})?)$/.test(newValue)
+                  ) {
+                    formik.setFieldValue("caseScoreMin", newValue);
+                  }
+                }}
+                inputProps={{
+                  inputMode: "decimal",
+                }}
+                fullWidth
+                size="small"
+                sx={{ width: "80%" }}
+                disabled={!checkboxStates.caseScoreRangeCheckbox}
+              />
+
+              <TextField
+                id="caseScoreMax"
+                name="caseScoreMax"
+                label="Score range To"
+                type="text"
+                value={formik.values.caseScoreMax}
+                onChange={(event) => {
+                  const newValue = event.target.value;
+                  // Allow empty input to clear the field
+                  if (
+                    newValue === "" ||
+                    /^(0(\.\d{0,10})?|1(\.0{0,10})?)$/.test(newValue)
+                  ) {
+                    formik.setFieldValue("caseScoreMax", newValue);
+                  }
+                }}
+                inputProps={{
+                  inputMode: "decimal",
+                }}
+                fullWidth
+                size="small"
+                sx={{ width: "80%" }}
+                disabled={!checkboxStates.caseScoreRangeCheckbox}
+              />
+            </Stack>
           </Box>
-          {ErrorMessage("caseScoreMax")}
+          {ErrorMessage("caseScoreMin")}
 
           <Box display="flex" alignItems="center">
             <Checkbox

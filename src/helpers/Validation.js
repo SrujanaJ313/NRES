@@ -786,20 +786,25 @@ const caseLookUpValidationSchema = (checkboxStates) => {
     //           "RTW days To must be greater than or equal to RTW days From"
     //         ),
     //   }),
-    // caseScoreMin: yup.number().required("RTW days From is required"),
 
-    // caseScoreMax: yup
-    //   .number()
-    //   .when("caseScoreMin", {
-    //     is: (caseScoreMin) => caseScoreMin !== undefined,
-    //     then: () =>
-    //       yup
-    //         .number()
-    //         .min(
-    //           yup.ref("caseScoreMin"),
-    //           "Score Range To must be greater than or equal to Score From"
-    //         ),
-    //   }),
+    caseScoreMin: yup
+      .number()
+      .min(0, "Score must be between 0 and 1")
+      .max(1, "Score must be between 0 and 1")
+      .when("caseScoreMax", {
+        is: (caseScoreMax) => caseScoreMax !== undefined,
+        then: (schema) =>
+          schema.lessThan(
+            yup.ref("caseScoreMax"),
+            "Score range From must be less than Score range To"
+          ),
+        otherwise: (schema) => schema,
+      }),
+
+    caseScoreMax: yup
+      .number()
+      .min(0, "Score must be between 0 and 1")
+      .max(1, "Score must be between 0 and 1"),
 
     orientationStartDt: yup.string().when([], {
       is: () => checkboxStates.orientationDateCheckbox,
