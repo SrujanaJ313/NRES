@@ -30,6 +30,22 @@ import { useSnackbar } from "../../../context/SnackbarContext";
 
 function LookupCases({ setLookUpSummary }) {
   const [errorMessages, setErrorMessages] = useState([]);
+  const [openFields, setOpenFields] = useState({
+    officeNum: false,
+    caseStage: false,
+    caseStatus: false,
+    terminationReason: false,
+  });
+
+  // Handle opening the dropdown for a specific field
+  const handleOpen = (field) => {
+    setOpenFields((prev) => ({ ...prev, [field]: true }));
+  };
+
+  // Handle closing the dropdown for a specific field
+  const handleClose = (field) => {
+    setOpenFields((prev) => ({ ...prev, [field]: false }));
+  };
   const showSnackbar = useSnackbar();
   const [checkboxStates, setCheckboxStates] = useState({
     officeNumCheckbox: false,
@@ -230,7 +246,16 @@ function LookupCases({ setLookUpSummary }) {
     }
   }
 
-  // console.log("formik errors--->", formik.errors);
+  console.log("formik errors--->", formik.errors);
+  const handleMenuClose = () => {
+    // Logic to close the dropdown menu
+    setOpen(false);
+  };
+
+  const handleOkClick = () => {
+    // Close dropdown after clicking Ok (using the MenuProps)
+    handleMenuClose();
+  };
 
   const ErrorMessage = (fieldName) => {
     return (
@@ -302,6 +327,9 @@ function LookupCases({ setLookUpSummary }) {
               disabled={!checkboxStates.officeNumCheckbox}
               SelectProps={{
                 multiple: true,
+                open: openFields.officeNum,
+                onOpen: () => handleOpen("officeNum"),
+                onClose: () => handleClose("officeNum"),
                 renderValue: (selected) =>
                   selected
                     .map(
@@ -321,6 +349,20 @@ function LookupCases({ setLookUpSummary }) {
                   <ListItemText primary={ofc.officeName} />
                 </MenuItem>
               ))}
+              <div
+                style={{
+                  width: "95%",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Button
+                  variant="contained"
+                  onClick={() => handleClose("officeNum")}
+                >
+                  Ok
+                </Button>
+              </div>
             </TextField>
           </Box>
           {ErrorMessage("officeNum")}
@@ -377,6 +419,9 @@ function LookupCases({ setLookUpSummary }) {
               disabled={!checkboxStates.caseStageCheckbox}
               SelectProps={{
                 multiple: true,
+                open: openFields.caseStage,
+                onOpen: () => handleOpen("caseStage"),
+                onClose: () => handleClose("caseStage"),
                 renderValue: (selected) =>
                   selected
                     .map(
@@ -396,6 +441,20 @@ function LookupCases({ setLookUpSummary }) {
                   <ListItemText primary={cse.desc} />
                 </MenuItem>
               ))}
+              <div
+                style={{
+                  width: "95%",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Button
+                  variant="contained"
+                  onClick={() => handleClose("caseStage")}
+                >
+                  Ok
+                </Button>
+              </div>
             </TextField>
           </Box>
           {ErrorMessage("caseStage")}
@@ -424,6 +483,9 @@ function LookupCases({ setLookUpSummary }) {
               disabled={!checkboxStates.caseStatusCheckbox}
               SelectProps={{
                 multiple: true,
+                open: openFields.caseStatus,
+                onOpen: () => handleOpen("caseStatus"),
+                onClose: () => handleClose("caseStatus"),
                 renderValue: (selected) =>
                   selected
                     .map(
@@ -443,6 +505,17 @@ function LookupCases({ setLookUpSummary }) {
                   <ListItemText primary={cse.desc} />
                 </MenuItem>
               ))}
+              <div
+                style={{
+                  width: "95%",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Button variant="contained" onClick={() => handleClose("caseStatus")}>
+                  Ok
+                </Button>
+              </div>
             </TextField>
           </Box>
           {ErrorMessage("caseStatus")}
@@ -487,7 +560,7 @@ function LookupCases({ setLookUpSummary }) {
             </Typography>
           </Box>
 
-          <Box display="flex" alignItems="center">
+          {/* <Box display="flex" alignItems="center">
             <Checkbox
               checked={checkboxStates.rtwDaysRange}
               onChange={handleCheckboxChange("rtwDaysRange")}
@@ -539,62 +612,64 @@ function LookupCases({ setLookUpSummary }) {
                 disabled={!checkboxStates.rtwDaysRangeCheckbox}
               />
             </Stack>
-          </Box>
-          {ErrorMessage("rtwDaysMax")}
-
-          {/* <Box display="flex" alignItems="center">
+          </Box> */}
+          <Box display="flex" alignItems="center">
             <Checkbox
-              checked={checkboxStates.caseScoreRange}
-              onChange={handleCheckboxChange("caseScoreRange")}
+              checked={checkboxStates.rtwDaysRange}
+              onChange={handleCheckboxChange("rtwDaysRange")}
             />
             <Stack direction="row" spacing={1} sx={{ width: "80%" }}>
               <TextField
-                id="caseScoreMin"
-                name="caseScoreMin"
-                label="Score range From"
+                id="rtwDaysMin"
+                name="rtwDaysMin"
+                label="RTW days From"
                 type="text"
-                value={formik.values.caseScoreMin}
+                value={formik.values.rtwDaysMin}
                 onChange={(event) => {
-                  const newValue = event.target.value;
-                  if (/^\d*$/.test(newValue)) {
-                    formik.setFieldValue("caseScoreMin", newValue);
+                  let newValue = event.target.value;
+                  if (/^\d{1,3}$/.test(newValue) && parseInt(newValue) <= 365) {
+                    formik.setFieldValue("rtwDaysMin", newValue);
+                  } else if (newValue === "") {
+                    formik.setFieldValue("rtwDaysMin", "");
                   }
                 }}
                 inputProps={{
                   inputMode: "numeric",
-                  // maxLength: 1,
-                  // "aria-label": "SSN",
+                  maxLength: 3,
                 }}
                 fullWidth
                 size="small"
                 sx={{ width: "80%" }}
-                disabled={!checkboxStates.caseScoreRangeCheckbox}
+                disabled={!checkboxStates.rtwDaysRangeCheckbox}
               />
 
               <TextField
-                id="caseScoreMax"
-                name="caseScoreMax"
-                label="Score range To"
+                id="rtwDaysMax"
+                name="rtwDaysMax"
+                label="RTW days To"
                 type="text"
-                value={formik.values.caseScoreMax}
+                value={formik.values.rtwDaysMax}
                 onChange={(event) => {
-                  const newValue = event.target.value;
-                  if (/^\d*$/.test(newValue)) {
-                    formik.setFieldValue("caseScoreMax", newValue);
+                  let newValue = event.target.value;
+                  if (/^\d{1,3}$/.test(newValue) && parseInt(newValue) <= 365) {
+                    formik.setFieldValue("rtwDaysMax", newValue);
+                  } else if (newValue === "") {
+                    formik.setFieldValue("rtwDaysMax", "");
                   }
                 }}
                 inputProps={{
                   inputMode: "numeric",
-                  // maxLength: 1,
-                  // "aria-label": "SSN",
+                  maxLength: 3,
                 }}
                 fullWidth
                 size="small"
                 sx={{ width: "80%" }}
-                disabled={!checkboxStates.caseScoreRangeCheckbox}
+                disabled={!checkboxStates.rtwDaysRangeCheckbox}
               />
             </Stack>
-          </Box> */}
+          </Box>
+          {ErrorMessage("rtwDaysMax")}
+
           <Box display="flex" alignItems="center">
             <Checkbox
               checked={checkboxStates.caseScoreRange}
@@ -609,7 +684,6 @@ function LookupCases({ setLookUpSummary }) {
                 value={formik.values.caseScoreMin}
                 onChange={(event) => {
                   const newValue = event.target.value;
-                  // Allow empty input to clear the field
                   if (
                     newValue === "" ||
                     /^(0(\.\d{0,10})?|1(\.0{0,10})?)$/.test(newValue)
@@ -634,7 +708,6 @@ function LookupCases({ setLookUpSummary }) {
                 value={formik.values.caseScoreMax}
                 onChange={(event) => {
                   const newValue = event.target.value;
-                  // Allow empty input to clear the field
                   if (
                     newValue === "" ||
                     /^(0(\.\d{0,10})?|1(\.0{0,10})?)$/.test(newValue)
@@ -798,6 +871,9 @@ function LookupCases({ setLookUpSummary }) {
               disabled={!checkboxStates.terminationReasonCheckbox}
               SelectProps={{
                 multiple: true,
+                open: openFields.terminationReason,
+                onOpen: () => handleOpen("terminationReason"),
+                onClose: () => handleClose("terminationReason"),
                 renderValue: (selected) =>
                   selected
                     .map(
@@ -817,6 +893,17 @@ function LookupCases({ setLookUpSummary }) {
                   <ListItemText primary={tr.desc} />
                 </MenuItem>
               ))}
+              <div
+                style={{
+                  width: "95%",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Button variant="contained" onClick={() => handleClose("terminationReason")}>
+                  Ok
+                </Button>
+              </div>
             </TextField>
           </Box>
           {ErrorMessage("terminationReason")}
