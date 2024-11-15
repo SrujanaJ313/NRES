@@ -28,8 +28,9 @@ import {
   appointmentsMeetingStatusURL,
 } from "../../../helpers/Urls";
 import { useSnackbar } from "../../../context/SnackbarContext";
+import ExpandableTableRow from "./ExpandableTableRow";
 
-function LookUpAppointments({setLookUpSummary}) {
+function LookUpAppointments({ setLookUpSummary }) {
   const [errorMessages, setErrorMessages] = useState([]);
   const showSnackbar = useSnackbar();
   const [checkboxStates, setCheckboxStates] = useState({
@@ -92,7 +93,7 @@ function LookUpAppointments({setLookUpSummary}) {
         }
         console.log("submited payload-->\n", payload);
         const result = await client.post(appointmentsLookUpSummaryURL, payload);
-        setLookUpSummary(result)
+        setLookUpSummary(result);
         showSnackbar("Request has been submitted successfully.", 5000);
       } catch (errorResponse) {
         console.log("errorResponse-->\n", errorResponse);
@@ -222,17 +223,12 @@ function LookUpAppointments({setLookUpSummary}) {
               </div>
             ))}
           </Box>
-          <Box
-            display="flex"
-            marginTop="10px"
-            alignItems="center"
-            width="89.5%"
-          >
+          <Box display="flex" marginTop="10px" alignItems="center">
             <Checkbox
               checked={checkboxStates.officeNumCheckbox}
               onChange={handleCheckboxChange("officeNum")}
             />
-            <TextField
+            {/* <TextField
               id="officeNum"
               name="officeNum"
               label="Local Office"
@@ -265,7 +261,14 @@ function LookUpAppointments({setLookUpSummary}) {
                   <ListItemText primary={ofc.officeName} />
                 </MenuItem>
               ))}
-            </TextField>
+            </TextField> */}
+            <ExpandableTableRow
+              accordianLabelName={"Local Office"}
+              options={dropdownOptions.officeNumOptions}
+              isDisabled={!checkboxStates.officeNumCheckbox}
+              formik={formik}
+              fieldName={"officeNum"}
+            />
           </Box>
           {ErrorMessage("officeNum")}
 
@@ -396,13 +399,12 @@ function LookUpAppointments({setLookUpSummary}) {
             display="flex"
             marginTop="10px"
             alignItems="center"
-            width="89.5%"
           >
             <Checkbox
               checked={checkboxStates.meetingStatusCdCheckbox}
               onChange={handleCheckboxChange("meetingStatusCd")}
             />
-            <TextField
+            {/* <TextField
               id="meetingStatusCd"
               name="meetingStatusCd"
               label="Meeting Status"
@@ -435,7 +437,14 @@ function LookUpAppointments({setLookUpSummary}) {
                   <ListItemText primary={meeting.desc} />
                 </MenuItem>
               ))}
-            </TextField>
+            </TextField> */}
+              <ExpandableTableRow
+              accordianLabelName={"Meeting Status"}
+              options={dropdownOptions.meetingStatusCdOptions}
+              isDisabled={!checkboxStates.meetingStatusCdCheckbox}
+              formik={formik}
+              fieldName={"meetingStatusCd"}
+            />
           </Box>
           {ErrorMessage("meetingStatusCd")}
 
@@ -483,13 +492,12 @@ function LookUpAppointments({setLookUpSummary}) {
             display="flex"
             marginTop="10px"
             alignItems="center"
-            width="89.5%"
           >
             <Checkbox
               checked={checkboxStates.scheduledByCheckbox}
               onChange={handleCheckboxChange("scheduledBy")}
             />
-            <TextField
+            {/* <TextField
               id="scheduledBy"
               name="scheduledBy"
               label="Scheduled by"
@@ -522,7 +530,14 @@ function LookUpAppointments({setLookUpSummary}) {
                   <ListItemText primary={schedule.desc} />
                 </MenuItem>
               ))}
-            </TextField>
+            </TextField> */}
+             <ExpandableTableRow
+              accordianLabelName={"Scheduled by"}
+              options={dropdownOptions.scheduledByOptions}
+              isDisabled={!checkboxStates.scheduledByCheckbox}
+              formik={formik}
+              fieldName={"scheduledBy"}
+            />
           </Box>
           {ErrorMessage("scheduledBy")}
 
