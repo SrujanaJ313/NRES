@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   TextField,
@@ -7,7 +7,7 @@ import {
   Button,
   Typography,
   Stack,
-  ListItemText,
+  // ListItemText,
   FormHelperText,
 } from "@mui/material";
 import client from "../../../helpers/Api";
@@ -31,20 +31,71 @@ import { useSnackbar } from "../../../context/SnackbarContext";
 import ExpandableTableRow from "./ExpandableTableRow";
 
 function LookUpAppointments({ setLookUpSummary }) {
-  const [errorMessages, setErrorMessages] = useState([]);
   const showSnackbar = useSnackbar();
+  const [errorMessages, setErrorMessages] = useState([]);
   const [checkboxStates, setCheckboxStates] = useState({
-    officeNumCheckbox: false,
+    // officeNumCheckbox: false,
     caseManagerIdCheckbox: false,
     appointmentDateCheckbox: false,
     timeslotTypeCdCheckbox: false,
     timeslotUsageCdCheckbox: false,
-    meetingStatusCdCheckbox: false,
-    scheduledByCheckbox: false,
+    // meetingStatusCdCheckbox: false,
+    // scheduledByCheckbox: false,
     claimantNameCheckbox: false,
     ssnCheckbox: false,
     byeDateCheckbox: false,
   });
+  const [dropdownOptions, setDropdownOptions] = useState({
+    officeNumOptions: [],
+    caseManagerIdOptions: [],
+    timeslotTypeCdOptions: [],
+    timeslotUsageCdOptions: [],
+    meetingStatusCdOptions: [],
+    scheduledByOptions: [],
+  });
+  const fieldNameUrls = {
+    // officeNumCheckbox: appointmentsLocalOfficeURL,
+    caseManagerIdCheckbox: appointmentsCaseManagerURL,
+    timeslotTypeCdCheckbox: appointmentsTimeSlotTypeURL,
+    timeslotUsageCdCheckbox: appointmentsTimeUsageURL,
+    // meetingStatusCdCheckbox: appointmentsMeetingStatusURL,
+    // scheduledByCheckbox: appointmentsScheduledByURL,
+  };
+
+  const onLoadPageFields = {
+    officeNum: appointmentsLocalOfficeURL,
+    meetingStatusCd: appointmentsMeetingStatusURL,
+    scheduledBy: appointmentsScheduledByURL,
+  };
+
+  const resettableFields = ["appointmentDate", "byeDate"];
+
+  const ignoredFields = [
+    "appointmentDate",
+    "beyond21DaysInd",
+    "hiPriorityInd",
+    "claimantName",
+    "ssn",
+    "byeDate",
+  ];
+
+  useEffect(() => {
+    async function loadData(fieldName) {
+      try {
+        const data = await client.get(onLoadPageFields[fieldName]);
+        setDropdownOptions((prevOptions) => ({
+          ...prevOptions,
+          [`${fieldName}Options`]: data,
+        }));
+      } catch (errorResponse) {
+        console.error("Error in loadData for onLoadPage Fields", errorResponse);
+      }
+    }
+
+    Promise.all(
+      Object.keys(onLoadPageFields).map((fieldName) => loadData(fieldName))
+    );
+  }, []);
 
   const formik = useFormik({
     initialValues: {
@@ -92,6 +143,7 @@ function LookUpAppointments({ setLookUpSummary }) {
           return;
         }
         console.log("submited payload-->\n", payload);
+        return;
         const result = await client.post(appointmentsLookUpSummaryURL, payload);
         setLookUpSummary(result);
         showSnackbar("Request has been submitted successfully.", 5000);
@@ -105,35 +157,6 @@ function LookUpAppointments({ setLookUpSummary }) {
       }
     },
   });
-
-  const [dropdownOptions, setDropdownOptions] = useState({
-    officeNumOptions: [],
-    caseManagerIdOptions: [],
-    timeslotTypeCdOptions: [],
-    timeslotUsageCdOptions: [],
-    meetingStatusCdOptions: [],
-    scheduledByOptions: [],
-  });
-
-  const fieldNameUrls = {
-    officeNumCheckbox: appointmentsLocalOfficeURL,
-    caseManagerIdCheckbox: appointmentsCaseManagerURL,
-    timeslotTypeCdCheckbox: appointmentsTimeSlotTypeURL,
-    timeslotUsageCdCheckbox: appointmentsTimeUsageURL,
-    meetingStatusCdCheckbox: appointmentsMeetingStatusURL,
-    scheduledByCheckbox: appointmentsScheduledByURL,
-  };
-
-  const resettableFields = ["appointmentDate", "byeDate"];
-
-  const ignoredFields = [
-    "appointmentDate",
-    "beyond21DaysInd",
-    "hiPriorityInd",
-    "claimantName",
-    "ssn",
-    "byeDate",
-  ];
 
   const handleCheckboxChange = (field) => (event) => {
     handleCheckBoxData(field, event.target.checked);
@@ -188,7 +211,6 @@ function LookUpAppointments({ setLookUpSummary }) {
                 display: "flex",
                 justifyContent: "flex-start",
                 width: "60%",
-                // backgroundColor: "pink",
               }}
             >
               {formik.errors[fieldName]}
@@ -200,7 +222,16 @@ function LookUpAppointments({ setLookUpSummary }) {
   };
 
   return (
-    <Box width="35%" bgcolor="#FFFFFF" p={0} borderRight="2px solid #3b5998">
+    <Box
+      width="35%"
+      bgcolor="#FFFFFF"
+      p={0}
+      borderRight="2px solid #3b5998"
+      sx={{
+        height: "100%",
+        overflowY: "auto",
+      }}
+    >
       <Typography
         sx={{
           backgroundColor: "#183084",
@@ -223,51 +254,18 @@ function LookUpAppointments({ setLookUpSummary }) {
               </div>
             ))}
           </Box>
-          <Box display="flex" marginTop="10px" alignItems="center">
-            <Checkbox
-              checked={checkboxStates.officeNumCheckbox}
-              onChange={handleCheckboxChange("officeNum")}
-            />
-            {/* <TextField
-              id="officeNum"
-              name="officeNum"
-              label="Local Office"
-              value={formik.values.officeNum}
-              onChange={(e) =>
-                formik.setFieldValue("officeNum", e.target.value)
-              }
-              select
-              fullWidth
-              size="small"
-              disabled={!checkboxStates.officeNumCheckbox}
-              SelectProps={{
-                multiple: true,
-                renderValue: (selected) =>
-                  selected
-                    .map(
-                      (officeNum) =>
-                        dropdownOptions.officeNumOptions.find(
-                          (ofc) => ofc.officeNum === officeNum
-                        )?.officeName
-                    )
-                    .join(", "),
-              }}
-            >
-              {dropdownOptions.officeNumOptions.map((ofc) => (
-                <MenuItem key={ofc.officeNum} value={ofc.officeNum}>
-                  <Checkbox
-                    checked={formik.values.officeNum.includes(ofc.officeNum)}
-                  />
-                  <ListItemText primary={ofc.officeName} />
-                </MenuItem>
-              ))}
-            </TextField> */}
+          <Box
+            display="flex"
+            marginTop="10px"
+            alignItems="center"
+            justifyContent={"center"}
+          >
             <ExpandableTableRow
               accordianLabelName={"Local Office"}
               options={dropdownOptions.officeNumOptions}
-              isDisabled={!checkboxStates.officeNumCheckbox}
               formik={formik}
               fieldName={"officeNum"}
+              setErrorMessages={setErrorMessages}
             />
           </Box>
           {ErrorMessage("officeNum")}
@@ -399,51 +397,14 @@ function LookUpAppointments({ setLookUpSummary }) {
             display="flex"
             marginTop="10px"
             alignItems="center"
+            justifyContent={"center"}
           >
-            <Checkbox
-              checked={checkboxStates.meetingStatusCdCheckbox}
-              onChange={handleCheckboxChange("meetingStatusCd")}
-            />
-            {/* <TextField
-              id="meetingStatusCd"
-              name="meetingStatusCd"
-              label="Meeting Status"
-              value={formik.values.meetingStatusCd}
-              onChange={(e) =>
-                formik.setFieldValue("meetingStatusCd", e.target.value)
-              }
-              select
-              fullWidth
-              size="small"
-              disabled={!checkboxStates.meetingStatusCdCheckbox}
-              SelectProps={{
-                multiple: true,
-                renderValue: (selected) =>
-                  selected
-                    .map(
-                      (id) =>
-                        dropdownOptions.meetingStatusCdOptions.find(
-                          (m) => m.id === id
-                        )?.desc
-                    )
-                    .join(", "),
-              }}
-            >
-              {dropdownOptions?.meetingStatusCdOptions?.map((meeting) => (
-                <MenuItem key={meeting.id} value={meeting.id}>
-                  <Checkbox
-                    checked={formik.values.meetingStatusCd.includes(meeting.id)}
-                  />
-                  <ListItemText primary={meeting.desc} />
-                </MenuItem>
-              ))}
-            </TextField> */}
-              <ExpandableTableRow
+            <ExpandableTableRow
               accordianLabelName={"Meeting Status"}
               options={dropdownOptions.meetingStatusCdOptions}
-              isDisabled={!checkboxStates.meetingStatusCdCheckbox}
               formik={formik}
               fieldName={"meetingStatusCd"}
+              setErrorMessages={setErrorMessages}
             />
           </Box>
           {ErrorMessage("meetingStatusCd")}
@@ -492,51 +453,14 @@ function LookUpAppointments({ setLookUpSummary }) {
             display="flex"
             marginTop="10px"
             alignItems="center"
+            justifyContent={"center"}
           >
-            <Checkbox
-              checked={checkboxStates.scheduledByCheckbox}
-              onChange={handleCheckboxChange("scheduledBy")}
-            />
-            {/* <TextField
-              id="scheduledBy"
-              name="scheduledBy"
-              label="Scheduled by"
-              value={formik.values.scheduledBy}
-              onChange={(e) =>
-                formik.setFieldValue("scheduledBy", e.target.value)
-              }
-              select
-              fullWidth
-              size="small"
-              disabled={!checkboxStates.scheduledByCheckbox}
-              SelectProps={{
-                multiple: true,
-                renderValue: (selected) =>
-                  selected
-                    .map(
-                      (id) =>
-                        dropdownOptions.scheduledByOptions.find(
-                          (m) => m.id === id
-                        )?.desc
-                    )
-                    .join(", "),
-              }}
-            >
-              {dropdownOptions?.scheduledByOptions?.map((schedule) => (
-                <MenuItem key={schedule.id} value={schedule.id}>
-                  <Checkbox
-                    checked={formik.values.scheduledBy.includes(schedule.id)}
-                  />
-                  <ListItemText primary={schedule.desc} />
-                </MenuItem>
-              ))}
-            </TextField> */}
-             <ExpandableTableRow
+            <ExpandableTableRow
               accordianLabelName={"Scheduled by"}
               options={dropdownOptions.scheduledByOptions}
-              isDisabled={!checkboxStates.scheduledByCheckbox}
               formik={formik}
               fieldName={"scheduledBy"}
+              setErrorMessages={setErrorMessages}
             />
           </Box>
           {ErrorMessage("scheduledBy")}
@@ -631,14 +555,21 @@ function LookUpAppointments({ setLookUpSummary }) {
             </Stack>
           </Box>
           {ErrorMessage("clmByeStartDt")}
-          <Button
-            color="primary"
-            variant="contained"
-            type="submit"
-            sx={{ alignSelf: "center", width: "50%" }}
+          <Box
+            display={"flex"}
+            justifyContent={"flex-end"}
+            width={"88%"}
+            padding={"10px 0px"}
           >
-            Search
-          </Button>
+            <Button
+              color="primary"
+              variant="contained"
+              type="submit"
+              sx={{ alignSelf: "center", width: "30%" }}
+            >
+              Search
+            </Button>
+          </Box>
         </Stack>
       </form>
     </Box>

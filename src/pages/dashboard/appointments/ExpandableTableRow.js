@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -9,26 +9,21 @@ import { Checkbox, Typography } from "@mui/material";
 export default function ExpandableTableRow({
   accordianLabelName,
   options,
-  isDisabled,
   formik,
   fieldName,
+  setErrorMessages
 }) {
   const [expanded, setExpanded] = useState(false);
-  useEffect(() => {
-    if (isDisabled) {
-      setExpanded(false);
-    }
-  }, [isDisabled]);
+  
   const handleChange = () => {
     setExpanded(!expanded);
   };
   const modifiedOptions = mapToGenericKeys(options);
   return (
-    <div style={{ width: "80%" }}>
+    <div style={{ width: "80%", marginRight:"5%" }}>
       <Accordion
         expanded={expanded}
         onChange={handleChange}
-        disabled={isDisabled}
         sx={{ padding: "5px" }}
       >
         <AccordionSummary
@@ -60,6 +55,7 @@ export default function ExpandableTableRow({
                         option.id,
                       ]);
                     }
+                    setErrorMessages([]);
                   }}
                 />
                 <h3>{option.value}</h3>

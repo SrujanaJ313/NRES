@@ -696,10 +696,10 @@ const reAssignPageValidationSchema = yup.object({
 
 const lookUpAppointmentsValidationSchema = (checkboxStates) => {
   return yup.object().shape({
-    officeNum: yup.array().when([], {
-      is: () => checkboxStates.officeNumCheckbox,
-      then: () => yup.array().min(1, "Please select values for local office"),
-    }),
+    // officeNum: yup.array().when([], {
+    //   is: () => checkboxStates.officeNumCheckbox,
+    //   then: () => yup.array().min(1, "Please select values for local office"),
+    // }),
     caseManagerId: yup.string().when([], {
       is: () => checkboxStates.caseManagerIdCheckbox,
       then: () => yup.string().required("Please select value for case manager"),
@@ -720,16 +720,16 @@ const lookUpAppointmentsValidationSchema = (checkboxStates) => {
       then: () =>
         yup.string().required("Please select value for timeslot usage"),
     }),
-    meetingStatusCd: yup.array().when([], {
-      is: () => checkboxStates.meetingStatusCdCheckbox,
-      then: () => yup.array().min(1, "Please select values for meeting status"),
-    }),
+    // meetingStatusCd: yup.array().when([], {
+    //   is: () => checkboxStates.meetingStatusCdCheckbox,
+    //   then: () => yup.array().min(1, "Please select values for meeting status"),
+    // }),
     beyond21DaysInd: yup.string(),
     hiPriorityInd: yup.string(),
-    scheduledBy: yup.array().when([], {
-      is: () => checkboxStates.scheduledByCheckbox,
-      then: () => yup.array().min(1, "Please select values for scheduled by"),
-    }),
+    // scheduledBy: yup.array().when([], {
+    //   is: () => checkboxStates.scheduledByCheckbox,
+    //   then: () => yup.array().min(1, "Please select values for scheduled by"),
+    // }),
     claimantName: yup.string().when([], {
       is: () => checkboxStates.claimantNameCheckbox,
       then: () =>
@@ -770,22 +770,29 @@ const caseLookUpValidationSchema = (checkboxStates) => {
     waitlisted: yup.string(),
     hiPriorityInd: yup.string(),
 
-    // rtwDaysMin: yup
-    //   .number()
-    //   .required("RTW days From is required"),
-
-    // rtwDaysMax: yup
-    //   .number()
-    //   .when("rtwDaysMin", {
-    //     is: (rtwDaysMin) => rtwDaysMin !== undefined,
-    //     then: () =>
-    //       yup
-    //         .number()
-    //         .min(
-    //           yup.ref("rtwDaysMin"),
-    //           "RTW days To must be greater than or equal to RTW days From"
-    //         ),
-    //   }),
+  //   rtwDaysMin: yup
+  //   .number()
+  //   .min(0, "RTW days must be at least 0")
+  //   .max(365, "RTW days must be 365 or less")
+  //   .required("RTW days From is required")
+  //   .when("rtwDaysRangeCheckbox", {
+  //     is: (rtwDaysRangeCheckbox) => rtwDaysRangeCheckbox === true,
+  //     then: (schema) => schema.required("RTW days From is required"), // You can keep required here or add additional checks if needed
+  //     otherwise: (schema) => schema.notRequired(),
+  //   }),
+  
+  // rtwDaysMax: yup
+  //   .number()
+  //   .min(0, "RTW days must be at least 0")
+  //   .max(365, "RTW days must be 365 or less")
+  //   .when("rtwDaysRangeCheckbox", {
+  //     is: (rtwDaysRangeCheckbox) => rtwDaysRangeCheckbox === true,
+  //     then: (schema) =>
+  //       schema
+  //         .moreThan(yup.ref("rtwDaysMin"), "RTW days To must be greater than RTW days From")
+  //         .required("RTW days To is required"),
+  //     otherwise: (schema) => schema.notRequired(),
+  //   }),
 
     caseScoreMin: yup
       .number()
