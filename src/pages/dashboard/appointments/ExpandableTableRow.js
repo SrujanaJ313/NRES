@@ -58,7 +58,7 @@ export default function ExpandableTableRow({
                     setErrorMessages([]);
                   }}
                 />
-                <h3>{option.value}</h3>
+                <div style={{display:'flex', alignItems:'center', fontSize:'15px'}}>{option.value}</div>
               </div>
             );
           })}
