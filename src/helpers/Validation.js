@@ -694,59 +694,59 @@ const reAssignPageValidationSchema = yup.object({
     .required("Look Up Case Manager Availability is required"),
 });
 
-const lookUpAppointmentsValidationSchema = (checkboxStates) => {
-  return yup.object().shape({
-    // officeNum: yup.array().when([], {
-    //   is: () => checkboxStates.officeNumCheckbox,
-    //   then: () => yup.array().min(1, "Please select values for local office"),
-    // }),
-    caseManagerId: yup.string().when([], {
-      is: () => checkboxStates.caseManagerIdCheckbox,
-      then: () => yup.string().required("Please select value for case manager"),
-    }),
-    apptStartDt: yup.string().when([], {
-      is: () => checkboxStates.appointmentDateCheckbox,
-      then: () =>
-        yup.string().required("Please select date for appointment start date"),
-    }),
-    apptEndDt: yup.string(),
-    timeslotTypeCd: yup.string().when([], {
-      is: () => checkboxStates.timeslotTypeCdCheckbox,
-      then: () =>
-        yup.string().required("Please select value for timeslot type"),
-    }),
-    timeslotUsageCd: yup.string().when([], {
-      is: () => checkboxStates.timeslotUsageCdCheckbox,
-      then: () =>
-        yup.string().required("Please select value for timeslot usage"),
-    }),
-    // meetingStatusCd: yup.array().when([], {
-    //   is: () => checkboxStates.meetingStatusCdCheckbox,
-    //   then: () => yup.array().min(1, "Please select values for meeting status"),
-    // }),
-    beyond21DaysInd: yup.string(),
-    hiPriorityInd: yup.string(),
-    // scheduledBy: yup.array().when([], {
-    //   is: () => checkboxStates.scheduledByCheckbox,
-    //   then: () => yup.array().min(1, "Please select values for scheduled by"),
-    // }),
-    claimantName: yup.string().when([], {
-      is: () => checkboxStates.claimantNameCheckbox,
-      then: () =>
-        yup.string().required("Please select value for claimant name"),
-    }),
-    ssn: yup.string().when([], {
-      is: () => checkboxStates.ssnCheckbox,
-      then: () => yup.string().required("Please select value for ssn"),
-    }),
-    clmByeStartDt: yup.string().when([], {
-      is: () => checkboxStates.byeDateCheckbox,
-      then: () =>
-        yup.string().required("Please select date for BYE start date"),
-    }),
-    clmByeEndDt: yup.string(),
-  });
-};
+// const lookUpAppointmentsValidationSchema = (checkboxStates) => {
+//   return yup.object().shape({
+//     // officeNum: yup.array().when([], {
+//     //   is: () => checkboxStates.officeNumCheckbox,
+//     //   then: () => yup.array().min(1, "Please select values for local office"),
+//     // }),
+//     caseManagerId: yup.string().when([], {
+//       is: () => checkboxStates.caseManagerIdCheckbox,
+//       then: () => yup.string().required("Please select value for case manager"),
+//     }),
+//     apptStartDt: yup.string().when([], {
+//       is: () => checkboxStates.appointmentDateCheckbox,
+//       then: () =>
+//         yup.string().required("Please select date for appointment start date"),
+//     }),
+//     apptEndDt: yup.string(),
+//     timeslotTypeCd: yup.string().when([], {
+//       is: () => checkboxStates.timeslotTypeCdCheckbox,
+//       then: () =>
+//         yup.string().required("Please select value for timeslot type"),
+//     }),
+//     timeslotUsageCd: yup.string().when([], {
+//       is: () => checkboxStates.timeslotUsageCdCheckbox,
+//       then: () =>
+//         yup.string().required("Please select value for timeslot usage"),
+//     }),
+//     // meetingStatusCd: yup.array().when([], {
+//     //   is: () => checkboxStates.meetingStatusCdCheckbox,
+//     //   then: () => yup.array().min(1, "Please select values for meeting status"),
+//     // }),
+//     // beyond21DaysInd: yup.string(),
+//     // hiPriorityInd: yup.string(),
+//     // scheduledBy: yup.array().when([], {
+//     //   is: () => checkboxStates.scheduledByCheckbox,
+//     //   then: () => yup.array().min(1, "Please select values for scheduled by"),
+//     // }),
+//   //   claimantName: yup.string().when([], {
+//   //     is: () => checkboxStates.claimantNameCheckbox,
+//   //     then: () =>
+//   //       yup.string().required("Please select value for claimant name"),
+//   //   }),
+//   //   ssn: yup.string().when([], {
+//   //     is: () => checkboxStates.ssnCheckbox,
+//   //     then: () => yup.string().required("Please select value for ssn"),
+//   //   }),
+//   //   clmByeStartDt: yup.string().when([], {
+//   //     is: () => checkboxStates.byeDateCheckbox,
+//   //     then: () =>
+//   //       yup.string().required("Please select date for BYE start date"),
+//   //   }),
+//   //   clmByeEndDt: yup.string(),
+//   // });
+// };
 
 const caseLookUpValidationSchema = (checkboxStates) => {
   return yup.object().shape({
@@ -866,7 +866,7 @@ export {
   switchValidationSchema,
   availableEventSchema,
   reAssignPageValidationSchema,
-  lookUpAppointmentsValidationSchema,
+  // lookUpAppointmentsValidationSchema,
   caseLookUpValidationSchema,
 };
 

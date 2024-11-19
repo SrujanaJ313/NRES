@@ -19,18 +19,19 @@ export default function ExpandableTableRow({
     setExpanded(!expanded);
   };
   const modifiedOptions = mapToGenericKeys(options);
+
   return (
-    <div style={{ width: "80%", marginRight:"5%" }}>
+    <div style={{ width: "90%"}}>
       <Accordion
         expanded={expanded}
         onChange={handleChange}
-        sx={{ padding: "5px" }}
+        sx={{ padding: "1px" }}
       >
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls={`${accordianLabelName}-content`}
           id={`${accordianLabelName}-header`}
-          sx={{ marginLeft: "2px" }}
+          sx={{ marginLeft: "7px" }}
         >
           <Typography sx={{ fontSize: "14px" }}>
             {accordianLabelName}

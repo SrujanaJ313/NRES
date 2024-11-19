@@ -111,3 +111,11 @@ export const mapToGenericKeys = (array) => {
   });
 };
 
+export const genericSortOptionsAlphabetically = (data, property) => {
+  return data.sort((a, b) => {
+    const valueA = a[property]?.toString().toLowerCase() || "";
+    const valueB = b[property]?.toString().toLowerCase() || "";
+    return valueA.localeCompare(valueB);
+  });
+};
+
