@@ -171,27 +171,28 @@ function LookUpAppointments({ setLookUpSummary }) {
 
   return (
     <Box width="35%" bgcolor="#FFFFFF" borderRight="2px solid #3b5998">
-      <Typography
-        sx={{
-          backgroundColor: "#183084",
-          color: "#FFFFFF",
-          padding: "10px",
-          marginTop: "10px",
-        }}
-        variant="h6"
-        gutterBottom
-      >
-        Lookup Appointments
-      </Typography>
-
       <form onSubmit={formik.handleSubmit}>
         <Stack
-          spacing={1.2}
+          spacing={1}
           sx={{
             height: "80vh",
             overflowY: "auto",
           }}
         >
+          <Box display="flex" justifyContent="center">
+            <Typography
+              sx={{
+                color: "#183084",
+                marginTop: "10px",
+                fontWeight: "bold",
+                width: "90%",
+              }}
+              variant="h6"
+              gutterBottom
+            >
+              Lookup Appointments
+            </Typography>
+          </Box>
           <Box display="flex" justifyContent="center">
             {errorMessages.map((x) => (
               <div key={x}>
@@ -206,7 +207,7 @@ function LookUpAppointments({ setLookUpSummary }) {
             justifyContent="center"
           >
             <ExpandableTableRow
-              accordianLabelName={"Local Office"}
+              labelName={"Local Office"}
               options={dropdownOptions.officeNumOptions}
               formik={formik}
               fieldName={"officeNum"}
@@ -229,6 +230,7 @@ function LookUpAppointments({ setLookUpSummary }) {
                 width: "90%",
                 "& .MuiInputLabel-root": {
                   color: "#183084",
+                  fontWeight: "bold",
                 },
               }}
             >
@@ -253,10 +255,10 @@ function LookUpAppointments({ setLookUpSummary }) {
                 onChange={onHandleChange}
                 size="small"
                 fullWidth
-                
                 sx={{
                   "& .MuiInputLabel-root": {
                     color: "#183084",
+                    fontWeight: "bold",
                   },
                 }}
               />
@@ -297,6 +299,7 @@ function LookUpAppointments({ setLookUpSummary }) {
                 width: "90%",
                 "& .MuiInputLabel-root": {
                   color: "#183084",
+                  fontWeight: "bold",
                 },
               }}
             >
@@ -323,6 +326,7 @@ function LookUpAppointments({ setLookUpSummary }) {
                 width: "90%",
                 "& .MuiInputLabel-root": {
                   color: "#183084",
+                  fontWeight: "bold",
                 },
               }}
             >
@@ -337,7 +341,7 @@ function LookUpAppointments({ setLookUpSummary }) {
 
           <Box display="flex" alignItems="center" justifyContent={"center"}>
             <ExpandableTableRow
-              accordianLabelName={"Meeting Status"}
+              labelName={"Meeting Status"}
               options={dropdownOptions.meetingStatusCdOptions}
               formik={formik}
               fieldName={"meetingStatusCd"}
@@ -346,9 +350,13 @@ function LookUpAppointments({ setLookUpSummary }) {
           </Box>
           {/* {ErrorMessage("meetingStatusCd")} */}
 
-          <Box display="flex" justifyContent="flex-start" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="flex-start"
+            alignItems="center"
+          >
             <Checkbox
-              sx={{ marginLeft: "10px" }}
+              sx={{ marginLeft: "10px", padding:"0 0 0 11px"}}
               checked={formik.values.beyond21DaysInd === "Y"}
               onChange={(event) => {
                 formik.setFieldValue(
@@ -358,12 +366,18 @@ function LookUpAppointments({ setLookUpSummary }) {
                 setErrorMessages([]);
               }}
             />
-            <Typography sx={{ color: "#183084" }}>Beyond 21 days</Typography>
+            <Typography sx={{ color: "#183084", fontWeight: "bold", paddingLeft:"5px" }}>
+              Beyond 21 days
+            </Typography>
           </Box>
 
-          <Box display="flex" justifyContent="flex-start" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="flex-start"
+            alignItems="center"
+          >
             <Checkbox
-              sx={{ marginLeft: "10px" }}
+              sx={{ marginLeft: "10px",padding:"0 0 0 11px" }}
               checked={formik.values.hiPriorityInd === "Y"}
               onChange={(event) => {
                 formik.setFieldValue(
@@ -373,12 +387,14 @@ function LookUpAppointments({ setLookUpSummary }) {
                 setErrorMessages([]);
               }}
             />
-            <Typography sx={{ color: "#183084" }}>HI Priority</Typography>
+            <Typography sx={{ color: "#183084", fontWeight: "bold", paddingLeft:"5px"  }}>
+              HI Priority
+            </Typography>
           </Box>
 
           <Box display="flex" alignItems="center" justifyContent={"center"}>
             <ExpandableTableRow
-              accordianLabelName={"Scheduled by"}
+              labelName={"Scheduled by"}
               options={dropdownOptions.scheduledByOptions}
               formik={formik}
               fieldName={"scheduledBy"}
@@ -400,6 +416,7 @@ function LookUpAppointments({ setLookUpSummary }) {
                 width: "90%",
                 "& .MuiInputLabel-root": {
                   color: "#183084",
+                  fontWeight: "bold",
                 },
               }}
             />
@@ -430,6 +447,7 @@ function LookUpAppointments({ setLookUpSummary }) {
                 width: "90%",
                 "& .MuiInputLabel-root": {
                   color: "#183084",
+                  fontWeight: "bold",
                 },
               }}
             />
@@ -451,6 +469,7 @@ function LookUpAppointments({ setLookUpSummary }) {
                 sx={{
                   "& .MuiInputLabel-root": {
                     color: "#183084",
+                    fontWeight: "bold",
                   },
                 }}
               />
