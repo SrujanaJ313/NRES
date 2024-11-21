@@ -12,7 +12,7 @@ import {
 import client from "../../../helpers/Api";
 import { useFormik } from "formik";
 import { appointmentsLookUpSummaryURL } from "../../../helpers/Urls";
-// import { lookUpAppointmentsValidationSchema } from "../../../helpers/Validation";
+import { lookUpAppointmentsValidationSchema } from "../../../helpers/Validation";
 import {
   convertISOToMMDDYYYY,
   getMsgsFromErrorCode,
@@ -81,15 +81,15 @@ function LookUpAppointments({ setLookUpSummary }) {
       Object.keys(onLoadPageFields).map((fieldName) => loadData(fieldName))
     );
   }, []);
-
+  
   const formik = useFormik({
     initialValues: {
       officeNum: [],
-      caseManagerId: "",
+      caseManagerId: [],
       apptStartDt: "",
       apptEndDt: "",
-      timeslotTypeCd: "",
-      timeslotUsageCd: "",
+      timeslotTypeCd: [],
+      timeslotUsageCd: [],
       meetingStatusCd: [],
       beyond21DaysInd: "N",
       hiPriorityInd: "N",
@@ -99,7 +99,7 @@ function LookUpAppointments({ setLookUpSummary }) {
       clmByeStartDt: "",
       clmByeEndDt: "",
     },
-    // validationSchema: () => lookUpAppointmentsValidationSchema(checkboxStates),
+    validationSchema: () => lookUpAppointmentsValidationSchema(formik),
     onSubmit: async (values) => {
       const dateFields = [
         "apptStartDt",
@@ -141,28 +141,33 @@ function LookUpAppointments({ setLookUpSummary }) {
         setErrorMessages(newErrMsgs);
       }
     },
+    validateOnChange: true,
+    validateOnBlur: true
   });
 
-  // const ErrorMessage = (fieldName) => {
-  //   return (
-  //     <>
-  //       {formik.touched[fieldName] && formik.errors[fieldName] && (
-  //         <span style={{ marginLeft: "10%" }}>
-  //           <FormHelperText
-  //             sx={{
-  //               color: "red",
-  //               display: "flex",
-  //               justifyContent: "flex-start",
-  //               width: "60%",
-  //             }}
-  //           >
-  //             {formik.errors[fieldName]}
-  //           </FormHelperText>
-  //         </span>
-  //       )}
-  //     </>
-  //   );
-  // };
+  // console.log(`formik.errors-->`, formik.errors);
+
+  const ErrorMessage = (fieldName) => {
+    console.log('Error Message-->', formik.errors[fieldName]);
+    return (
+      <>
+        {formik.touched[fieldName] && formik.errors[fieldName] && (
+          <span style={{ marginLeft: "10%" }}>
+            <FormHelperText
+              sx={{
+                color: "red",
+                display: "flex",
+                justifyContent: "flex-start",
+                width: "60%",
+              }}
+            >
+              {formik.errors[fieldName]}
+            </FormHelperText>
+          </span>
+        )}
+      </>
+    );
+  };
 
   const onHandleChange = (e) => {
     formik.handleChange(e);
@@ -175,8 +180,21 @@ function LookUpAppointments({ setLookUpSummary }) {
         <Stack
           spacing={1}
           sx={{
-            height: "80vh",
+            height: "85vh",
             overflowY: "auto",
+            "&::-webkit-scrollbar": {
+              width: "5px", // Decrease scrollbar width
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#888", // Style scrollbar thumb
+              borderRadius: "10px", // Add rounded edges
+            },
+            "&::-webkit-scrollbar-thumb:hover": {
+              backgroundColor: "#555", // Style thumb on hover
+            },
+            "&::-webkit-scrollbar-track": {
+              backgroundColor: "#f1f1f1", // Style scrollbar track
+            },
           }}
         >
           <Box display="flex" justifyContent="center">
@@ -215,9 +233,8 @@ function LookUpAppointments({ setLookUpSummary }) {
             />
           </Box>
           {/* {ErrorMessage("officeNum")} */}
-
           <Box display="flex" justifyContent="center">
-            <TextField
+            {/* <TextField
               id="caseManagerId"
               name="caseManagerId"
               label="Case Manager"
@@ -239,10 +256,16 @@ function LookUpAppointments({ setLookUpSummary }) {
                   {cm?.name}
                 </MenuItem>
               ))}
-            </TextField>
+            </TextField> */}
+            <ExpandableTableRow
+              labelName={"Case Manager"}
+              options={dropdownOptions.caseManagerIdOptions}
+              formik={formik}
+              fieldName={"caseManagerId"}
+              setErrorMessages={setErrorMessages}
+            />
           </Box>
           {/* {ErrorMessage("caseManagerId")} */}
-
           <Box display="flex" justifyContent="center">
             <Stack direction="row" spacing={1} sx={{ width: "90%" }}>
               <TextField
@@ -284,10 +307,9 @@ function LookUpAppointments({ setLookUpSummary }) {
               />
             </Stack>
           </Box>
-          {/* {ErrorMessage("apptStartDt")} */}
-
+          {ErrorMessage("apptEndDt")}
           <Box display="flex" justifyContent="center">
-            <TextField
+            {/* <TextField
               id="timeslotTypeCd"
               name="timeslotTypeCd"
               label="Timeslot Type"
@@ -308,12 +330,18 @@ function LookUpAppointments({ setLookUpSummary }) {
                   {tst?.desc}
                 </MenuItem>
               ))}
-            </TextField>
+            </TextField> */}
+            <ExpandableTableRow
+              labelName={"Timeslot Type"}
+              options={dropdownOptions.timeslotTypeCdOptions}
+              formik={formik}
+              fieldName={"timeslotTypeCd"}
+              setErrorMessages={setErrorMessages}
+            />
           </Box>
           {/* {ErrorMessage("timeslotTypeCd")} */}
-
           <Box display="flex" justifyContent="center">
-            <TextField
+            {/* <TextField
               id="timeslotUsageCd"
               name="timeslotUsageCd"
               label="Timeslot Usage"
@@ -335,10 +363,16 @@ function LookUpAppointments({ setLookUpSummary }) {
                   {tsu?.desc}
                 </MenuItem>
               ))}
-            </TextField>
+            </TextField> */}
+            <ExpandableTableRow
+              labelName={"Timeslot Usage"}
+              options={dropdownOptions.timeslotUsageCdOptions}
+              formik={formik}
+              fieldName={"timeslotUsageCd"}
+              setErrorMessages={setErrorMessages}
+            />
           </Box>
           {/* {ErrorMessage("timeslotUsageCd")} */}
-
           <Box display="flex" alignItems="center" justifyContent={"center"}>
             <ExpandableTableRow
               labelName={"Meeting Status"}
@@ -349,14 +383,9 @@ function LookUpAppointments({ setLookUpSummary }) {
             />
           </Box>
           {/* {ErrorMessage("meetingStatusCd")} */}
-
-          <Box
-            display="flex"
-            justifyContent="flex-start"
-            alignItems="center"
-          >
+          <Box display="flex" justifyContent="flex-start" alignItems="center">
             <Checkbox
-              sx={{ marginLeft: "10px", padding:"0 0 0 11px"}}
+              sx={{ marginLeft: "10px", padding: "0 0 0 11px" }}
               checked={formik.values.beyond21DaysInd === "Y"}
               onChange={(event) => {
                 formik.setFieldValue(
@@ -366,18 +395,15 @@ function LookUpAppointments({ setLookUpSummary }) {
                 setErrorMessages([]);
               }}
             />
-            <Typography sx={{ color: "#183084", fontWeight: "bold", paddingLeft:"5px" }}>
+            <Typography
+              sx={{ color: "#183084", fontWeight: "bold", paddingLeft: "5px" }}
+            >
               Beyond 21 days
             </Typography>
           </Box>
-
-          <Box
-            display="flex"
-            justifyContent="flex-start"
-            alignItems="center"
-          >
+          <Box display="flex" justifyContent="flex-start" alignItems="center">
             <Checkbox
-              sx={{ marginLeft: "10px",padding:"0 0 0 11px" }}
+              sx={{ marginLeft: "10px", padding: "0 0 0 11px" }}
               checked={formik.values.hiPriorityInd === "Y"}
               onChange={(event) => {
                 formik.setFieldValue(
@@ -387,11 +413,12 @@ function LookUpAppointments({ setLookUpSummary }) {
                 setErrorMessages([]);
               }}
             />
-            <Typography sx={{ color: "#183084", fontWeight: "bold", paddingLeft:"5px"  }}>
+            <Typography
+              sx={{ color: "#183084", fontWeight: "bold", paddingLeft: "5px" }}
+            >
               HI Priority
             </Typography>
           </Box>
-
           <Box display="flex" alignItems="center" justifyContent={"center"}>
             <ExpandableTableRow
               labelName={"Scheduled by"}
@@ -402,7 +429,6 @@ function LookUpAppointments({ setLookUpSummary }) {
             />
           </Box>
           {/* {ErrorMessage("scheduledBy")} */}
-
           <Box display="flex" justifyContent="center">
             <TextField
               id="claimantName"
@@ -422,7 +448,6 @@ function LookUpAppointments({ setLookUpSummary }) {
             />
           </Box>
           {/* {ErrorMessage("claimantName")} */}
-
           <Box display="flex" justifyContent="center">
             <TextField
               id="ssn"
@@ -435,6 +460,7 @@ function LookUpAppointments({ setLookUpSummary }) {
                 if (newValue.length <= 4 && /^\d*$/.test(newValue)) {
                   formik.setFieldValue("ssn", newValue);
                 }
+                setErrorMessages([])
               }}
               inputProps={{
                 inputMode: "numeric",
@@ -452,8 +478,7 @@ function LookUpAppointments({ setLookUpSummary }) {
               }}
             />
           </Box>
-          {/* {ErrorMessage("ssn")} */}
-
+          {ErrorMessage("ssn")}
           <Box display="flex" justifyContent="center">
             <Stack direction="row" spacing={1} sx={{ width: "90%" }}>
               <TextField
@@ -495,13 +520,14 @@ function LookUpAppointments({ setLookUpSummary }) {
               />
             </Stack>
           </Box>
-          {/* {ErrorMessage("clmByeStartDt")} */}
+          {ErrorMessage("clmByeEndDt")}
         </Stack>
         <Box
           display={"flex"}
           justifyContent={"flex-end"}
           width={"88%"}
           padding={"10px 0px"}
+          marginTop={"20px"}
         >
           <Button
             color="primary"

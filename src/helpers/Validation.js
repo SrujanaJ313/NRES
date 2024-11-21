@@ -694,59 +694,62 @@ const reAssignPageValidationSchema = yup.object({
     .required("Look Up Case Manager Availability is required"),
 });
 
-// const lookUpAppointmentsValidationSchema = (checkboxStates) => {
-//   return yup.object().shape({
-//     // officeNum: yup.array().when([], {
-//     //   is: () => checkboxStates.officeNumCheckbox,
-//     //   then: () => yup.array().min(1, "Please select values for local office"),
-//     // }),
-//     caseManagerId: yup.string().when([], {
-//       is: () => checkboxStates.caseManagerIdCheckbox,
-//       then: () => yup.string().required("Please select value for case manager"),
-//     }),
-//     apptStartDt: yup.string().when([], {
-//       is: () => checkboxStates.appointmentDateCheckbox,
-//       then: () =>
-//         yup.string().required("Please select date for appointment start date"),
-//     }),
-//     apptEndDt: yup.string(),
-//     timeslotTypeCd: yup.string().when([], {
-//       is: () => checkboxStates.timeslotTypeCdCheckbox,
-//       then: () =>
-//         yup.string().required("Please select value for timeslot type"),
-//     }),
-//     timeslotUsageCd: yup.string().when([], {
-//       is: () => checkboxStates.timeslotUsageCdCheckbox,
-//       then: () =>
-//         yup.string().required("Please select value for timeslot usage"),
-//     }),
-//     // meetingStatusCd: yup.array().when([], {
-//     //   is: () => checkboxStates.meetingStatusCdCheckbox,
-//     //   then: () => yup.array().min(1, "Please select values for meeting status"),
-//     // }),
-//     // beyond21DaysInd: yup.string(),
-//     // hiPriorityInd: yup.string(),
-//     // scheduledBy: yup.array().when([], {
-//     //   is: () => checkboxStates.scheduledByCheckbox,
-//     //   then: () => yup.array().min(1, "Please select values for scheduled by"),
-//     // }),
-//   //   claimantName: yup.string().when([], {
-//   //     is: () => checkboxStates.claimantNameCheckbox,
-//   //     then: () =>
-//   //       yup.string().required("Please select value for claimant name"),
-//   //   }),
-//   //   ssn: yup.string().when([], {
-//   //     is: () => checkboxStates.ssnCheckbox,
-//   //     then: () => yup.string().required("Please select value for ssn"),
-//   //   }),
-//   //   clmByeStartDt: yup.string().when([], {
-//   //     is: () => checkboxStates.byeDateCheckbox,
-//   //     then: () =>
-//   //       yup.string().required("Please select date for BYE start date"),
-//   //   }),
-//   //   clmByeEndDt: yup.string(),
-//   // });
-// };
+const lookUpAppointmentsValidationSchema = (formik) => {
+  return yup.object().shape({
+    // officeNum: yup.array().when([], {
+    //   is: () => checkboxStates.officeNumCheckbox,
+    //   then: () => yup.array().min(1, "Please select values for local office"),
+    // }),
+    // caseManagerId: yup.string().when([], {
+    //   is: () => checkboxStates.caseManagerIdCheckbox,
+    //   then: () => yup.string().required("Please select value for case manager"),
+    // }),
+    apptStartDt: yup.string(),
+    apptEndDt: yup.string().when(["apptStartDt"], {
+      is: (apptStartDt) => apptStartDt,
+      then: () =>
+        yup.string().required("Appointment Date to is required"),
+    }),
+    // timeslotTypeCd: yup.string().when([], {
+    //   is: () => checkboxStates.timeslotTypeCdCheckbox,
+    //   then: () =>
+    //     yup.string().required("Please select value for timeslot type"),
+    // }),
+    // timeslotUsageCd: yup.string().when([], {
+    //   is: () => checkboxStates.timeslotUsageCdCheckbox,
+    //   then: () =>
+    //     yup.string().required("Please select value for timeslot usage"),
+    // }),
+    // meetingStatusCd: yup.array().when([], {
+    //   is: () => checkboxStates.meetingStatusCdCheckbox,
+    //   then: () => yup.array().min(1, "Please select values for meeting status"),
+    // }),
+    // beyond21DaysInd: yup.string(),
+    // hiPriorityInd: yup.string(),
+    // scheduledBy: yup.array().when([], {
+    //   is: () => checkboxStates.scheduledByCheckbox,
+    //   then: () => yup.array().min(1, "Please select values for scheduled by"),
+    // }),
+    //   claimantName: yup.string().when([], {
+    //     is: () => checkboxStates.claimantNameCheckbox,
+    //     then: () =>
+    //       yup.string().required("Please select value for claimant name"),
+    //   }),
+    ssn: yup
+    .string()
+    .test(
+      "len",
+      "SSN must be exactly 4 digits",
+      (value) => !value || value.length === 4
+    ),
+      clmByeStartDt: yup.string(),
+      clmByeEndDt: yup.string().when(["clmByeStartDt"], {
+        is: (clmByeStartDt) => clmByeStartDt,
+        then: () =>
+          yup.string().required("Claimant Date to is required"),
+      }),
+  });
+};
 
 const caseLookUpValidationSchema = (checkboxStates) => {
   return yup.object().shape({
@@ -770,29 +773,29 @@ const caseLookUpValidationSchema = (checkboxStates) => {
     waitlisted: yup.string(),
     hiPriorityInd: yup.string(),
 
-  //   rtwDaysMin: yup
-  //   .number()
-  //   .min(0, "RTW days must be at least 0")
-  //   .max(365, "RTW days must be 365 or less")
-  //   .required("RTW days From is required")
-  //   .when("rtwDaysRangeCheckbox", {
-  //     is: (rtwDaysRangeCheckbox) => rtwDaysRangeCheckbox === true,
-  //     then: (schema) => schema.required("RTW days From is required"), // You can keep required here or add additional checks if needed
-  //     otherwise: (schema) => schema.notRequired(),
-  //   }),
-  
-  // rtwDaysMax: yup
-  //   .number()
-  //   .min(0, "RTW days must be at least 0")
-  //   .max(365, "RTW days must be 365 or less")
-  //   .when("rtwDaysRangeCheckbox", {
-  //     is: (rtwDaysRangeCheckbox) => rtwDaysRangeCheckbox === true,
-  //     then: (schema) =>
-  //       schema
-  //         .moreThan(yup.ref("rtwDaysMin"), "RTW days To must be greater than RTW days From")
-  //         .required("RTW days To is required"),
-  //     otherwise: (schema) => schema.notRequired(),
-  //   }),
+    //   rtwDaysMin: yup
+    //   .number()
+    //   .min(0, "RTW days must be at least 0")
+    //   .max(365, "RTW days must be 365 or less")
+    //   .required("RTW days From is required")
+    //   .when("rtwDaysRangeCheckbox", {
+    //     is: (rtwDaysRangeCheckbox) => rtwDaysRangeCheckbox === true,
+    //     then: (schema) => schema.required("RTW days From is required"), // You can keep required here or add additional checks if needed
+    //     otherwise: (schema) => schema.notRequired(),
+    //   }),
+
+    // rtwDaysMax: yup
+    //   .number()
+    //   .min(0, "RTW days must be at least 0")
+    //   .max(365, "RTW days must be 365 or less")
+    //   .when("rtwDaysRangeCheckbox", {
+    //     is: (rtwDaysRangeCheckbox) => rtwDaysRangeCheckbox === true,
+    //     then: (schema) =>
+    //       schema
+    //         .moreThan(yup.ref("rtwDaysMin"), "RTW days To must be greater than RTW days From")
+    //         .required("RTW days To is required"),
+    //     otherwise: (schema) => schema.notRequired(),
+    //   }),
 
     caseScoreMin: yup
       .number()
@@ -866,7 +869,7 @@ export {
   switchValidationSchema,
   availableEventSchema,
   reAssignPageValidationSchema,
-  // lookUpAppointmentsValidationSchema,
+  lookUpAppointmentsValidationSchema,
   caseLookUpValidationSchema,
 };
 
