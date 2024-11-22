@@ -67,7 +67,10 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
       try {
         const { url, propertyName } = onLoadPageFields[fieldName];
         const data = await client.get(url);
-        const sortedData = genericSortOptionsAlphabetically(data, propertyName);
+        const sortedData =
+          fieldName === "timeslotUsageCd"
+            ? data
+            : genericSortOptionsAlphabetically(data, propertyName);
         setDropdownOptions((prevOptions) => ({
           ...prevOptions,
           [`${fieldName}Options`]: sortedData,
@@ -154,13 +157,19 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
     return (
       <>
         {formik.touched[fieldName] && formik.errors[fieldName] && (
-          <span style={{ marginLeft: "10%" }}>
+          <span
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginRight: "5px",
+            }}
+          >
             <FormHelperText
               sx={{
                 color: "red",
-                display: "flex",
-                justifyContent: "flex-start",
-                width: "60%",
+                // display: "flex",
+                // justifyContent: "flex-start",
+                // width: "60%",
               }}
             >
               {formik.errors[fieldName]}
@@ -183,7 +192,11 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
       borderRight="2px solid #3b5998"
       height="100%"
     >
-      <form onSubmit={formik.handleSubmit} style={{ height: "100%" }}>
+      <form
+        onSubmit={formik.handleSubmit}
+        onReset={formik.handleReset}
+        style={{ height: "100%" }}
+      >
         <Stack
           spacing={1}
           sx={{
@@ -476,24 +489,43 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
           </Box>
           {ErrorMessage("clmByeEndDt")}
         </Stack>
-        <Box
-          display={"flex"}
-          justifyContent={"flex-end"}
-          width={"88%"}
-          padding={"10px 0px"}
-        >
-          <Button
-            color="primary"
-            variant="contained"
-            type="submit"
-            sx={{ alignSelf: "center", width: "15%" }}
+        <Stack display={"flex"} flexDirection={"row-reverse"}>
+          <Box
+            display={"flex"}
+            justifyContent={"center"}
+            width={"50%"}
+            padding={"10px 0px"}
           >
-            Search
-          </Button>
-        </Box>
+            <Button
+              color="primary"
+              variant="contained"
+              type="submit"
+              sx={{ alignSelf: "center", width: "15%" }}
+            >
+              Search
+            </Button>
+          </Box>
+
+          <Box
+            display={"flex"}
+            justifyContent={"flex-end"}
+            width={"50%"}
+            padding={"10px 0px"}
+          >
+            <Button
+              color="primary"
+              variant="contained"
+              sx={{ alignSelf: "center", width: "15%" }}
+              type="reset"
+            >
+              Clear
+            </Button>
+          </Box>
+        </Stack>
       </form>
     </Box>
   );
 }
 
 export default LookUpAppointments;
+

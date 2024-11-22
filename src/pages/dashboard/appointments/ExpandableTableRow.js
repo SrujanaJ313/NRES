@@ -17,9 +17,9 @@ export default function ExpandableTableRow({
   fieldName,
   setErrorMessages,
 }) {
-  const [selectedValues, setSelectedValues] = useState(
-    formik.values?.[fieldName] || []
-  );
+  // const [selectedValues, setSelectedValues] = useState(
+  //   formik.values?.[fieldName] || []
+  // );
   const modifiedOptions = mapToGenericKeys(options);
 
   const handleChange = (event) => {
@@ -29,7 +29,7 @@ export default function ExpandableTableRow({
 
     // Convert to array and update states
     const newValues = typeof value === "string" ? value.split(",") : value;
-    setSelectedValues(newValues);
+    // setSelectedValues(newValues);
     formik.setFieldValue(fieldName, newValues);
     setErrorMessages([]); // Clear errors when value changes
   };
@@ -62,7 +62,7 @@ export default function ExpandableTableRow({
           labelId={`${fieldName}-label`}
           id={`${fieldName}-select`}
           multiple
-          value={selectedValues}
+          value={formik.values[fieldName]}
           onChange={handleChange}
           input={<OutlinedInput id={`${fieldName}-input`} label={labelName} />}
           renderValue={(selected) => (
@@ -80,7 +80,8 @@ export default function ExpandableTableRow({
               })}
             </Box>
           )}
-          sx={{ height: !selectedValues.length ? "35px" : "100%" }}
+          // sx={{ height: !selectedValues.length ? "35px" : "100%" }}
+          sx={{ height: !formik.values?.[fieldName].length ? "35px" : "100%" }}
         >
           {modifiedOptions.map((option) => (
             <MenuItem key={option.id} value={option.id}>
