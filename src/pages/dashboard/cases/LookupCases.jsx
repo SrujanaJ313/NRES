@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   TextField,
@@ -16,6 +16,7 @@ import { caseLookUpValidationSchema } from "../../../helpers/Validation";
 import {
   convertISOToMMDDYYYY,
   getMsgsFromErrorCode,
+  genericSortOptionsAlphabetically
 } from "../../../helpers/utils";
 
 import {
@@ -27,46 +28,22 @@ import {
   caseLookUpSummaryURL,
 } from "../../../helpers/Urls";
 import { useSnackbar } from "../../../context/SnackbarContext";
+import ExpandableTableRow from "../appointments/ExpandableTableRow";
 
 function LookupCases({ setLookUpSummary }) {
   const [errorMessages, setErrorMessages] = useState([]);
-  const [openFields, setOpenFields] = useState({
-    officeNum: false,
-    caseStage: false,
-    caseStatus: false,
-    terminationReason: false,
-  });
 
-  // Handle opening the dropdown for a specific field
-  const handleOpen = (field) => {
-    setOpenFields((prev) => ({ ...prev, [field]: true }));
-  };
-
-  // Handle closing the dropdown for a specific field
-  const handleClose = (field) => {
-    setOpenFields((prev) => ({ ...prev, [field]: false }));
-  };
   const showSnackbar = useSnackbar();
-  const [checkboxStates, setCheckboxStates] = useState({
-    officeNumCheckbox: false,
-    caseManagerIdCheckbox: false,
-    caseStageCheckbox: false,
-    caseStatusCheckbox: false,
-    rtwDaysRangeCheckbox: false,
-    caseScoreRangeCheckbox: false,
-    orientationDateCheckbox: false,
-    intialAppointmentDateCheckbox: false,
-    recentAppointmentDateCheckbox: false,
-    terminationReasonCheckbox: false,
-    claimantNameCheckbox: false,
-    ssnCheckbox: false,
-    byeDateCheckbox: false,
-  });
+
+  const onHandleChange = (e) => {
+    formik.handleChange(e);
+    setErrorMessages([]);
+  };
 
   const formik = useFormik({
     initialValues: {
       officeNum: [],
-      caseManagerId: "",
+      caseManagerId: [],
       caseStage: [],
       caseStatus: [],
       waitlisted: "N",
@@ -87,7 +64,7 @@ function LookupCases({ setLookUpSummary }) {
       clmByeStartDt: "",
       clmByeEndDt: "",
     },
-    validationSchema: () => caseLookUpValidationSchema(checkboxStates),
+    validationSchema: () => caseLookUpValidationSchema(),
     onSubmit: async (values) => {
       const dateFields = [
         "orientationStartDt",
@@ -134,7 +111,7 @@ function LookupCases({ setLookUpSummary }) {
         }
 
         if (Object.keys(payload).length === 2) {
-          setErrorMessages(["Atleast one field needs to be selected"]);
+          setErrorMessages(["At least one field needs to be selected"]);
           return;
         }
         console.log("submited payload-->\n", payload);
@@ -150,6 +127,8 @@ function LookupCases({ setLookUpSummary }) {
         setErrorMessages(newErrMsgs);
       }
     },
+    validateOnChange: false,
+    validateOnBlur: false,
   });
 
   const [dropdownOptions, setDropdownOptions] = useState({
@@ -160,115 +139,63 @@ function LookupCases({ setLookUpSummary }) {
     terminationReasonOptions: [],
   });
 
-  const fieldNameUrls = {
-    officeNumCheckbox: appointmentsLocalOfficeURL,
-    caseManagerIdCheckbox: appointmentsCaseManagerURL,
-    caseStageCheckbox: caseStageURL,
-    caseStatusCheckbox: caseStatusURL,
-    terminationReasonCheckbox: caseTerminationReasonURL,
+  const onLoadPageFields = {
+    officeNum: { url: appointmentsLocalOfficeURL, propertyName: "officeName" },
+    caseManagerId: {
+      url: appointmentsCaseManagerURL,
+      propertyName: "name",
+    },
+    caseStage: {
+      url: caseStageURL,
+      propertyName: "desc",
+    },
+    caseStatus: {
+      url: caseStatusURL,
+      propertyName: "desc",
+    },
+    terminationReason: {
+      url: caseTerminationReasonURL,
+      propertyName: "desc",
+    },
   };
 
-  const resettableFields = [
-    "orientationDate",
-    "intialAppointmentDate",
-    "recentAppointmentDate",
-    "byeDate",
-  ];
-
-  const rangeFields = ["caseScoreRange", "rtwDaysRange"];
-
-  const ignoredFields = [
-    "orientationDate",
-    "intialAppointmentDate",
-    "recentAppointmentDate",
-    "waitlisted",
-    "hiPriorityInd",
-    "claimantName",
-    "ssn",
-    "byeDate",
-    "caseScoreRange",
-    "rtwDaysRange",
-  ];
-
-  const handleCheckboxChange = (field) => (event) => {
-    handleCheckBoxData(field, event.target.checked);
-    setCheckboxStates({
-      ...checkboxStates,
-      [`${field}Checkbox`]: event.target.checked,
-    });
-  };
-
-  async function handleCheckBoxData(fieldName, fieldValue) {
-    if (!fieldValue) {
-      if (resettableFields.includes(fieldName)) {
-        const dateFieldMap = {
-          orientationDate: ["orientationStartDt", "orientationEndDt"],
-          intialAppointmentDate: ["initialApptStartDt", "initialApptEndDt"],
-          recentAppointmentDate: ["recentApptStartDt", "recentApptEndDt"],
-          byeDate: ["clmByeStartDt", "clmByeEndDt"],
-        };
-
-        dateFieldMap[fieldName]?.forEach((dateField) =>
-          formik.setFieldValue(dateField, formik.initialValues[dateField])
-        );
-        return;
+  useEffect(() => {
+    async function loadData(fieldName) {
+      try {
+        const { url, propertyName } = onLoadPageFields[fieldName];
+        const data = await client.get(url);
+        const sortedData =
+          fieldName === "caseStage"
+            ? data
+            : genericSortOptionsAlphabetically(data, propertyName);
+        setDropdownOptions((prevOptions) => ({
+          ...prevOptions,
+          [`${fieldName}Options`]: sortedData,
+        }));
+      } catch (errorResponse) {
+        console.error("Error in loadData for onLoadPage Fields", errorResponse);
       }
-
-      if (rangeFields.includes(fieldName)) {
-        const rangeFieldsMap = {
-          rtwDaysRange: ["rtwDaysMin", "rtwDaysMax"],
-          caseScoreRange: ["caseScoreMin", "caseScoreMax"],
-        };
-        rangeFieldsMap[fieldName]?.forEach((rangeField) =>
-          formik.setFieldValue(rangeField, formik.initialValues[rangeField])
-        );
-        return;
-      }
-
-      if (`${fieldName}Options` in dropdownOptions) {
-        setDropdownOptions({ ...dropdownOptions, [`${fieldName}Options`]: [] });
-      }
-
-      formik.setFieldValue(fieldName, formik.initialValues[fieldName]);
-      formik.setFieldTouched(fieldName, false);
-      return;
     }
 
-    setErrorMessages([]);
-    if (ignoredFields.includes(fieldName)) {
-      return;
-    }
-    try {
-      const data = await client.get(fieldNameUrls[`${fieldName}Checkbox`]);
-      setDropdownOptions({ ...dropdownOptions, [`${fieldName}Options`]: data });
-    } catch (errorResponse) {
-      console.error("Error in handleCheckBoxData", errorResponse);
-    }
-  }
+    Promise.all(
+      Object.keys(onLoadPageFields).map((fieldName) => loadData(fieldName))
+    );
+  }, []);
+
 
   console.log("formik errors--->", formik.errors);
-  const handleMenuClose = () => {
-    // Logic to close the dropdown menu
-    setOpen(false);
-  };
 
-  const handleOkClick = () => {
-    // Close dropdown after clicking Ok (using the MenuProps)
-    handleMenuClose();
-  };
+  // console.log('Touched state:', formik.touched);
 
-  const ErrorMessage = (fieldName) => {
+
+  const ErrorMessage = (fieldName, styleProps) => {
     return (
       <>
         {formik.touched[fieldName] && formik.errors[fieldName] && (
-          <span style={{ marginLeft: "10%", marginTop: "0" }}>
+          <span style={styleProps}>
             <FormHelperText
               sx={{
                 color: "red",
-                display: "flex",
-                justifyContent: "flex-start",
-                width: "60%",
-                // backgroundColor: "pink",
               }}
             >
               {formik.errors[fieldName]}
@@ -281,21 +208,45 @@ function LookupCases({ setLookUpSummary }) {
 
   return (
     <Box width="35%" bgcolor="#FFFFFF" p={0} borderRight="2px solid #3b5998">
-      <Typography
-        sx={{
-          backgroundColor: "#183084",
-          color: "#FFFFFF",
-          padding: "10px",
-          marginTop: "10px",
-        }}
-        variant="h6"
-        gutterBottom
+      <form
+        onSubmit={formik.handleSubmit}
+        onReset={formik.handleReset}
+        style={{ height: "100%" }}
       >
-        Lookup Cases
-      </Typography>
+        <Stack
+          spacing={0.8}
+          sx={{
+            height: "calc(100% - 3.2rem)",
+            overflowY: "auto",
+            "&::-webkit-scrollbar": {
+              width: "5px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#888",
+              borderRadius: "10px",
+            },
+            "&::-webkit-scrollbar-thumb:hover": {
+              backgroundColor: "#555",
+            },
+            "&::-webkit-scrollbar-track": {
+              backgroundColor: "#f1f1f1",
+            },
+          }}
+        >
+          <Typography
+            sx={{
+              color: "#183084",
+              marginLeft: "0",
+              fontWeight: "bold",
+              width: "94%",
+              paddingLeft:'15px'
+            }}
+            variant="h6"
+            gutterBottom
+          >
+            Lookup Cases
+          </Typography>
 
-      <form onSubmit={formik.handleSubmit}>
-        <Stack spacing={0.5}>
           <Box display="flex" justifyContent="center">
             {errorMessages.map((x) => (
               <div key={x}>
@@ -303,225 +254,50 @@ function LookupCases({ setLookUpSummary }) {
               </div>
             ))}
           </Box>
-          <Box
-            display="flex"
-            marginTop="10px"
-            alignItems="center"
-            width="87.5%"
-          >
-            <Checkbox
-              checked={checkboxStates.officeNumCheckbox}
-              onChange={handleCheckboxChange("officeNum")}
-            />
-            <TextField
-              id="officeNum"
-              name="officeNum"
-              label="Local Office"
-              value={formik.values.officeNum}
-              onChange={(e) =>
-                formik.setFieldValue("officeNum", e.target.value)
-              }
-              select
-              fullWidth
-              size="small"
-              disabled={!checkboxStates.officeNumCheckbox}
-              SelectProps={{
-                multiple: true,
-                open: openFields.officeNum,
-                onOpen: () => handleOpen("officeNum"),
-                onClose: () => handleClose("officeNum"),
-                renderValue: (selected) =>
-                  selected
-                    .map(
-                      (officeNum) =>
-                        dropdownOptions.officeNumOptions.find(
-                          (ofc) => ofc.officeNum === officeNum
-                        )?.officeName
-                    )
-                    .join(", "),
-              }}
-            >
-              {dropdownOptions.officeNumOptions.map((ofc) => (
-                <MenuItem key={ofc.officeNum} value={ofc.officeNum}>
-                  <Checkbox
-                    checked={formik.values.officeNum.includes(ofc.officeNum)}
-                  />
-                  <ListItemText primary={ofc.officeName} />
-                </MenuItem>
-              ))}
-              <div
-                style={{
-                  width: "95%",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Button
-                  variant="contained"
-                  onClick={() => handleClose("officeNum")}
-                >
-                  Ok
-                </Button>
-              </div>
-            </TextField>
-          </Box>
-          {ErrorMessage("officeNum")}
 
-          <Box display="flex" alignItems="center">
-            <Checkbox
-              checked={checkboxStates.caseManagerIdCheckbox}
-              onChange={handleCheckboxChange("caseManagerId")}
+          <Box display="flex" justifyContent="center">
+            <ExpandableTableRow
+              labelName={"Local Office"}
+              options={dropdownOptions.officeNumOptions}
+              formik={formik}
+              fieldName={"officeNum"}
+              setErrorMessages={setErrorMessages}
             />
-            <TextField
-              id="caseManagerId"
-              name="caseManagerId"
-              label="Case Manager"
-              value={formik.values.caseManagerId}
-              onChange={formik.handleChange}
-              select
-              fullWidth
-              size="small"
-              sx={{
-                width: "80%",
-              }}
-              disabled={!checkboxStates.caseManagerIdCheckbox}
-            >
-              {dropdownOptions?.caseManagerIdOptions?.map((cm) => (
-                <MenuItem key={cm?.id} value={cm?.id}>
-                  {cm?.name}
-                </MenuItem>
-              ))}
-            </TextField>
           </Box>
-          {ErrorMessage("caseManagerId")}
 
-          <Box
-            display="flex"
-            marginTop="10px"
-            alignItems="center"
-            width="87.5%"
-          >
-            <Checkbox
-              checked={checkboxStates.caseStageCheckbox}
-              onChange={handleCheckboxChange("caseStage")}
+          <Box display="flex" justifyContent="center">
+            <ExpandableTableRow
+              labelName={"Case Manager"}
+              options={dropdownOptions.caseManagerIdOptions}
+              formik={formik}
+              fieldName={"caseManagerId"}
+              setErrorMessages={setErrorMessages}
             />
-            <TextField
-              id="caseStage"
-              name="caseStage"
-              label="Stage"
-              value={formik.values.caseStage}
-              onChange={(e) =>
-                formik.setFieldValue("caseStage", e.target.value)
-              }
-              select
-              fullWidth
-              size="small"
-              disabled={!checkboxStates.caseStageCheckbox}
-              SelectProps={{
-                multiple: true,
-                open: openFields.caseStage,
-                onOpen: () => handleOpen("caseStage"),
-                onClose: () => handleClose("caseStage"),
-                renderValue: (selected) =>
-                  selected
-                    .map(
-                      (caseStageId) =>
-                        dropdownOptions.caseStageOptions.find(
-                          (cse) => cse.id === caseStageId
-                        )?.desc
-                    )
-                    .join(", "),
-              }}
-            >
-              {dropdownOptions.caseStageOptions.map((cse) => (
-                <MenuItem key={cse.id} value={cse.id}>
-                  <Checkbox
-                    checked={formik.values.caseStage.includes(cse.id)}
-                  />
-                  <ListItemText primary={cse.desc} />
-                </MenuItem>
-              ))}
-              <div
-                style={{
-                  width: "95%",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Button
-                  variant="contained"
-                  onClick={() => handleClose("caseStage")}
-                >
-                  Ok
-                </Button>
-              </div>
-            </TextField>
           </Box>
-          {ErrorMessage("caseStage")}
 
-          <Box
-            display="flex"
-            marginTop="10px"
-            alignItems="center"
-            width="87.5%"
-          >
-            <Checkbox
-              checked={checkboxStates.caseStatusCheckbox}
-              onChange={handleCheckboxChange("caseStatus")}
+          <Box display="flex" justifyContent="center">
+            <ExpandableTableRow
+              labelName={"Stage"}
+              options={dropdownOptions.caseStageOptions}
+              formik={formik}
+              fieldName={"caseStage"}
+              setErrorMessages={setErrorMessages}
             />
-            <TextField
-              id="caseStatus"
-              name="caseStatus"
-              label="Status"
-              value={formik.values.caseStatus}
-              onChange={(e) =>
-                formik.setFieldValue("caseStatus", e.target.value)
-              }
-              select
-              fullWidth
-              size="small"
-              disabled={!checkboxStates.caseStatusCheckbox}
-              SelectProps={{
-                multiple: true,
-                open: openFields.caseStatus,
-                onOpen: () => handleOpen("caseStatus"),
-                onClose: () => handleClose("caseStatus"),
-                renderValue: (selected) =>
-                  selected
-                    .map(
-                      (caseStatusId) =>
-                        dropdownOptions.caseStatusOptions.find(
-                          (cse) => cse.id === caseStatusId
-                        )?.desc
-                    )
-                    .join(", "),
-              }}
-            >
-              {dropdownOptions.caseStatusOptions.map((cse) => (
-                <MenuItem key={cse.id} value={cse.id}>
-                  <Checkbox
-                    checked={formik.values.caseStatus.includes(cse.id)}
-                  />
-                  <ListItemText primary={cse.desc} />
-                </MenuItem>
-              ))}
-              <div
-                style={{
-                  width: "95%",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Button variant="contained" onClick={() => handleClose("caseStatus")}>
-                  Ok
-                </Button>
-              </div>
-            </TextField>
           </Box>
-          {ErrorMessage("caseStatus")}
 
-          <Box display="flex" alignItems="center">
+          <Box display="flex" justifyContent="center">
+            <ExpandableTableRow
+              labelName={"Status"}
+              options={dropdownOptions.caseStatusOptions}
+              formik={formik}
+              fieldName={"caseStatus"}
+              setErrorMessages={setErrorMessages}
+            />
+          </Box>
+
+          <Box display="flex" justifyContent="flex-start" alignItems="center">
             <Checkbox
+              sx={{ marginLeft: "0.8rem", padding: "0" }}
               checked={formik.values.hiPriorityInd === "Y"}
               onChange={(event) => {
                 formik.setFieldValue(
@@ -532,16 +308,15 @@ function LookupCases({ setLookUpSummary }) {
               }}
             />
             <Typography
-              sx={{
-                color: formik.values.hiPriorityInd === "Y" ? "black" : "gray",
-              }}
+              sx={{ color: "#183084", fontWeight: "bold", paddingLeft: "5px" }}
             >
               HI Priority
             </Typography>
           </Box>
 
-          <Box display="flex" alignItems="center">
+          <Box display="flex" justifyContent="flex-start" alignItems="center">
             <Checkbox
+              sx={{ marginLeft: "0.8rem", padding: "0"  }}
               checked={formik.values.waitlisted === "Y"}
               onChange={(event) => {
                 formik.setFieldValue(
@@ -552,79 +327,25 @@ function LookupCases({ setLookUpSummary }) {
               }}
             />
             <Typography
-              sx={{
-                color: formik.values.waitlisted === "Y" ? "black" : "gray",
-              }}
+              sx={{ color: "#183084", fontWeight: "bold", paddingLeft: "5px" }}
             >
               Waitlisted
             </Typography>
           </Box>
 
-          {/* <Box display="flex" alignItems="center">
-            <Checkbox
-              checked={checkboxStates.rtwDaysRange}
-              onChange={handleCheckboxChange("rtwDaysRange")}
-            />
-            <Stack direction="row" spacing={1} sx={{ width: "80%" }}>
+          <Box
+            display="flex"
+            justifyContent="center"
+            style={{ marginTop: "10px" }}
+          >
+            <Stack direction="row" spacing={1} sx={{ width: "94%" }}>
               <TextField
                 id="rtwDaysMin"
                 name="rtwDaysMin"
                 label="RTW days From"
                 type="text"
                 value={formik.values.rtwDaysMin}
-                onChange={(event) => {
-                  const newValue = event.target.value;
-                  if (/^\d*$/.test(newValue)) {
-                    formik.setFieldValue("rtwDaysMin", newValue);
-                  }
-                }}
-                inputProps={{
-                  inputMode: "numeric",
-                  // maxLength: 4,
-                  // "aria-label": "SSN",
-                }}
-                fullWidth
-                size="small"
-                sx={{ width: "80%" }}
-                disabled={!checkboxStates.rtwDaysRangeCheckbox}
-              />
-
-              <TextField
-                id="rtwDaysMax"
-                name="rtwDaysMax"
-                label="RTW days To"
-                type="text"
-                value={formik.values.rtwDaysMax}
-                onChange={(event) => {
-                  const newValue = event.target.value;
-                  if (/^\d*$/.test(newValue)) {
-                    formik.setFieldValue("rtwDaysMax", newValue);
-                  }
-                }}
-                inputProps={{
-                  inputMode: "numeric",
-                  // maxLength: 4,
-                  // "aria-label": "SSN",
-                }}
-                fullWidth
-                size="small"
-                sx={{ width: "80%" }}
-                disabled={!checkboxStates.rtwDaysRangeCheckbox}
-              />
-            </Stack>
-          </Box> */}
-          <Box display="flex" alignItems="center">
-            <Checkbox
-              checked={checkboxStates.rtwDaysRange}
-              onChange={handleCheckboxChange("rtwDaysRange")}
-            />
-            <Stack direction="row" spacing={1} sx={{ width: "80%" }}>
-              <TextField
-                id="rtwDaysMin"
-                name="rtwDaysMin"
-                label="RTW days From"
-                type="text"
-                value={formik.values.rtwDaysMin}
+                onBlur={formik.handleBlur}
                 onChange={(event) => {
                   let newValue = event.target.value;
                   if (/^\d{1,3}$/.test(newValue) && parseInt(newValue) <= 365) {
@@ -639,8 +360,13 @@ function LookupCases({ setLookUpSummary }) {
                 }}
                 fullWidth
                 size="small"
-                sx={{ width: "80%" }}
-                disabled={!checkboxStates.rtwDaysRangeCheckbox}
+                sx={{
+                  width: "80%",
+                  "& .MuiInputLabel-root": {
+                    color: "#183084",
+                    fontWeight: "bold",
+                  },
+                }}
               />
 
               <TextField
@@ -649,6 +375,7 @@ function LookupCases({ setLookUpSummary }) {
                 label="RTW days To"
                 type="text"
                 value={formik.values.rtwDaysMax}
+                onBlur={formik.handleBlur}
                 onChange={(event) => {
                   let newValue = event.target.value;
                   if (/^\d{1,3}$/.test(newValue) && parseInt(newValue) <= 365) {
@@ -663,25 +390,35 @@ function LookupCases({ setLookUpSummary }) {
                 }}
                 fullWidth
                 size="small"
-                sx={{ width: "80%" }}
-                disabled={!checkboxStates.rtwDaysRangeCheckbox}
+                sx={{
+                  width: "80%",
+                  "& .MuiInputLabel-root": {
+                    color: "#183084",
+                    fontWeight: "bold",
+                  },
+                }}
               />
             </Stack>
           </Box>
-          {ErrorMessage("rtwDaysMax")}
+          {ErrorMessage("rtwDaysMax", {
+            display: "flex",
+            justifyContent: "flex-end",
+            marginRight: "5px",
+          })}
 
-          <Box display="flex" alignItems="center">
-            <Checkbox
-              checked={checkboxStates.caseScoreRange}
-              onChange={handleCheckboxChange("caseScoreRange")}
-            />
-            <Stack direction="row" spacing={1} sx={{ width: "80%" }}>
+          <Box
+            display="flex"
+            justifyContent="center"
+            style={{ marginTop: "10px" }}
+          >
+            <Stack direction="row" spacing={1} sx={{ width: "94%" }}>
               <TextField
                 id="caseScoreMin"
                 name="caseScoreMin"
                 label="Score range From"
                 type="text"
                 value={formik.values.caseScoreMin}
+                onBlur={formik.handleBlur}
                 onChange={(event) => {
                   const newValue = event.target.value;
                   if (
@@ -696,8 +433,13 @@ function LookupCases({ setLookUpSummary }) {
                 }}
                 fullWidth
                 size="small"
-                sx={{ width: "80%" }}
-                disabled={!checkboxStates.caseScoreRangeCheckbox}
+                sx={{
+                  width: "80%",
+                  "& .MuiInputLabel-root": {
+                    color: "#183084",
+                    fontWeight: "bold",
+                  },
+                }}
               />
 
               <TextField
@@ -706,6 +448,7 @@ function LookupCases({ setLookUpSummary }) {
                 label="Score range To"
                 type="text"
                 value={formik.values.caseScoreMax}
+                onBlur={formik.handleBlur}
                 onChange={(event) => {
                   const newValue = event.target.value;
                   if (
@@ -720,19 +463,28 @@ function LookupCases({ setLookUpSummary }) {
                 }}
                 fullWidth
                 size="small"
-                sx={{ width: "80%" }}
-                disabled={!checkboxStates.caseScoreRangeCheckbox}
+                sx={{
+                  width: "80%",
+                  "& .MuiInputLabel-root": {
+                    color: "#183084",
+                    fontWeight: "bold",
+                  },
+                }}
               />
             </Stack>
           </Box>
-          {ErrorMessage("caseScoreMin")}
+          {ErrorMessage("caseScoreMax",{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginRight: "5px",
+          })}
 
-          <Box display="flex" alignItems="center">
-            <Checkbox
-              checked={checkboxStates.orientationDate}
-              onChange={handleCheckboxChange("orientationDate")}
-            />
-            <Stack direction="row" spacing={1} sx={{ width: "80%" }}>
+          <Box
+            display="flex"
+            justifyContent="center"
+            style={{ marginTop: "10px" }}
+          >
+            <Stack direction="row" spacing={1} sx={{ width: "94%" }}>
               <TextField
                 id="orientationStartDt"
                 name="orientationStartDt"
@@ -740,10 +492,16 @@ function LookupCases({ setLookUpSummary }) {
                 type="date"
                 InputLabelProps={{ shrink: true }}
                 value={formik.values.orientationStartDt}
+                onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 size="small"
                 fullWidth
-                disabled={!checkboxStates.orientationDateCheckbox}
+                sx={{
+                  "& .MuiInputLabel-root": {
+                    color: "#183084",
+                    fontWeight: "bold",
+                  },
+                }}
               />
               <TextField
                 id="orientationEndDt"
@@ -752,27 +510,35 @@ function LookupCases({ setLookUpSummary }) {
                 type="date"
                 InputLabelProps={{ shrink: true }}
                 value={formik.values.orientationEndDt}
+                onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 size="small"
                 fullWidth
                 inputProps={{
                   min: formik.values.orientationStartDt,
                 }}
-                disabled={
-                  !checkboxStates.orientationDateCheckbox ||
-                  !formik.values.orientationStartDt
-                }
+                sx={{
+                  "& .MuiInputLabel-root": {
+                    color: formik.values.orientationStartDt ? "#183084" : "gray",
+                    fontWeight: "bold",
+                  },
+                }}
+                disabled={!formik.values.orientationStartDt}
               />
             </Stack>
           </Box>
-          {ErrorMessage("orientationStartDt")}
+          {ErrorMessage("orientationEndDt", {
+            display: "flex",
+            justifyContent: "flex-end",
+            marginRight: "5px",
+          })}
 
-          <Box display="flex" alignItems="center">
-            <Checkbox
-              checked={checkboxStates.intialAppointmentDate}
-              onChange={handleCheckboxChange("intialAppointmentDate")}
-            />
-            <Stack direction="row" spacing={1} sx={{ width: "80%" }}>
+          <Box
+            display="flex"
+            justifyContent="center"
+            style={{ marginTop: "10px" }}
+          >
+            <Stack direction="row" spacing={1} sx={{ width: "94%" }}>
               <TextField
                 id="initialApptStartDt"
                 name="initialApptStartDt"
@@ -780,10 +546,16 @@ function LookupCases({ setLookUpSummary }) {
                 type="date"
                 InputLabelProps={{ shrink: true }}
                 value={formik.values.initialApptStartDt}
+                onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 size="small"
                 fullWidth
-                disabled={!checkboxStates.intialAppointmentDateCheckbox}
+                sx={{
+                  "& .MuiInputLabel-root": {
+                    color: "#183084",
+                    fontWeight: "bold",
+                  },
+                }}
               />
               <TextField
                 id="initialApptEndDt"
@@ -792,27 +564,35 @@ function LookupCases({ setLookUpSummary }) {
                 type="date"
                 InputLabelProps={{ shrink: true }}
                 value={formik.values.initialApptEndDt}
+                onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 size="small"
                 fullWidth
                 inputProps={{
                   min: formik.values.initialApptStartDt,
                 }}
-                disabled={
-                  !checkboxStates.intialAppointmentDateCheckbox ||
-                  !formik.values.initialApptStartDt
-                }
+                sx={{
+                  "& .MuiInputLabel-root": {
+                    color: formik.values.initialApptStartDt ? "#183084" : "gray",
+                    fontWeight: "bold",
+                  },
+                }}
+                disabled={!formik.values.initialApptStartDt}
               />
             </Stack>
           </Box>
-          {ErrorMessage("initialApptStartDt")}
+          {ErrorMessage("initialApptEndDt", {
+            display: "flex",
+            justifyContent: "flex-end",
+            marginRight: "5px",
+          })}
 
-          <Box display="flex" alignItems="center">
-            <Checkbox
-              checked={checkboxStates.recentAppointmentDate}
-              onChange={handleCheckboxChange("recentAppointmentDate")}
-            />
-            <Stack direction="row" spacing={1} sx={{ width: "80%" }}>
+          <Box
+            display="flex"
+            justifyContent="center"
+            style={{ marginTop: "10px" }}
+          >
+            <Stack direction="row" spacing={1} sx={{ width: "94%" }}>
               <TextField
                 id="recentApptStartDt"
                 name="recentApptStartDt"
@@ -820,10 +600,16 @@ function LookupCases({ setLookUpSummary }) {
                 type="date"
                 InputLabelProps={{ shrink: true }}
                 value={formik.values.recentApptStartDt}
+                onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 size="small"
                 fullWidth
-                disabled={!checkboxStates.recentAppointmentDateCheckbox}
+                sx={{
+                  "& .MuiInputLabel-root": {
+                    color: "#183084",
+                    fontWeight: "bold",
+                  },
+                }}
               />
               <TextField
                 id="recentApptEndDt"
@@ -832,119 +618,72 @@ function LookupCases({ setLookUpSummary }) {
                 type="date"
                 InputLabelProps={{ shrink: true }}
                 value={formik.values.recentApptEndDt}
+                onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 size="small"
                 fullWidth
                 inputProps={{
                   min: formik.values.recentApptStartDt,
                 }}
-                disabled={
-                  !checkboxStates.recentAppointmentDateCheckbox ||
-                  !formik.values.recentApptStartDt
-                }
+                disabled={!formik.values.recentApptStartDt}
+                sx={{
+                  "& .MuiInputLabel-root": {
+                    color: formik.values.recentApptStartDt ? "#183084" : "gray",
+                    fontWeight: 'bold'
+                  },
+                }}
               />
             </Stack>
           </Box>
-          {ErrorMessage("recentApptStartDt")}
+          {ErrorMessage("recentApptEndDt", {
+            display: "flex",
+            justifyContent: "flex-end",
+            marginRight: "5px",
+          })}
 
-          <Box
-            display="flex"
-            marginTop="10px"
-            alignItems="center"
-            width="87.5%"
-          >
-            <Checkbox
-              checked={checkboxStates.terminationReasonCheckbox}
-              onChange={handleCheckboxChange("terminationReason")}
+          <Box display="flex" justifyContent="center">
+            <ExpandableTableRow
+              labelName={"Termination Reason"}
+              options={dropdownOptions.terminationReasonOptions}
+              formik={formik}
+              fieldName={"terminationReason"}
+              setErrorMessages={setErrorMessages}
             />
-            <TextField
-              id="terminationReason"
-              name="terminationReason"
-              label="Termination Reason"
-              value={formik.values.terminationReason}
-              onChange={(e) =>
-                formik.setFieldValue("terminationReason", e.target.value)
-              }
-              select
-              fullWidth
-              size="small"
-              disabled={!checkboxStates.terminationReasonCheckbox}
-              SelectProps={{
-                multiple: true,
-                open: openFields.terminationReason,
-                onOpen: () => handleOpen("terminationReason"),
-                onClose: () => handleClose("terminationReason"),
-                renderValue: (selected) =>
-                  selected
-                    .map(
-                      (terminationId) =>
-                        dropdownOptions.terminationReasonOptions.find(
-                          (tr) => tr.id === terminationId
-                        )?.desc
-                    )
-                    .join(", "),
-              }}
-            >
-              {dropdownOptions.terminationReasonOptions.map((tr) => (
-                <MenuItem key={tr.id} value={tr.id}>
-                  <Checkbox
-                    checked={formik.values.terminationReason.includes(tr.id)}
-                  />
-                  <ListItemText primary={tr.desc} />
-                </MenuItem>
-              ))}
-              <div
-                style={{
-                  width: "95%",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Button variant="contained" onClick={() => handleClose("terminationReason")}>
-                  Ok
-                </Button>
-              </div>
-            </TextField>
           </Box>
-          {ErrorMessage("terminationReason")}
 
-          <Box display="flex" alignItems="center">
-            <Checkbox
-              checked={checkboxStates.claimantName}
-              onChange={handleCheckboxChange("claimantName")}
-            />
+          <Box display="flex" justifyContent="center">
             <TextField
               id="claimantName"
               name="claimantName"
               label="Claimant name"
               value={formik.values.claimantName}
-              onChange={formik.handleChange}
+              onChange={onHandleChange}
               fullWidth
               size="small"
               sx={{
-                width: "80%",
+                width: "94%",
+                "& .MuiInputLabel-root": {
+                  color: "#183084",
+                  fontWeight: "bold",
+                },
               }}
-              disabled={!checkboxStates.claimantNameCheckbox}
             />
           </Box>
-          {ErrorMessage("claimantName")}
 
-          <Box display="flex" alignItems="center">
-            <Checkbox
-              checked={checkboxStates.ssn}
-              onChange={handleCheckboxChange("ssn")}
-            />
+          <Box display="flex" justifyContent="center">
             <TextField
               id="ssn"
               name="ssn"
               label="Last 4 of SSN"
               type="text"
               value={formik.values.ssn}
+              onBlur={formik.handleBlur}
               onChange={(event) => {
                 const newValue = event.target.value;
                 if (newValue.length <= 4 && /^\d*$/.test(newValue)) {
                   formik.setFieldValue("ssn", newValue);
                 }
+                setErrorMessages([]);
               }}
               inputProps={{
                 inputMode: "numeric",
@@ -953,18 +692,18 @@ function LookupCases({ setLookUpSummary }) {
               }}
               fullWidth
               size="small"
-              sx={{ width: "80%" }}
-              disabled={!checkboxStates.ssnCheckbox}
+              sx={{
+                width: "94%",
+                "& .MuiInputLabel-root": {
+                  color: "#183084",
+                  fontWeight: "bold",
+                },
+              }}
             />
           </Box>
-          {ErrorMessage("ssn")}
-
-          <Box display="flex" alignItems="center">
-            <Checkbox
-              checked={checkboxStates.byeDate}
-              onChange={handleCheckboxChange("byeDate")}
-            />
-            <Stack direction="row" spacing={1} sx={{ width: "80%" }}>
+          {ErrorMessage("ssn", { marginLeft: "5%" })}
+          <Box display="flex" justifyContent="center">
+            <Stack direction="row" spacing={1.5} sx={{ width: "94%" }}>
               <TextField
                 id="clmByeStartDt"
                 name="clmByeStartDt"
@@ -972,10 +711,16 @@ function LookupCases({ setLookUpSummary }) {
                 type="date"
                 InputLabelProps={{ shrink: true }}
                 value={formik.values.clmByeStartDt}
-                onChange={formik.handleChange}
+                onChange={onHandleChange}
+                onBlur={formik.handleBlur}
                 size="small"
                 fullWidth
-                disabled={!checkboxStates.byeDateCheckbox}
+                sx={{
+                  "& .MuiInputLabel-root": {
+                    color: "#183084",
+                    fontWeight: "bold",
+                  },
+                }}
               />
               <TextField
                 id="clmByeEndDt"
@@ -984,29 +729,60 @@ function LookupCases({ setLookUpSummary }) {
                 type="date"
                 InputLabelProps={{ shrink: true }}
                 value={formik.values.clmByeEndDt}
-                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                onChange={onHandleChange}
                 size="small"
                 fullWidth
                 inputProps={{
                   min: formik.values.clmByeStartDt,
                 }}
-                disabled={
-                  !checkboxStates.byeDateCheckbox ||
-                  !formik.values.clmByeStartDt
-                }
+                sx={{
+                  "& .MuiInputLabel-root": {
+                    color: formik.values.clmByeStartDt ? "#183084" : "gray",
+                  },
+                }}
+                disabled={!formik.values.clmByeStartDt}
               />
             </Stack>
           </Box>
-          {ErrorMessage("clmByeStartDt")}
-
-          <Button
-            color="primary"
-            variant="contained"
-            type="submit"
-            sx={{ alignSelf: "center", width: "50%" }}
+          {ErrorMessage("clmByeEndDt", {
+            display: "flex",
+            justifyContent: "flex-end",
+            marginRight: "5px",
+          })}
+        </Stack>
+        <Stack display={"flex"} flexDirection={"row-reverse"}>
+          <Box
+            display={"flex"}
+            justifyContent={"center"}
+            width={"50%"}
+            padding={"10px 0px"}
           >
-            Search
-          </Button>
+            <Button
+              color="primary"
+              variant="contained"
+              type="submit"
+              sx={{ alignSelf: "center", width: "15%" }}
+            >
+              Search
+            </Button>
+          </Box>
+
+          <Box
+            display={"flex"}
+            justifyContent={"flex-end"}
+            width={"50%"}
+            padding={"10px 0px"}
+          >
+            <Button
+              color="primary"
+              variant="contained"
+              sx={{ alignSelf: "center", width: "15%" }}
+              type="reset"
+            >
+              Clear
+            </Button>
+          </Box>
         </Stack>
       </form>
     </Box>

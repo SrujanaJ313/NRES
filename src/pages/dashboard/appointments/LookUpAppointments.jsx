@@ -102,7 +102,7 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
       clmByeStartDt: "",
       clmByeEndDt: "",
     },
-    validationSchema: () => lookUpAppointmentsValidationSchema(formik),
+    validationSchema: () => lookUpAppointmentsValidationSchema(),
     onSubmit: async (values) => {
       const dateFields = [
         "apptStartDt",
