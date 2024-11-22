@@ -35,7 +35,7 @@ export default function ExpandableTableRow({
   };
 
   return (
-    <Box sx={{ width: "90%" }}>
+    <Box sx={{ width: "94%" }}>
       <FormControl fullWidth>
         <InputLabel
           sx={{
@@ -45,12 +45,12 @@ export default function ExpandableTableRow({
             top: "50%",
             transform: "translateY(-50%)",
             left: "10px",
-            pointerEvents: "none", 
+            pointerEvents: "none",
             transition: "all 0.2s ease-out",
             "&.Mui-focused, &.MuiFormLabel-filled": {
               top: "0",
               transform: "translateY(1)",
-              fontSize:"10px"
+              fontSize: "10px",
             },
           }}
           id={`${fieldName}-label`}
@@ -72,8 +72,9 @@ export default function ExpandableTableRow({
                 return (
                   <Chip
                     key={id}
+                    size={"small"}
                     label={option?.value || id}
-                    sx={{ padding: "20px" }}
+                    sx={{ padding: "5px" }}
                   />
                 );
               })}

@@ -30,9 +30,9 @@ import {
 import { useSnackbar } from "../../../context/SnackbarContext";
 import ExpandableTableRow from "./ExpandableTableRow";
 
-function LookUpAppointments({ setLookUpSummary }) {
-  const showSnackbar = useSnackbar();
+function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
   const [errorMessages, setErrorMessages] = useState([]);
+  const showSnackbar = useSnackbar();
   const [dropdownOptions, setDropdownOptions] = useState({
     officeNumOptions: [],
     caseManagerIdOptions: [],
@@ -81,7 +81,7 @@ function LookUpAppointments({ setLookUpSummary }) {
       Object.keys(onLoadPageFields).map((fieldName) => loadData(fieldName))
     );
   }, []);
-  
+
   const formik = useFormik({
     initialValues: {
       officeNum: [],
@@ -124,13 +124,18 @@ function LookUpAppointments({ setLookUpSummary }) {
         }
 
         if (!Object.keys(payload).length) {
-          setErrorMessages(["Atleast one field needs to be selected"]);
+          setErrorMessages(["At least one field needs to be selected"]);
           return;
         }
+        payload.pagination = {
+          pageNumber: 1,
+          pageSize: 10,
+          needTotalCount: true,
+        };
         console.log("submited payload-->\n", payload);
-        return;
+        setReqPayload(payload);
         const result = await client.post(appointmentsLookUpSummaryURL, payload);
-        setLookUpSummary(result);
+        setLookUpSummary([result]);
         showSnackbar("Request has been submitted successfully.", 5000);
       } catch (errorResponse) {
         console.log("errorResponse-->\n", errorResponse);
@@ -142,13 +147,10 @@ function LookUpAppointments({ setLookUpSummary }) {
       }
     },
     validateOnChange: true,
-    validateOnBlur: true
+    validateOnBlur: true,
   });
 
-  // console.log(`formik.errors-->`, formik.errors);
-
   const ErrorMessage = (fieldName) => {
-    console.log('Error Message-->', formik.errors[fieldName]);
     return (
       <>
         {formik.touched[fieldName] && formik.errors[fieldName] && (
@@ -175,25 +177,30 @@ function LookUpAppointments({ setLookUpSummary }) {
   };
 
   return (
-    <Box width="35%" bgcolor="#FFFFFF" borderRight="2px solid #3b5998">
-      <form onSubmit={formik.handleSubmit}>
+    <Box
+      width="25%"
+      bgcolor="#FFFFFF"
+      borderRight="2px solid #3b5998"
+      height="100%"
+    >
+      <form onSubmit={formik.handleSubmit} style={{ height: "100%" }}>
         <Stack
           spacing={1}
           sx={{
-            height: "85vh",
+            height: "calc(100% - 3.2rem)",
             overflowY: "auto",
             "&::-webkit-scrollbar": {
-              width: "5px", // Decrease scrollbar width
+              width: "5px",
             },
             "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#888", // Style scrollbar thumb
-              borderRadius: "10px", // Add rounded edges
+              backgroundColor: "#888",
+              borderRadius: "10px",
             },
             "&::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: "#555", // Style thumb on hover
+              backgroundColor: "#555",
             },
             "&::-webkit-scrollbar-track": {
-              backgroundColor: "#f1f1f1", // Style scrollbar track
+              backgroundColor: "#f1f1f1",
             },
           }}
         >
@@ -201,9 +208,9 @@ function LookUpAppointments({ setLookUpSummary }) {
             <Typography
               sx={{
                 color: "#183084",
-                marginTop: "10px",
+                margin: "0",
                 fontWeight: "bold",
-                width: "90%",
+                width: "94%",
               }}
               variant="h6"
               gutterBottom
@@ -211,13 +218,15 @@ function LookUpAppointments({ setLookUpSummary }) {
               Lookup Appointments
             </Typography>
           </Box>
-          <Box display="flex" justifyContent="center">
-            {errorMessages.map((x) => (
-              <div key={x}>
-                <span className="errorMsg">*{x}</span>
-              </div>
-            ))}
-          </Box>
+          {errorMessages?.length > 0 && (
+            <Box display="flex" justifyContent="center">
+              {errorMessages.map((x) => (
+                <div key={x}>
+                  <span className="errorMsg">*{x}</span>
+                </div>
+              ))}
+            </Box>
+          )}
           <Box
             display="flex"
             marginTop="10px"
@@ -232,31 +241,8 @@ function LookUpAppointments({ setLookUpSummary }) {
               setErrorMessages={setErrorMessages}
             />
           </Box>
-          {/* {ErrorMessage("officeNum")} */}
+
           <Box display="flex" justifyContent="center">
-            {/* <TextField
-              id="caseManagerId"
-              name="caseManagerId"
-              label="Case Manager"
-              value={formik.values.caseManagerId}
-              onChange={onHandleChange}
-              select
-              fullWidth
-              size="small"
-              sx={{
-                width: "90%",
-                "& .MuiInputLabel-root": {
-                  color: "#183084",
-                  fontWeight: "bold",
-                },
-              }}
-            >
-              {dropdownOptions?.caseManagerIdOptions?.map((cm) => (
-                <MenuItem key={cm?.id} value={cm?.id}>
-                  {cm?.name}
-                </MenuItem>
-              ))}
-            </TextField> */}
             <ExpandableTableRow
               labelName={"Case Manager"}
               options={dropdownOptions.caseManagerIdOptions}
@@ -265,9 +251,13 @@ function LookUpAppointments({ setLookUpSummary }) {
               setErrorMessages={setErrorMessages}
             />
           </Box>
-          {/* {ErrorMessage("caseManagerId")} */}
-          <Box display="flex" justifyContent="center">
-            <Stack direction="row" spacing={1} sx={{ width: "90%" }}>
+
+          <Box
+            display="flex"
+            justifyContent="center"
+            style={{ marginTop: "10px" }}
+          >
+            <Stack direction="row" spacing={1} sx={{ width: "94%" }}>
               <TextField
                 id="apptStartDt"
                 name="apptStartDt"
@@ -309,28 +299,6 @@ function LookUpAppointments({ setLookUpSummary }) {
           </Box>
           {ErrorMessage("apptEndDt")}
           <Box display="flex" justifyContent="center">
-            {/* <TextField
-              id="timeslotTypeCd"
-              name="timeslotTypeCd"
-              label="Timeslot Type"
-              value={formik.values.timeslotTypeCd}
-              onChange={onHandleChange}
-              select
-              size="small"
-              sx={{
-                width: "90%",
-                "& .MuiInputLabel-root": {
-                  color: "#183084",
-                  fontWeight: "bold",
-                },
-              }}
-            >
-              {dropdownOptions?.timeslotTypeCdOptions?.map((tst) => (
-                <MenuItem key={tst?.id} value={tst?.id}>
-                  {tst?.desc}
-                </MenuItem>
-              ))}
-            </TextField> */}
             <ExpandableTableRow
               labelName={"Timeslot Type"}
               options={dropdownOptions.timeslotTypeCdOptions}
@@ -339,31 +307,8 @@ function LookUpAppointments({ setLookUpSummary }) {
               setErrorMessages={setErrorMessages}
             />
           </Box>
-          {/* {ErrorMessage("timeslotTypeCd")} */}
+
           <Box display="flex" justifyContent="center">
-            {/* <TextField
-              id="timeslotUsageCd"
-              name="timeslotUsageCd"
-              label="Timeslot Usage"
-              value={formik.values.timeslotUsageCd}
-              onChange={onHandleChange}
-              select
-              fullWidth
-              size="small"
-              sx={{
-                width: "90%",
-                "& .MuiInputLabel-root": {
-                  color: "#183084",
-                  fontWeight: "bold",
-                },
-              }}
-            >
-              {dropdownOptions?.timeslotUsageCdOptions?.map((tsu) => (
-                <MenuItem key={tsu?.id} value={tsu?.id}>
-                  {tsu?.desc}
-                </MenuItem>
-              ))}
-            </TextField> */}
             <ExpandableTableRow
               labelName={"Timeslot Usage"}
               options={dropdownOptions.timeslotUsageCdOptions}
@@ -372,7 +317,7 @@ function LookUpAppointments({ setLookUpSummary }) {
               setErrorMessages={setErrorMessages}
             />
           </Box>
-          {/* {ErrorMessage("timeslotUsageCd")} */}
+
           <Box display="flex" alignItems="center" justifyContent={"center"}>
             <ExpandableTableRow
               labelName={"Meeting Status"}
@@ -382,10 +327,15 @@ function LookUpAppointments({ setLookUpSummary }) {
               setErrorMessages={setErrorMessages}
             />
           </Box>
-          {/* {ErrorMessage("meetingStatusCd")} */}
-          <Box display="flex" justifyContent="flex-start" alignItems="center">
+
+          <Box
+            display="flex"
+            justifyContent="flex-start"
+            alignItems="center"
+            width="94%"
+          >
             <Checkbox
-              sx={{ marginLeft: "10px", padding: "0 0 0 11px" }}
+              sx={{ marginLeft: "0.5rem", padding: "0 0 0 0" }}
               checked={formik.values.beyond21DaysInd === "Y"}
               onChange={(event) => {
                 formik.setFieldValue(
@@ -401,9 +351,10 @@ function LookUpAppointments({ setLookUpSummary }) {
               Beyond 21 days
             </Typography>
           </Box>
+
           <Box display="flex" justifyContent="flex-start" alignItems="center">
             <Checkbox
-              sx={{ marginLeft: "10px", padding: "0 0 0 11px" }}
+              sx={{ marginLeft: "0.5rem", padding: "0 0 0 0" }}
               checked={formik.values.hiPriorityInd === "Y"}
               onChange={(event) => {
                 formik.setFieldValue(
@@ -419,6 +370,7 @@ function LookUpAppointments({ setLookUpSummary }) {
               HI Priority
             </Typography>
           </Box>
+
           <Box display="flex" alignItems="center" justifyContent={"center"}>
             <ExpandableTableRow
               labelName={"Scheduled by"}
@@ -429,6 +381,7 @@ function LookUpAppointments({ setLookUpSummary }) {
             />
           </Box>
           {/* {ErrorMessage("scheduledBy")} */}
+
           <Box display="flex" justifyContent="center">
             <TextField
               id="claimantName"
@@ -439,7 +392,7 @@ function LookUpAppointments({ setLookUpSummary }) {
               fullWidth
               size="small"
               sx={{
-                width: "90%",
+                width: "94%",
                 "& .MuiInputLabel-root": {
                   color: "#183084",
                   fontWeight: "bold",
@@ -448,6 +401,7 @@ function LookUpAppointments({ setLookUpSummary }) {
             />
           </Box>
           {/* {ErrorMessage("claimantName")} */}
+
           <Box display="flex" justifyContent="center">
             <TextField
               id="ssn"
@@ -460,7 +414,7 @@ function LookUpAppointments({ setLookUpSummary }) {
                 if (newValue.length <= 4 && /^\d*$/.test(newValue)) {
                   formik.setFieldValue("ssn", newValue);
                 }
-                setErrorMessages([])
+                setErrorMessages([]);
               }}
               inputProps={{
                 inputMode: "numeric",
@@ -470,7 +424,7 @@ function LookUpAppointments({ setLookUpSummary }) {
               fullWidth
               size="small"
               sx={{
-                width: "90%",
+                width: "94%",
                 "& .MuiInputLabel-root": {
                   color: "#183084",
                   fontWeight: "bold",
@@ -480,7 +434,7 @@ function LookUpAppointments({ setLookUpSummary }) {
           </Box>
           {ErrorMessage("ssn")}
           <Box display="flex" justifyContent="center">
-            <Stack direction="row" spacing={1} sx={{ width: "90%" }}>
+            <Stack direction="row" spacing={1.5} sx={{ width: "94%" }}>
               <TextField
                 id="clmByeStartDt"
                 name="clmByeStartDt"
@@ -527,13 +481,12 @@ function LookUpAppointments({ setLookUpSummary }) {
           justifyContent={"flex-end"}
           width={"88%"}
           padding={"10px 0px"}
-          marginTop={"20px"}
         >
           <Button
             color="primary"
             variant="contained"
             type="submit"
-            sx={{ alignSelf: "center", width: "30%" }}
+            sx={{ alignSelf: "center", width: "15%" }}
           >
             Search
           </Button>
@@ -544,4 +497,3 @@ function LookUpAppointments({ setLookUpSummary }) {
 }
 
 export default LookUpAppointments;
-
