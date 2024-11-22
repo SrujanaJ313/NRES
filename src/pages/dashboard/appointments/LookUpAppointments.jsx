@@ -153,23 +153,14 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
     validateOnBlur: true,
   });
 
-  const ErrorMessage = (fieldName) => {
+  const ErrorMessage = (fieldName, styleProps) => {
     return (
       <>
         {formik.touched[fieldName] && formik.errors[fieldName] && (
-          <span
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginRight: "5px",
-            }}
-          >
+          <span style={styleProps}>
             <FormHelperText
               sx={{
                 color: "red",
-                // display: "flex",
-                // justifyContent: "flex-start",
-                // width: "60%",
               }}
             >
               {formik.errors[fieldName]}
@@ -310,7 +301,11 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
               />
             </Stack>
           </Box>
-          {ErrorMessage("apptEndDt")}
+          {ErrorMessage("apptEndDt", {
+            display: "flex",
+            justifyContent: "flex-end",
+            marginRight: "5px",
+          })}
           <Box display="flex" justifyContent="center">
             <ExpandableTableRow
               labelName={"Timeslot Type"}
@@ -445,7 +440,7 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
               }}
             />
           </Box>
-          {ErrorMessage("ssn")}
+          {ErrorMessage("ssn", { marginLeft: "5%" })}
           <Box display="flex" justifyContent="center">
             <Stack direction="row" spacing={1.5} sx={{ width: "94%" }}>
               <TextField
@@ -487,7 +482,11 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
               />
             </Stack>
           </Box>
-          {ErrorMessage("clmByeEndDt")}
+          {ErrorMessage("clmByeEndDt", {
+            display: "flex",
+            justifyContent: "flex-end",
+            marginRight: "5px",
+          })}
         </Stack>
         <Stack display={"flex"} flexDirection={"row-reverse"}>
           <Box
