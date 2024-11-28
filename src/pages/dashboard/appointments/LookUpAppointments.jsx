@@ -17,6 +17,7 @@ import {
   convertISOToMMDDYYYY,
   getMsgsFromErrorCode,
   genericSortOptionsAlphabetically,
+  normalizeDate
 } from "../../../helpers/utils";
 
 import {
@@ -120,7 +121,8 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
           ) {
             continue;
           } else if (dateFields.includes(key)) {
-            payload[key] = convertISOToMMDDYYYY(values[key]);
+            const utcDate = normalizeDate(values[key])
+            payload[key] = convertISOToMMDDYYYY(utcDate);
           } else {
             payload[key] = values[key];
           }
@@ -136,6 +138,7 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
           needTotalCount: true,
         };
         console.log("submited payload-->\n", payload);
+        return;
         setReqPayload(payload);
         const result = await client.post(appointmentsLookUpSummaryURL, payload);
         setLookUpSummary([result]);
@@ -301,6 +304,7 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
               />
             </Stack>
           </Box>
+
           {ErrorMessage("apptEndDt", {
             display: "flex",
             justifyContent: "flex-end",

@@ -119,3 +119,7 @@ export const genericSortOptionsAlphabetically = (data, property) => {
   });
 };
 
+export const normalizeDate = (dateString) => {
+  const date = new Date(dateString);
+  return new Date(date.toISOString().split("T")[0]);
+};
