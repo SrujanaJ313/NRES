@@ -8,6 +8,8 @@ import {
   Typography,
   Stack,
   FormHelperText,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import client from "../../../helpers/Api";
 import { useFormik } from "formik";
@@ -17,7 +19,7 @@ import {
   convertISOToMMDDYYYY,
   getMsgsFromErrorCode,
   genericSortOptionsAlphabetically,
-  normalizeDate
+  normalizeDate,
 } from "../../../helpers/utils";
 
 import {
@@ -30,6 +32,8 @@ import {
 } from "../../../helpers/Urls";
 import { useSnackbar } from "../../../context/SnackbarContext";
 import ExpandableTableRow from "./ExpandableTableRow";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
   const [errorMessages, setErrorMessages] = useState([]);
@@ -90,8 +94,8 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
     initialValues: {
       officeNum: [],
       caseManagerId: [],
-      apptStartDt: "",
-      apptEndDt: "",
+      apptStartDt: null,
+      apptEndDt: null,
       timeslotTypeCd: [],
       timeslotUsageCd: [],
       meetingStatusCd: [],
@@ -121,8 +125,8 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
           ) {
             continue;
           } else if (dateFields.includes(key)) {
-            const utcDate = normalizeDate(values[key])
-            payload[key] = convertISOToMMDDYYYY(utcDate);
+            // const utcDate = normalizeDate(values[key]);
+            payload[key] = convertISOToMMDDYYYY(values[key]);
           } else {
             payload[key] = values[key];
           }
@@ -259,7 +263,7 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
             />
           </Box>
 
-          <Box
+          {/* <Box
             display="flex"
             justifyContent="center"
             style={{ marginTop: "10px" }}
@@ -303,13 +307,101 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
                 disabled={!formik.values.apptStartDt}
               />
             </Stack>
+          </Box> */}
+          <Box
+            display="flex"
+            justifyContent="center"
+            style={{ marginTop: "10px" }}
+          >
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Stack direction="row" spacing={2} sx={{ width: "94%" }}>
+                <FormControl sx={{ width: "100%" }}>
+                  <DatePicker
+                    label="Appointment Date From"
+                    value={formik.values.apptStartDt}
+                    onChange={(date) =>
+                      formik.setFieldValue("apptStartDt", date)
+                    }
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        fullWidth: true,
+                        name: "apptStartDt",
+                        InputLabelProps: {
+                          shrink: true,
+                          style: {
+                            fontWeight: "bold",
+                            color: "#183084",
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </FormControl>
+
+                <FormControl sx={{ width: "100%" }}>
+                  <DatePicker
+                    label="Appointment Date To"
+                    value={formik.values.apptEndDt}
+                    onChange={(date) => formik.setFieldValue("apptEndDt", date)}
+                    minDate={formik.values.apptStartDt} // Ensure the end date cannot be before the start date
+                    disabled={!formik.values.apptStartDt} // Disable if start date is not selected
+                    // slotProps={{
+                    //   textField: { size: "small", fullWidth: true },
+                    // }}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        fullWidth: true,
+                        name: "apptStartDt",
+                        InputLabelProps: {
+                          shrink: true,
+                          style: {
+                            fontWeight: "bold",
+                            color: formik.values.apptStartDt
+                              ? "#183084"
+                              : "gray",
+                          },
+                        },
+                      },
+                    }}
+                    // renderInput={(params) => (
+                    //   <TextField
+                    //     {...params}
+                    //     size="small"
+                    //     name="apptEndDt"
+                    //     error={
+                    //       formik.touched.apptEndDt &&
+                    //       Boolean(formik.errors.apptEndDt)
+                    //     }
+                    //     helperText={
+                    //       formik.touched.apptEndDt && formik.errors.apptEndDt
+                    //     }
+                    //     sx={{
+                    //       "& .MuiInputLabel-root": {
+                    // color: formik.values.apptStartDt
+                    //   ? "#183084"
+                    //   : "gray",
+                    //       },
+                    //     }}
+                    //   />
+                    // )}
+                  />
+                  {formik.touched.apptEndDt && formik.errors.apptEndDt && (
+                    <FormHelperText error>
+                      {formik.errors.apptEndDt}
+                    </FormHelperText>
+                  )}
+                </FormControl>
+              </Stack>
+            </LocalizationProvider>
           </Box>
 
-          {ErrorMessage("apptEndDt", {
+          {/* {ErrorMessage("apptEndDt", {
             display: "flex",
             justifyContent: "flex-end",
             marginRight: "5px",
-          })}
+          })} */}
           <Box display="flex" justifyContent="center">
             <ExpandableTableRow
               labelName={"Timeslot Type"}
