@@ -61,6 +61,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   color: "#ffffff",
   textAlign: "center",
   lineHeight: "10px",
+  padding:"10px"
 }));
 
 const ContentCell = styled(TableCell)(({ theme }) => ({
@@ -100,6 +101,7 @@ const CaseloadMetrics = React.memo(
       Initial: "initialInterview",
       "1stSub": "firstSubInterview",
       "2ndSub": "secondSubInterview",
+      "Pending Schedule":"pendingSchedule",
       "Follow-up": "followUp",
       "HI Priority": "hiPriority",
       Failed: "failed",

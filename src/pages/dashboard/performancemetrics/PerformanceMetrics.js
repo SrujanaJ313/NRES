@@ -91,6 +91,7 @@ const PerformanceMetrics = () => {
   };
   const [period, setPeriod] = useState(30);
   const [selectedFor, setSelectedFor] = useState("mary");
+  const [localOffice, setLocalOffice] = useState("LO");
 
   const handlePeriodChange = (event) => {
     setPeriod(event.target.value);
@@ -103,76 +104,102 @@ const PerformanceMetrics = () => {
   return (
     <Container>
       <Header variant="h6">Key Performance Metrics</Header>
-      <Label>Coming soon...</Label>
-      {/*<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>*/}
-      {/*  <Label>For:</Label>*/}
-      {/*  <FormControl component="fieldset">*/}
-      {/*    <RadioGroup*/}
-      {/*      row*/}
-      {/*      value={selectedFor}*/}
-      {/*      onChange={handleForChange}*/}
-      {/*      aria-label="for"*/}
-      {/*      name="for"*/}
-      {/*    >*/}
-      {/*      <FormControlLabel value="mary" control={<Radio />} label="Mary" />*/}
-      {/*      <FormControlLabel value="lo" control={<Radio />} label="LO" />*/}
-      {/*      <FormControlLabel*/}
-      {/*        value="agency"*/}
-      {/*        control={<Radio />}*/}
-      {/*        label="Agency"*/}
-      {/*      />*/}
-      {/*    </RadioGroup>*/}
-      {/*  </FormControl>*/}
-      {/*</Box>*/}
-      {/*<StatItem label="Caseload:" value={data.caseload} />*/}
-      {/*<Stack direction="row">*/}
-      {/*  <Stack width="30%" justifyContent={"center"}>*/}
-      {/*    <Typography className="label-text">Over the past:</Typography>*/}
-      {/*  </Stack>*/}
-      {/*  <Stack width="70%">*/}
-      {/*    <Select*/}
-      {/*      size="small"*/}
-      {/*      value={period}*/}
-      {/*      onChange={handlePeriodChange}*/}
-      {/*      fullWidth*/}
-      {/*    >*/}
-      {/*      <MenuItem value={30}>30 days</MenuItem>*/}
-      {/*      <MenuItem value={60}>60 days</MenuItem>*/}
-      {/*      <MenuItem value={90}>90 days</MenuItem>*/}
-      {/*    </Select>*/}
-      {/*  </Stack>*/}
-      {/*</Stack>*/}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+        <FormControl fullWidth>
+          <InputLabel
+            id="caseManagerId"
+            sx={{ color: "#183084", fontWeight: "bold" }}
+          >
+            Case Manager
+          </InputLabel>
+          <Select
+            labelId="caseManagerId"
+            id="caseManager"
+            value={selectedFor}
+            label="Case Manager"
+            onChange={(e) => setSelectedFor(e.target.value)}
+            sx={{ height: "45px" }}
+          >
+            <MenuItem value={"mary"}>Mary</MenuItem>
+            <MenuItem value={"john"}>John</MenuItem>
+            <MenuItem value={"ryan"}>Ryan</MenuItem>
+          </Select>
+        </FormControl>
 
-      {/*<StatItem*/}
-      {/*  label="Avg weeks to employment:"*/}
-      {/*  value={data.avgWeeksToEmployment}*/}
-      {/*/>*/}
-      {/*<Label>Appointments</Label>*/}
-      {/*<Box sx={{ display: "flex", flexDirection: "column", px: 2, gap: 1 }}>*/}
-      {/*  {data.appointments.map((item) => (*/}
-      {/*    <StatItem*/}
-      {/*      key={item.label}*/}
-      {/*      label={item.label}*/}
-      {/*      value={item.value}*/}
-      {/*      percentage={item.percentage}*/}
-      {/*    />*/}
-      {/*  ))}*/}
-      {/*</Box>*/}
+        <FormControl fullWidth>
+          <InputLabel
+            id="localOfficeId"
+            sx={{ color: "#183084", fontWeight: "bold" }}
+          >
+            Local Office
+          </InputLabel>
+          <Select
+            labelId="localOfficeId"
+            id="localOffice"
+            value={localOffice}
+            label="Local Office"
+            onChange={(e) => setLocalOffice(e.target.value)}
+            sx={{ height: "45px" }}
+          >
+            <MenuItem value={"LO"}>LO</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControlLabel value="agency" control={<Radio />} label="Agency" sx={{
+          ".MuiFormControlLabel-label":{
+            color: "#183084", fontWeight: "bold"
+          }
+        }} />
+      </Box>
+      <StatItem label="Caseload:" value={data.caseload} />
+      <Stack direction="row">
+        <Stack width="30%" justifyContent={"center"}>
+          <Typography className="label-text">Over the past:</Typography>
+        </Stack>
+        <Stack width="70%">
+          <Select
+            size="small"
+            value={period}
+            onChange={handlePeriodChange}
+            fullWidth
+          >
+            <MenuItem value={30}>30 days</MenuItem>
+            <MenuItem value={60}>60 days</MenuItem>
+            <MenuItem value={90}>90 days</MenuItem>
+          </Select>
+        </Stack>
+      </Stack>
 
-      {/*<StatItem*/}
-      {/*  label="Inadequate Work Searches:"*/}
-      {/*  value={data.inadequateWorkSearches}*/}
-      {/*/>*/}
-      {/*<StatItem label="Job Referrals made:" value={data.jobReferralsMade} />*/}
-      {/*<StatItem*/}
-      {/*  label="Training Referrals made:"*/}
-      {/*  value={data.trainingReferralsMade}*/}
-      {/*/>*/}
-      {/*<Box textAlign={"right"}>*/}
-      {/*  <Link>Graphical View</Link>*/}
-      {/*</Box>*/}
+      <StatItem
+        label="Avg weeks to employment:"
+        value={data.avgWeeksToEmployment}
+      />
+      <Label>Appointments</Label>
+      <Box sx={{ display: "flex", flexDirection: "column", px: 2, gap: 1 }}>
+        {data.appointments.map((item) => (
+          <StatItem
+            key={item.label}
+            label={item.label}
+            value={item.value}
+            percentage={item.percentage}
+          />
+        ))}
+      </Box>
+
+      <StatItem
+        label="Inadequate Work Searches:"
+        value={data.inadequateWorkSearches}
+      />
+      <StatItem label="Job Referrals made:" value={data.jobReferralsMade} />
+      <StatItem
+        label="Training Referrals made:"
+        value={data.trainingReferralsMade}
+      />
+      <Box textAlign={"right"}>
+        <Link>Graphical View</Link>
+      </Box>
     </Container>
   );
 };
 
 export default PerformanceMetrics;
+
