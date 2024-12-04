@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -13,6 +13,12 @@ import {
   Stack,
 } from "@mui/material";
 import { styled } from "@mui/system";
+import {
+  appointmentsLocalOfficeURL,
+  appointmentsCaseManagerURL,
+} from "../../../helpers/Urls";
+import client from "../../../helpers/Api";
+import { genericSortOptionsAlphabetically } from "../../../helpers/utils";
 
 const Container = styled(Box)(({ theme }) => ({
   width: "100%",
@@ -72,12 +78,13 @@ const StatItem = ({ label, value, percentage }) => (
   </Grid>
 );
 
-const PerformanceMetrics = () => {
+const PerformanceMetrics = ({ userId }) => {
   const data = {
     caseload: "#",
     avgWeeksToEmployment: "#",
     appointments: [
       { label: "Completed:", value: "#", percentage: "#" },
+      { label: "Completed-RTW:", value: "#", percentage: "#" },
       { label: "No Shows:", value: "#", percentage: "#" },
       { label: "RTW:", value: "#", percentage: "#" },
       { label: "Rescheduled:", value: "#", percentage: "#" },
@@ -90,65 +97,166 @@ const PerformanceMetrics = () => {
     trainingReferralsMade: "#",
   };
   const [period, setPeriod] = useState(30);
-  const [selectedFor, setSelectedFor] = useState("mary");
-  const [localOffice, setLocalOffice] = useState("LO");
+  const [caseManager, setCaseManager] = useState([]);
+  const [localOffice, setLocalOffice] = useState([]);
+  const [caseManagerId, setCaseManagerId] = useState(userId || "");
+  const [localOfficeId, setLocalOfficeId] = useState("");
+  const onPageLoadFields = {
+    CaseManager: {
+      url: appointmentsCaseManagerURL,
+      setData: setCaseManager,
+      propertyName: "name",
+    },
+    LocalOffice: {
+      url: appointmentsLocalOfficeURL,
+      setData: setLocalOffice,
+      propertyName: "officeName",
+    },
+  };
+
+  useEffect(() => {
+    async function loadData(fieldName) {
+      try {
+        const { url, setData, propertyName } = onPageLoadFields[fieldName];
+        console.log(fieldName, { url, setData });
+        const data = await client.get(url);
+        const sortedData = genericSortOptionsAlphabetically(data, propertyName);
+        setData(sortedData);
+      } catch (errorResponse) {
+        console.error("Error in Performance metrics loadData", errorResponse);
+      }
+    }
+
+    Promise.all(
+      Object.keys(onPageLoadFields).map((fieldName) => loadData(fieldName))
+    );
+  }, []);
 
   const handlePeriodChange = (event) => {
     setPeriod(event.target.value);
   };
 
-  const handleForChange = (event) => {
-    setSelectedFor(event.target.value);
-  };
+  // const handleForChange = (event) => {
+  //   console.log('e val--->', event.target.value);
+  //   setCaseManager(event.target.value);
+  // };
 
   return (
-    <Container>
+    <Container
+      sx={{
+        height: "calc(100% - 8.2rem)",
+        overflowY: "auto",
+        "&::-webkit-scrollbar": {
+          width: "5px",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "#888",
+          borderRadius: "10px",
+        },
+        "&::-webkit-scrollbar-thumb:hover": {
+          backgroundColor: "#555",
+        },
+        "&::-webkit-scrollbar-track": {
+          backgroundColor: "#f1f1f1",
+        },
+      }}
+    >
       <Header variant="h6">Key Performance Metrics</Header>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         <FormControl fullWidth>
           <InputLabel
             id="caseManagerId"
-            sx={{ color: "#183084", fontWeight: "bold" }}
+            sx={{
+              color: "#183084",
+              fontWeight: "bold",
+              position: "absolute",
+              top: "50%",
+              transform: "translateY(-50%)",
+              left: "10px",
+              pointerEvents: "none",
+              transition: "all 0.2s ease-out",
+              "&.Mui-focused, &.MuiFormLabel-filled": {
+                top: "0",
+                transform: "translateY(1)",
+                fontSize: "10px",
+              },
+            }}
           >
             Case Manager
           </InputLabel>
           <Select
             labelId="caseManagerId"
-            id="caseManager"
-            value={selectedFor}
+            id="caseManagerId"
+            value={caseManagerId}
             label="Case Manager"
-            onChange={(e) => setSelectedFor(e.target.value)}
-            sx={{ height: "45px" }}
+            onChange={(e) => {
+              const user = caseManager.find(
+                (s) => s.id === Number(e.target.value)
+              );
+              setCaseManagerId(user.id);
+            }}
+            sx={{ height: "35px" }}
           >
-            <MenuItem value={"mary"}>Mary</MenuItem>
-            <MenuItem value={"john"}>John</MenuItem>
-            <MenuItem value={"ryan"}>Ryan</MenuItem>
+            {Array.isArray(caseManager) &&
+              caseManager.map((cmr) => (
+                <MenuItem key={cmr.id} value={cmr.id}>
+                  {cmr.name}
+                </MenuItem>
+              ))}
           </Select>
         </FormControl>
 
         <FormControl fullWidth>
           <InputLabel
             id="localOfficeId"
-            sx={{ color: "#183084", fontWeight: "bold" }}
+            sx={{
+              color: "#183084",
+              fontWeight: "bold",
+              position: "absolute",
+              top: "50%",
+              transform: "translateY(-50%)",
+              left: "10px",
+              pointerEvents: "none",
+              transition: "all 0.2s ease-out",
+              "&.Mui-focused, &.MuiFormLabel-filled": {
+                top: "0",
+                transform: "translateY(1)",
+                fontSize: "10px",
+              },
+            }}
           >
             Local Office
           </InputLabel>
           <Select
             labelId="localOfficeId"
-            id="localOffice"
-            value={localOffice}
+            id="localOfficeId"
+            value={localOfficeId}
             label="Local Office"
-            onChange={(e) => setLocalOffice(e.target.value)}
-            sx={{ height: "45px" }}
+            onChange={(e) => {
+              const office = localOffice.find(
+                (s) => s.officeNum === Number(e.target.value)
+              );
+              setLocalOfficeId(office.officeNum);
+            }}
+            sx={{ height: "35px" }}
           >
-            <MenuItem value={"LO"}>LO</MenuItem>
+            {Array.isArray(localOffice) &&
+              localOffice.map((ofc) => (
+                <MenuItem value={ofc.officeNum}>{ofc.officeName}</MenuItem>
+              ))}
           </Select>
         </FormControl>
-        <FormControlLabel value="agency" control={<Radio />} label="Agency" sx={{
-          ".MuiFormControlLabel-label":{
-            color: "#183084", fontWeight: "bold"
-          }
-        }} />
+        <FormControlLabel
+          value="agency"
+          control={<Radio />}
+          label="Agency"
+          sx={{
+            ".MuiFormControlLabel-label": {
+              color: "#183084",
+              fontWeight: "bold",
+            },
+          }}
+        />
       </Box>
       <StatItem label="Caseload:" value={data.caseload} />
       <Stack direction="row">
@@ -186,14 +294,18 @@ const PerformanceMetrics = () => {
       </Box>
 
       <StatItem
-        label="Inadequate Work Searches:"
+        label="Inadequate WS-claimant:"
         value={data.inadequateWorkSearches}
       />
-      <StatItem label="Job Referrals made:" value={data.jobReferralsMade} />
       <StatItem
+        label="Inadequate WS-Weeks:"
+        value={data?.inadequateWorkSearchesWeeks} //Need to change
+      />
+      <StatItem label="Job Referrals:" value={data.jobReferralsMade} />
+      {/* <StatItem
         label="Training Referrals made:"
         value={data.trainingReferralsMade}
-      />
+      /> */}
       <Box textAlign={"right"}>
         <Link>Graphical View</Link>
       </Box>

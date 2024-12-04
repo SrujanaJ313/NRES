@@ -30,7 +30,7 @@ const Dashboard = () => {
     <Box>
       <Grid container sx={{ border: "2px solid #000" }}>
         <Grid item xs={12} sm={3} xl={3}>
-          <PerformanceMetrics />
+          <PerformanceMetrics userId={userId} />
         </Grid>
         <Grid item xs={12} sm={9} xl={9} maxHeight={"100%"} sx={{ padding: 1 }}>
           <Box>
