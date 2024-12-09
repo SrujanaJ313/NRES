@@ -16,9 +16,11 @@ import { styled } from "@mui/system";
 import {
   appointmentsLocalOfficeURL,
   appointmentsCaseManagerURL,
+  kpiSummaryURL,
 } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
 import { genericSortOptionsAlphabetically } from "../../../helpers/utils";
+import { BarChart } from "@mui/x-charts/BarChart";
 
 const Container = styled(Box)(({ theme }) => ({
   width: "100%",
@@ -65,12 +67,13 @@ const StatItem = ({ label, value, percentage }) => (
     </Grid>
     <Grid
       item
-      xs={!percentage ? 6 : 3}
+      xs={!percentage ?? 6}
       textAlign={!percentage ? "right" : "inherit"}
+      // backgroundColor="pink"
     >
       <Value>{value}</Value>
     </Grid>
-    {percentage && (
+    {percentage !== undefined && (
       <Grid item xs={3}>
         <Value>%</Value>
       </Grid>
@@ -79,28 +82,60 @@ const StatItem = ({ label, value, percentage }) => (
 );
 
 const PerformanceMetrics = ({ userId }) => {
-  const data = {
-    caseload: "#",
-    avgWeeksToEmployment: "#",
-    appointments: [
-      { label: "Completed:", value: "#", percentage: "#" },
-      { label: "Completed-RTW:", value: "#", percentage: "#" },
-      { label: "No Shows:", value: "#", percentage: "#" },
-      { label: "RTW:", value: "#", percentage: "#" },
-      { label: "Rescheduled:", value: "#", percentage: "#" },
-      { label: "Failed:", value: "#", percentage: "#" },
-      { label: "Remote:", value: "#", percentage: "#" },
-      { label: "In-person:", value: "#", percentage: "#" },
-    ],
-    inadequateWorkSearches: "#",
-    jobReferralsMade: "#",
-    trainingReferralsMade: "#",
-  };
   const [period, setPeriod] = useState(30);
   const [caseManager, setCaseManager] = useState([]);
   const [localOffice, setLocalOffice] = useState([]);
   const [caseManagerId, setCaseManagerId] = useState(userId || "");
   const [localOfficeId, setLocalOfficeId] = useState("");
+  const [kpiSummary, setKpiSummary] = useState({});
+  const [agency, setAgency] = useState("N");
+  const [isGraphicalView, setIsGraphicalView] = useState(false);
+  const data = {
+    caseload: kpiSummary?.caseLoad,
+    avgWksOfEmployment: kpiSummary?.avgWksOfEmployment,
+    appointments: [
+      {
+        label: "Completed:",
+        value: kpiSummary?.completedApptCount,
+        percentage: kpiSummary?.completedApptPercent,
+      },
+      {
+        label: "Completed-RTW:",
+        value: kpiSummary?.completedRTWApptCount,
+        percentage: kpiSummary?.completedRTWApptPercent,
+      },
+      {
+        label: "No Shows:",
+        value: kpiSummary?.noShowRTWCount,
+        percentage: kpiSummary?.noShowRTWPercent,
+      },
+      { label: "RTW:", value: "#", percentage: "#" },
+      {
+        label: "Rescheduled:",
+        value: kpiSummary?.noShowRescheduledCount,
+        percentage: kpiSummary?.noShowRescheduledPercent,
+      },
+      {
+        label: "Failed:",
+        value: kpiSummary?.noShowFailedCount,
+        percentage: kpiSummary?.noShowFailedPercent,
+      },
+      {
+        label: "Remote:",
+        value: kpiSummary?.remoteApptCount,
+        percentage: kpiSummary?.remoteApptPercent,
+      },
+      {
+        label: "In-person:",
+        value: kpiSummary?.inPersonApptCount,
+        percentage: kpiSummary?.inPersonApptPercent,
+      },
+    ],
+    inadequateWorkSearches: kpiSummary?.noOfInadequateWSCmts,
+    jobReferralsMade: kpiSummary?.noOfJobReferralsMade,
+    // trainingReferralsMade: kpiSummary?.noOfJobReferralsMade,
+  };
+
   const onPageLoadFields = {
     CaseManager: {
       url: appointmentsCaseManagerURL,
@@ -118,7 +153,7 @@ const PerformanceMetrics = ({ userId }) => {
     async function loadData(fieldName) {
       try {
         const { url, setData, propertyName } = onPageLoadFields[fieldName];
-        console.log(fieldName, { url, setData });
+        // console.log(fieldName, { url, setData });
         const data = await client.get(url);
         const sortedData = genericSortOptionsAlphabetically(data, propertyName);
         setData(sortedData);
@@ -132,14 +167,55 @@ const PerformanceMetrics = ({ userId }) => {
     );
   }, []);
 
+  useEffect(() => {
+    async function getKPISummary(payload) {
+      try {
+        const result = await client.get(kpiSummaryURL, payload);
+        setKpiSummary(result);
+      } catch (errorResponse) {
+        console.error("Error in getKPISummary", errorResponse);
+      }
+    }
+    if (caseManagerId && period) {
+      const payload = {
+        caseMgrId: caseManagerId,
+        periodRange: period,
+        lofId: localOffice || "",
+        agencySelectedInd: agency || "N",
+      };
+      getKPISummary(payload);
+    }
+  }, [caseManagerId, period, localOffice, agency]);
+
   const handlePeriodChange = (event) => {
     setPeriod(event.target.value);
   };
 
-  // const handleForChange = (event) => {
-  //   console.log('e val--->', event.target.value);
-  //   setCaseManager(event.target.value);
-  // };
+
+  if (isGraphicalView) {
+    return (
+      <Container>
+        <h1>Graphical View</h1>
+        <BarChart
+          xAxis={[
+            { scaleType: "band", data: ["group A", "group B", "group C"] },
+          ]}
+          series={[
+            { data: [4, 3, 5] },
+            { data: [1, 6, 3] },
+            { data: [2, 5, 6] },
+          ]}
+          width={300}
+          height={300}
+          barLabel="value"
+        />
+
+        <Box textAlign={"right"}>
+          <Link onClick={() => setIsGraphicalView((prev) => !prev)}>Back</Link>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container
@@ -242,13 +318,15 @@ const PerformanceMetrics = ({ userId }) => {
           >
             {Array.isArray(localOffice) &&
               localOffice.map((ofc) => (
-                <MenuItem value={ofc.officeNum}>{ofc.officeName}</MenuItem>
+                <MenuItem key={ofc.officeNum} value={ofc.officeNum}>
+                  {ofc.officeName}
+                </MenuItem>
               ))}
           </Select>
         </FormControl>
         <FormControlLabel
-          value="agency"
-          control={<Radio />}
+          value={agency}
+          control={<Radio onChange={() => setAgency("Y")} />}
           label="Agency"
           sx={{
             ".MuiFormControlLabel-label": {
@@ -279,7 +357,7 @@ const PerformanceMetrics = ({ userId }) => {
 
       <StatItem
         label="Avg weeks to employment:"
-        value={data.avgWeeksToEmployment}
+        value={data.avgWksOfEmployment}
       />
       <Label>Appointments</Label>
       <Box sx={{ display: "flex", flexDirection: "column", px: 2, gap: 1 }}>
@@ -307,7 +385,9 @@ const PerformanceMetrics = ({ userId }) => {
         value={data.trainingReferralsMade}
       /> */}
       <Box textAlign={"right"}>
-        <Link>Graphical View</Link>
+        <Link onClick={() => setIsGraphicalView((prev) => !prev)}>
+          Graphical View
+        </Link>
       </Box>
     </Container>
   );

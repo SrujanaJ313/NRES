@@ -52,6 +52,8 @@ const caseStageURL = `${baseApiUrl}${process.env.REACT_APP_CASE_STAGE}`;
 const caseTerminationReasonURL = `${baseApiUrl}${process.env.REACT_APP_CASE_TERMINATION_REASON}`;
 const caseLookUpSummaryURL = `${baseApiUrl}${process.env.REACT_APP_CASE_LOOK_UP_SUMMARY}`;
 
+const kpiSummaryURL = `${baseApiUrl}${process.env.REACT_APP_CASE_KPI_SUMMARY}`;
+
 export {
   baseApiUrl,
   validateJWTURL,
@@ -97,5 +99,7 @@ export {
   caseStageURL,
   caseTerminationReasonURL,
   caseLookUpSummaryURL,
+
+  kpiSummaryURL
 };
 
