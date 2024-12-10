@@ -20,7 +20,6 @@ import {
 } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
 import { genericSortOptionsAlphabetically } from "../../../helpers/utils";
-import { BarChart } from "@mui/x-charts/BarChart";
 
 const Container = styled(Box)(({ theme }) => ({
   width: "100%",
@@ -31,7 +30,7 @@ const Container = styled(Box)(({ theme }) => ({
   backgroundColor: "#f5f5f5",
   display: "flex",
   flexDirection: "column",
-  gap: theme.spacing(2),
+  gap: theme.spacing(1),
 }));
 
 const Header = styled(Typography)(({ theme }) => ({
@@ -50,30 +49,29 @@ const Value = styled(Box)(({ theme }) => ({
   color: "#000",
 }));
 
-const Link = styled(Typography)(({ theme }) => ({
-  color: "#183084",
-  cursor: "pointer",
-  textDecoration: "underline",
-  marginTop: theme.spacing(2),
-  "&:hover": {
-    textDecoration: "none",
-  },
-}));
+// const Link = styled(Typography)(({ theme }) => ({
+//   color: "#183084",
+//   cursor: "pointer",
+//   textDecoration: "underline",
+//   marginTop: theme.spacing(2),
+//   "&:hover": {
+//     textDecoration: "none",
+//   },
+// }));
 
 const StatItem = ({ label, value, percentage }) => (
-  <Grid container spacing={1} alignItems="center">
+  <Grid container spacing={0.9} alignItems="center">
     <Grid item xs={6}>
       <Label>{label}</Label>
     </Grid>
     <Grid
       item
-      xs={!percentage ?? 6}
+      xs={!percentage ? 6 : 3}
       textAlign={!percentage ? "right" : "inherit"}
-      // backgroundColor="pink"
     >
       <Value>{value}</Value>
     </Grid>
-    {percentage !== undefined && (
+    {!!percentage && (
       <Grid item xs={3}>
         <Value>%</Value>
       </Grid>
@@ -88,8 +86,7 @@ const PerformanceMetrics = ({ userId }) => {
   const [caseManagerId, setCaseManagerId] = useState(userId || "");
   const [localOfficeId, setLocalOfficeId] = useState("");
   const [kpiSummary, setKpiSummary] = useState({});
-  const [agency, setAgency] = useState("N");
-  const [isGraphicalView, setIsGraphicalView] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("");
   const data = {
     caseload: kpiSummary?.caseLoad,
     avgWksOfEmployment: kpiSummary?.avgWksOfEmployment,
@@ -105,11 +102,13 @@ const PerformanceMetrics = ({ userId }) => {
         percentage: kpiSummary?.completedRTWApptPercent,
       },
       {
-        label: "No Shows:",
+        label: "No Shows",
+      },
+      {
+        label: "RTW:",
         value: kpiSummary?.noShowRTWCount,
         percentage: kpiSummary?.noShowRTWPercent,
       },
-      { label: "RTW:", value: "#", percentage: "#" },
       {
         label: "Rescheduled:",
         value: kpiSummary?.noShowRescheduledCount,
@@ -153,7 +152,6 @@ const PerformanceMetrics = ({ userId }) => {
     async function loadData(fieldName) {
       try {
         const { url, setData, propertyName } = onPageLoadFields[fieldName];
-        // console.log(fieldName, { url, setData });
         const data = await client.get(url);
         const sortedData = genericSortOptionsAlphabetically(data, propertyName);
         setData(sortedData);
@@ -176,51 +174,40 @@ const PerformanceMetrics = ({ userId }) => {
         console.error("Error in getKPISummary", errorResponse);
       }
     }
-    if (caseManagerId && period) {
-      const payload = {
-        caseMgrId: caseManagerId,
-        periodRange: period,
-        lofId: localOffice || "",
-        agencySelectedInd: agency || "N",
-      };
-      getKPISummary(payload);
+    if (!period) {
+      return;
     }
-  }, [caseManagerId, period, localOffice, agency]);
+    let payload = {
+      periodRange: period,
+    };
+    if (selectedOption === "Agency") {
+      payload["agencySelectedInd"] = "Y";
+      getKPISummary(payload);
+    } else if (selectedOption === "CaseManager" && caseManagerId) {
+      payload["caseMgrId"] = caseManagerId;
+      getKPISummary(payload);
+    } else if (selectedOption === "LocalOffice" && localOfficeId) {
+      payload["lofId"] = localOfficeId;
+      getKPISummary(payload);
+    } else {
+      return;
+    }
+  }, [caseManagerId, localOfficeId, period, selectedOption]);
 
   const handlePeriodChange = (event) => {
     setPeriod(event.target.value);
   };
 
-
-  if (isGraphicalView) {
-    return (
-      <Container>
-        <h1>Graphical View</h1>
-        <BarChart
-          xAxis={[
-            { scaleType: "band", data: ["group A", "group B", "group C"] },
-          ]}
-          series={[
-            { data: [4, 3, 5] },
-            { data: [1, 6, 3] },
-            { data: [2, 5, 6] },
-          ]}
-          width={300}
-          height={300}
-          barLabel="value"
-        />
-
-        <Box textAlign={"right"}>
-          <Link onClick={() => setIsGraphicalView((prev) => !prev)}>Back</Link>
-        </Box>
-      </Container>
-    );
-  }
+  const handleRadioChange = (e) => {
+    setSelectedOption(e.target.value);
+    setCaseManagerId("");
+    setLocalOfficeId("");
+  };
 
   return (
     <Container
       sx={{
-        height: "calc(100% - 8.2rem)",
+        height: "calc(100% - 5.1rem)",
         overflowY: "auto",
         "&::-webkit-scrollbar": {
           width: "5px",
@@ -238,103 +225,124 @@ const PerformanceMetrics = ({ userId }) => {
       }}
     >
       <Header variant="h6">Key Performance Metrics</Header>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-        <FormControl fullWidth>
-          <InputLabel
-            id="caseManagerId"
-            sx={{
-              color: "#183084",
-              fontWeight: "bold",
-              position: "absolute",
-              top: "50%",
-              transform: "translateY(-50%)",
-              left: "10px",
-              pointerEvents: "none",
-              transition: "all 0.2s ease-out",
-              "&.Mui-focused, &.MuiFormLabel-filled": {
-                top: "0",
-                transform: "translateY(1)",
-                fontSize: "10px",
-              },
-            }}
-          >
-            Case Manager
-          </InputLabel>
-          <Select
-            labelId="caseManagerId"
-            id="caseManagerId"
-            value={caseManagerId}
-            label="Case Manager"
-            onChange={(e) => {
-              const user = caseManager.find(
-                (s) => s.id === Number(e.target.value)
-              );
-              setCaseManagerId(user.id);
-            }}
-            sx={{ height: "35px" }}
-          >
-            {Array.isArray(caseManager) &&
-              caseManager.map((cmr) => (
-                <MenuItem key={cmr.id} value={cmr.id}>
-                  {cmr.name}
-                </MenuItem>
-              ))}
-          </Select>
-        </FormControl>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <RadioGroup value={selectedOption} onChange={handleRadioChange}>
+          <Box display="flex" alignItems="center" mb={1}>
+            <FormControlLabel
+              value="CaseManager"
+              control={<Radio />}
+              label=""
+              sx={{ marginRight: 0 }}
+            />
+            <FormControl fullWidth disabled={selectedOption !== "CaseManager"}>
+              <InputLabel
+                id="caseManagerId"
+                sx={{
+                  color: "#183084",
+                  fontWeight: "bold",
+                  position: "absolute",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  left: "10px",
+                  pointerEvents: "none",
+                  transition: "all 0.2s ease-out",
+                  "&.Mui-focused, &.MuiFormLabel-filled": {
+                    top: "0",
+                    transform: "translateY(1)",
+                    fontSize: "10px",
+                  },
+                }}
+              >
+                Case Manager
+              </InputLabel>
+              <Select
+                labelId="caseManagerId"
+                id="caseManagerId"
+                value={caseManagerId}
+                label="Case Manager"
+                onChange={(e) => {
+                  const user = caseManager.find(
+                    (s) => s.id === Number(e.target.value)
+                  );
+                  setCaseManagerId(user.id);
+                }}
+                sx={{ height: "35px" }}
+              >
+                {Array.isArray(caseManager) &&
+                  caseManager.map((cmr) => (
+                    <MenuItem key={cmr.id} value={cmr.id}>
+                      {cmr.name}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+          </Box>
 
-        <FormControl fullWidth>
-          <InputLabel
-            id="localOfficeId"
-            sx={{
-              color: "#183084",
-              fontWeight: "bold",
-              position: "absolute",
-              top: "50%",
-              transform: "translateY(-50%)",
-              left: "10px",
-              pointerEvents: "none",
-              transition: "all 0.2s ease-out",
-              "&.Mui-focused, &.MuiFormLabel-filled": {
-                top: "0",
-                transform: "translateY(1)",
-                fontSize: "10px",
-              },
-            }}
-          >
-            Local Office
-          </InputLabel>
-          <Select
-            labelId="localOfficeId"
-            id="localOfficeId"
-            value={localOfficeId}
-            label="Local Office"
-            onChange={(e) => {
-              const office = localOffice.find(
-                (s) => s.officeNum === Number(e.target.value)
-              );
-              setLocalOfficeId(office.officeNum);
-            }}
-            sx={{ height: "35px" }}
-          >
-            {Array.isArray(localOffice) &&
-              localOffice.map((ofc) => (
-                <MenuItem key={ofc.officeNum} value={ofc.officeNum}>
-                  {ofc.officeName}
-                </MenuItem>
-              ))}
-          </Select>
-        </FormControl>
-        <FormControlLabel
-          value={agency}
-          control={<Radio onChange={() => setAgency("Y")} />}
-          label="Agency"
-          sx={{
-            ".MuiFormControlLabel-label": {
-              color: "#183084",
-              fontWeight: "bold",
-            },
-          }}
-        />
+          <Box display="flex" alignItems="center" mb={0.1}>
+            <FormControlLabel
+              value="LocalOffice"
+              control={<Radio />}
+              label=""
+              sx={{ marginRight: 0 }}
+            />
+            <FormControl fullWidth disabled={selectedOption !== "LocalOffice"}>
+              <InputLabel
+                id="localOfficeId"
+                sx={{
+                  color: "#183084",
+                  fontWeight: "bold",
+                  position: "absolute",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  left: "10px",
+                  pointerEvents: "none",
+                  transition: "all 0.2s ease-out",
+                  "&.Mui-focused, &.MuiFormLabel-filled": {
+                    top: "0",
+                    transform: "translateY(1)",
+                    fontSize: "10px",
+                  },
+                }}
+              >
+                Local Office
+              </InputLabel>
+              <Select
+                labelId="localOfficeId"
+                id="localOfficeId"
+                value={localOfficeId}
+                label="Local Office"
+                onChange={(e) => {
+                  const office = localOffice.find(
+                    (s) => s.officeNum === Number(e.target.value)
+                  );
+                  setLocalOfficeId(office.officeNum);
+                }}
+                sx={{ height: "35px" }}
+              >
+                {Array.isArray(localOffice) &&
+                  localOffice.map((ofc) => (
+                    <MenuItem key={ofc.officeNum} value={ofc.officeNum}>
+                      {ofc.officeName}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          <Box display="flex" alignItems="center">
+            <FormControlLabel
+              value="Agency"
+              control={<Radio />}
+              label="Agency"
+              sx={{
+                ".MuiFormControlLabel-label": {
+                  color: "#183084",
+                  fontWeight: "bold",
+                },
+              }}
+            />
+          </Box>
+        </RadioGroup>
       </Box>
       <StatItem label="Caseload:" value={data.caseload} />
       <Stack direction="row">
@@ -360,7 +368,7 @@ const PerformanceMetrics = ({ userId }) => {
         value={data.avgWksOfEmployment}
       />
       <Label>Appointments</Label>
-      <Box sx={{ display: "flex", flexDirection: "column", px: 2, gap: 1 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", px: 1.5, gap: 0.7 }}>
         {data.appointments.map((item) => (
           <StatItem
             key={item.label}
@@ -384,11 +392,11 @@ const PerformanceMetrics = ({ userId }) => {
         label="Training Referrals made:"
         value={data.trainingReferralsMade}
       /> */}
-      <Box textAlign={"right"}>
-        <Link onClick={() => setIsGraphicalView((prev) => !prev)}>
+      {/* <Box textAlign={"right"}>
+        <Link>
           Graphical View
         </Link>
-      </Box>
+      </Box> */}
     </Container>
   );
 };
