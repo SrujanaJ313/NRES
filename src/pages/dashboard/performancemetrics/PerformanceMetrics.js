@@ -100,7 +100,7 @@ const PerformanceMetrics = ({ userId }) => {
         label: "Completed-RTW:",
         value: kpiSummary?.completedRTWApptCount,
         percentage: kpiSummary?.completedRTWApptPercent,
-      }
+      },
     ],
     noShows: [
       {
@@ -131,6 +131,7 @@ const PerformanceMetrics = ({ userId }) => {
     ],
     inadequateWorkSearches: kpiSummary?.noOfInadequateWSCmts,
     jobReferralsMade: kpiSummary?.noOfJobReferralsMade,
+    inadequateWSWeeks: kpiSummary?.noOfInadequateWSWeeks
     // trainingReferralsMade: kpiSummary?.noOfJobReferralsMade,
   };
 
@@ -167,7 +168,10 @@ const PerformanceMetrics = ({ userId }) => {
   useEffect(() => {
     async function getKPISummary(payload) {
       try {
-        const result = await client.get(kpiSummaryURL, payload);
+        const result =
+          process.env.REACT_APP_ENV === "mockserver"
+            ? await client.get(kpiSummaryURL, payload)
+            : await client.post(kpiSummaryURL, payload);
         setKpiSummary(result);
       } catch (errorResponse) {
         console.error("Error in getKPISummary", errorResponse);
@@ -202,6 +206,7 @@ const PerformanceMetrics = ({ userId }) => {
     setCaseManagerId("");
     setLocalOfficeId("");
   };
+  console.log('data?.noOfInadequateWSWeeks-->',data?.noOfInadequateWSWeeks);
 
   return (
     <Container
@@ -396,7 +401,7 @@ const PerformanceMetrics = ({ userId }) => {
       />
       <StatItem
         label="Inadequate WS-Weeks:"
-        value={data?.inadequateWorkSearchesWeeks} //Need to change
+        value={data?.inadequateWSWeeks} //Need to change
       />
       <StatItem label="Job Referrals:" value={data.jobReferralsMade} />
       {/* <StatItem
