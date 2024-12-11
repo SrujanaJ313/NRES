@@ -101,6 +101,11 @@ const PerformanceMetrics = ({ userId }) => {
         value: kpiSummary?.completedRTWApptCount,
         percentage: kpiSummary?.completedRTWApptPercent,
       },
+      // {
+      //   label: "Scheduled:",
+      //   value: kpiSummary?.scheduledCount,
+      //   percentage: kpiSummary?.scheduledPercent,
+      // },
     ],
     noShows: [
       {
@@ -371,6 +376,7 @@ const PerformanceMetrics = ({ userId }) => {
         label="Avg weeks to employment:"
         value={data.avgWksOfEmployment}
       />
+      {/* <Label>Appointments:<span style={{ display:'inline-block', width:"50%", textAlign: 'center', paddingLeft:"5px"}}>{kpiSummary?.totalApptCount}</span></Label> */}
       <Label>Appointments</Label>
       <Box sx={{ display: "flex", flexDirection: "column", px: 1.5, gap: 0.7 }}>
         {data.appointments.map((item) => (
