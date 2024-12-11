@@ -66,21 +66,21 @@ const StatItem = ({ label, value, percentage }) => (
     </Grid>
     <Grid
       item
-      xs={!percentage ? 6 : 3}
-      textAlign={!percentage ? "right" : "inherit"}
+      xs={!percentage?.toString() ? 0.6 : 3}
+      textAlign={!percentage?.toString() ? "right" : "inherit"}
     >
       <Value>{value}</Value>
     </Grid>
-    {!!percentage && (
+    {percentage?.toString() && (
       <Grid item xs={3}>
-        <Value>%</Value>
+        <Value>{percentage}%</Value>
       </Grid>
     )}
   </Grid>
 );
 
 const PerformanceMetrics = ({ userId }) => {
-  const [period, setPeriod] = useState(30);
+  const [period, setPeriod] = useState("THREE_MONTHS");
   const [caseManager, setCaseManager] = useState([]);
   const [localOffice, setLocalOffice] = useState([]);
   const [caseManagerId, setCaseManagerId] = useState(userId || "");
@@ -100,10 +100,9 @@ const PerformanceMetrics = ({ userId }) => {
         label: "Completed-RTW:",
         value: kpiSummary?.completedRTWApptCount,
         percentage: kpiSummary?.completedRTWApptPercent,
-      },
-      {
-        label: "No Shows",
-      },
+      }
+    ],
+    noShows: [
       {
         label: "RTW:",
         value: kpiSummary?.noShowRTWCount,
@@ -356,9 +355,9 @@ const PerformanceMetrics = ({ userId }) => {
             onChange={handlePeriodChange}
             fullWidth
           >
-            <MenuItem value={30}>30 days</MenuItem>
-            <MenuItem value={60}>60 days</MenuItem>
-            <MenuItem value={90}>90 days</MenuItem>
+            <MenuItem value={"THREE_MONTHS"}>3 Months</MenuItem>
+            <MenuItem value={"SIX_MONTHS"}>6 Months</MenuItem>
+            <MenuItem value={"ONE_YEAR"}>1 Year</MenuItem>
           </Select>
         </Stack>
       </Stack>
@@ -370,6 +369,18 @@ const PerformanceMetrics = ({ userId }) => {
       <Label>Appointments</Label>
       <Box sx={{ display: "flex", flexDirection: "column", px: 1.5, gap: 0.7 }}>
         {data.appointments.map((item) => (
+          <StatItem
+            key={item.label}
+            label={item.label}
+            value={item.value}
+            percentage={item.percentage}
+          />
+        ))}
+      </Box>
+
+      <Label>No Shows</Label>
+      <Box sx={{ display: "flex", flexDirection: "column", px: 1.5, gap: 0.7 }}>
+        {data.noShows.map((item) => (
           <StatItem
             key={item.label}
             label={item.label}
