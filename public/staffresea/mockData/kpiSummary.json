@@ -1,0 +1,23 @@
+{
+  "caseLoad": 347,
+  "avgWksOfEmployment": 13.69,
+  "totalApptCount": 455,
+  "completedApptCount": 262,
+  "completedApptPercent": 58.00,
+  "completedRTWApptCount": 6,
+  "completedRTWApptPercent": 1.00,
+  "scheduledCount": 186,
+  "scheduledPercent": 41.00,
+  "noShowRTWCount": 0,
+  "noShowRescheduledCount": 1,
+  "noShowRescheduledPercent": 0.00,
+  "noShowFailedCount": 1,
+  "noShowFailedPercent": 0.00,
+  "remoteApptCount": 172,
+  "remoteApptPercent": 38.00,
+  "inPersonApptCount": 283,
+  "inPersonApptPercent": 62.00,
+  "noOfInadequateWSCmts": 4,
+  "noOfInadequateWSWeeks": 6,
+  "noOfJobReferralsMade": 85
+}

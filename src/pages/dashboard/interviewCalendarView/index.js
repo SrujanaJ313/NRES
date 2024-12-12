@@ -47,7 +47,6 @@ function InterviewCalendarView({ userId, userName }) {
           process.env.REACT_APP_ENV === "mockserver"
             ? await client.get(caseHeaderURL)
             : await client.get(`${caseHeaderURL}/${event.eventId}`);
-        console.log("response--->", response);
         setCaseDetails(response);
         setEvent(event);
         setOpen(true);
@@ -78,7 +77,7 @@ function InterviewCalendarView({ userId, userName }) {
         process.env.REACT_APP_ENV === "mockserver"
           ? await client.get(calendarDetailsURL)
           : await client.post(calendarDetailsURL, payload);
-      console.log("response-->", response);
+      //console.log("response-->", response);
       const data = response.map((event) => {
         const startDate = moment(
           `${event.appointmentDt} ${event.startTime}`,

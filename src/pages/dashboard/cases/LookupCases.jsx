@@ -114,12 +114,12 @@ function LookupCases({ setLookUpSummary }) {
           setErrorMessages(["At least one field needs to be selected"]);
           return;
         }
-        console.log("submited payload-->\n", payload);
+        //console.log("submited payload-->\n", payload);
         const result = await client.post(caseLookUpSummaryURL, payload);
         setLookUpSummary(result);
         showSnackbar("Request has been submitted successfully.", 5000);
       } catch (errorResponse) {
-        console.log("errorResponse-->\n", errorResponse);
+        //console.log("errorResponse-->\n", errorResponse);
         const newErrMsgs = getMsgsFromErrorCode(
           `POST:${process.env.REACT_APP_APPOINTMENTS_LOOK_UP_SUMMARY}`,
           errorResponse
@@ -183,9 +183,9 @@ function LookupCases({ setLookUpSummary }) {
   }, []);
 
 
-  console.log("formik errors--->", formik.errors);
+  //console.log("formik errors--->", formik.errors);
 
-  // console.log('Touched state:', formik.touched);
+  // //console.log('Touched state:', formik.touched);
 
 
   const ErrorMessage = (fieldName, styleProps) => {

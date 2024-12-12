@@ -1,0 +1,18 @@
+[
+  {
+    "id": 5629,
+    "desc": "Available"
+  },
+  {
+    "id": 5628,
+    "desc": "Do not schedule"
+  },
+  {
+    "id": 5630,
+    "desc": "In Use"
+  },
+  {
+    "id": 5631,
+    "desc": "Unused"
+  }
+]

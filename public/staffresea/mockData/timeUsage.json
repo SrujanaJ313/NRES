@@ -1,0 +1,22 @@
+[
+  {
+    "id": 5632,
+    "desc": "Initial Appointment"
+  },
+  {
+    "id": 5633,
+    "desc": "1st Subsequent Appointment"
+  },
+  {
+    "id": 5634,
+    "desc": "2nd Subsequent Appointment"
+  },
+  {
+    "id": 5636,
+    "desc": "State Holiday"
+  },
+  {
+    "id": 5635,
+    "desc": "Time-Off"
+  }
+]

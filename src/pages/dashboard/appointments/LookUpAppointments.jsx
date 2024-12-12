@@ -141,14 +141,14 @@ function LookUpAppointments({ setLookUpSummary, setReqPayload }) {
           pageSize: 10,
           needTotalCount: true,
         };
-        console.log("submited payload-->\n", payload);
+        //console.log("submited payload-->\n", payload);
         return;
         setReqPayload(payload);
         const result = await client.post(appointmentsLookUpSummaryURL, payload);
         setLookUpSummary([result]);
         showSnackbar("Request has been submitted successfully.", 5000);
       } catch (errorResponse) {
-        console.log("errorResponse-->\n", errorResponse);
+        //console.log("errorResponse-->\n", errorResponse);
         const newErrMsgs = getMsgsFromErrorCode(
           `POST:${process.env.REACT_APP_APPOINTMENTS_LOOK_UP_SUMMARY}`,
           errorResponse

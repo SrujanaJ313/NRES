@@ -18,7 +18,7 @@ import { getIsPastAppointment } from "../../../helpers/utils";
 
 function ScheduleEvent({ caseDetails, event, onSubmitClose }) {
   const [type, setType] = useState("");
-  console.log('caseDetails-->', caseDetails.reopenAccess);
+  //console.log('caseDetails-->', caseDetails.reopenAccess);
   const getTitle = () => {
     switch (type) {
       case "reschedule":

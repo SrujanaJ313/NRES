@@ -81,7 +81,9 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
         jmsReferralInd: "N",
         jmsResumeOffInd: "N",
       };
+      
       const employmentStartDt = convertISOToMMDDYYYY(values.employmentStartDt);
+      return;
       const userId = getCookieItem(CookieNames.USER_ID);
 
       if (!isFutureDate) {
@@ -145,7 +147,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
             epChecklistUploadInd: data.epChecklistUploadInd || "",
           });
         }
-        setIsViewMode(data.rtwMode === "View");
+        setIsViewMode(data.rtwMode !== "View");
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
           `GET:${process.env.REACT_APP_RETURN_TO_WORK_GET}`,
@@ -656,7 +658,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
             variant="contained"
             color="primary"
             type="submit"
-            disabled={!isUpdateAccessExist() || isViewMode}
+            // disabled={!isUpdateAccessExist() || isViewMode}
           >
             Submit
           </Button>

@@ -138,7 +138,6 @@ const CaseloadMetrics = React.memo(
             process.env.REACT_APP_ENV === "mockserver"
               ? await client.get(appointmentStaffListURL)
               : await client.get(appointmentStaffListURL);
-          console.log('REACT_APP_APPOINTMENT_STAFF_LIST-->', data);
           const sortedData = sortAlphabetically(data);
           setAppointmentStaffList(sortedData);
         } catch (errorResponse) {

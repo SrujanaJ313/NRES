@@ -46,7 +46,7 @@ function Issues({ formik, caseDetails, disableForm }) {
   }, []);
 
   useEffect(() => {
-    console.log('values.otherIssues-->', values.otherIssues);
+    //console.log('values.otherIssues-->', values.otherIssues);
     if (disableForm) {
       [...values.otherIssues].forEach((issue) => {
         fetchSubIssuesList(issue.issueType);
@@ -149,7 +149,7 @@ function Issues({ formik, caseDetails, disableForm }) {
 
       <Stack mt={1.2}>
         {values.otherIssues?.map((row, index) => {
-           console.log('row.issueSubType value-->', row.issueSubType, typeof row.issueSubType);
+           //console.log('row.issueSubType value-->', row.issueSubType, typeof row.issueSubType);
         return (
           <Stack
             key={index}
@@ -217,8 +217,8 @@ function Issues({ formik, caseDetails, disableForm }) {
                     }
                   >
                     {subIssues[row.issueType]?.map((subIssue) => {
-                      console.log('type of row', typeof row.issueSubType);
-                      console.log('type of subIssue', typeof subIssue.issueId);
+                      //console.log('type of row', typeof row.issueSubType);
+                      //console.log('type of subIssue', typeof subIssue.issueId);
                       return (
                       <MenuItem key={subIssue.issueId} value={subIssue.issueId}>
                         {subIssue.issueDesc}
