@@ -13,16 +13,17 @@ import {
   Button,
   Stack,
   FormGroup,
-  Checkbox
+  Checkbox,
+  Box
 } from "@mui/material";
 import {
-  caseManagerAvailabilityURL,
-  reassignCaseOfficeNameURL,
   reassignSaveURL,
+  scheduleLocalOfficeURL,
+  scheduleCaseManagerAvlURL,
 } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
 import { useFormik } from "formik";
-// import { reAssignPageValidationSchema } from "../../../helpers/Validation";
+import { schedulePageValidationSchema } from "../../../helpers/Validation";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
 import { isUpdateAccessExist } from "../../../utils/cookies";
 import { useSnackbar } from "../../../context/SnackbarContext";
@@ -30,7 +31,6 @@ import MoreTimeIcon from "@mui/icons-material/MoreTime";
 
 function Schedule({ onCancel, selectedRow, event }) {
   const showSnackbar = useSnackbar();
-
   const [errors, setErrors] = useState([]);
   const [caseMgrAvl, setCaseMgrAvl] = useState([]);
   const [caseOfficeName, setCaseOfficeName] = useState("");
@@ -45,9 +45,9 @@ function Schedule({ onCancel, selectedRow, event }) {
           event?.usageDesc === "Initial Appointment" ? true : false,
         selectedPrefMtgModeVirtual: false,
       },
-      beyond21DaysInd:""
+      beyond21DaysInd: "",
     },
-    // validationSchema: reAssignPageValidationSchema,
+    validationSchema: () => schedulePageValidationSchema(formik.values.mode),
     onSubmit: async (values) => {
       try {
         const { reassignReasonCd, staffNotes, localOffice, caseManagerAvl } =
@@ -70,52 +70,62 @@ function Schedule({ onCancel, selectedRow, event }) {
         setErrors(newErrMsgs);
       }
     },
-    validateOnChange: false,
+    validateOnChange: true,
     validateOnBlur: false,
   });
 
   useEffect(() => {
     async function fetchCaseManagerAvailibility() {
       try {
+        const payload = {
+          clmId: selectedRow?.clmId || 7142098,
+          clmLofInd: formik.values.localOffice,
+          showBeyondReseaDeadlineInd: formik.values.beyond21DaysInd ,
+          meetingModeInperson: formik.values.mode.selectedPrefMtgModeInPerson
+            ? "I"
+            : "",
+          meetingModeVirtual: formik.values.mode.selectedPrefMtgModeVirtual
+            ? "V"
+            : "",
+        };
         const data =
           process.env.REACT_APP_ENV === "mockserver"
-            ? await client.get(caseManagerAvailabilityURL)
-            : await client.get(
-                `${caseManagerAvailabilityURL}${selectedRow.caseNum}/${formik.values.localOffice}`
-              );
+            ? await client.get(scheduleCaseManagerAvlURL)
+            : await client.post(scheduleCaseManagerAvlURL, payload);
 
-        // setCaseMgrAvl(data);
         const result = data.map((item) => {
           const [name, office, dateTime, caseLoad] = item.name.split(" - ");
           return { ...item, nameList: { name, office, dateTime, caseLoad } };
         });
+        // console.log("result---->", result);
         setCaseMgrAvl(result);
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
-          `GET:${process.env.REACT_APP_REASSIGN_CASE_MANAGER_AVAILABILITY}`,
+          `GET:${process.env.REACT_APP_CASE_SCHEDULE_CASE_MANAGER_AVL_LIST}`, //Need to add in Error Constants
           errorResponse
         );
         setErrors(newErrMsgs);
       }
     }
-    if (formik.values.localOffice) {
+    if (
+      formik.values.mode.selectedPrefMtgModeInPerson ||
+      formik.values.mode.selectedPrefMtgModeVirtual
+    ) {
+      console.log("triggered manager");
       fetchCaseManagerAvailibility();
     }
-  }, [formik.values.localOffice]);
+  }, [formik.values.localOffice,formik.values.localOffice,formik.values.mode]);
 
   useEffect(() => {
     async function fetchCaseOfficeName() {
       try {
-        const data =
-          process.env.REACT_APP_ENV === "mockserver"
-            ? await client.get(reassignCaseOfficeNameURL)
-            : await client.get(
-                `${reassignCaseOfficeNameURL}${selectedRow.caseNum}`
-              );
+        const data = await client.get(
+          `${scheduleLocalOfficeURL}${selectedRow.clmId || ""}`
+        );
         setCaseOfficeName(data);
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
-          `GET:${process.env.REACT_APP_REASSIGN_CASE_OFFICE_NAME}`,
+          `GET:${process.env.REACT_APP_CASE_SCHEDULE_LOCAL_OFFICE}`, //Need to add in Error Constants
           errorResponse
         );
         setErrors(newErrMsgs);
@@ -133,16 +143,13 @@ function Schedule({ onCancel, selectedRow, event }) {
       selectedModes[name] = checked;
       formik.setFieldValue("mode", selectedModes);
     }
-   
   };
 
   return (
     <form onSubmit={formik.handleSubmit}>
       <Stack spacing={2}>
         <Stack direction={"column"} spacing={2}>
-          <Stack
-            direction="row"
-          >
+          <Stack direction="row">
             <FormControl
               component="fieldset"
               error={
@@ -177,13 +184,14 @@ function Schedule({ onCancel, selectedRow, event }) {
                   value="N"
                   control={<Radio />}
                   label="All other local offices"
+                  // sx={{ backgroundColor:"pink"}}
                 />
               </RadioGroup>
               <Typography
                 sx={{
                   alignSelf: "center",
                   color: "#ab0c0c",
-                  marginLeft: 0,
+                  marginLeft: "-15px",
                 }}
               >
                 (as virtual meetings only)
@@ -195,11 +203,9 @@ function Schedule({ onCancel, selectedRow, event }) {
               </FormHelperText>
             )}
           </Stack>
-          
+
           <Stack>
-            <FormControl
-              sx={{display: "flex", flexDirection: "row" }}
-            >
+            <FormControl sx={{ display: "flex", flexDirection: "row" }}>
               <Typography
                 sx={{
                   width: "20%",
@@ -208,7 +214,7 @@ function Schedule({ onCancel, selectedRow, event }) {
               >
                 *Preferred Meeting Modes:
               </Typography>
-              <FormGroup row >
+              <FormGroup row>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -251,24 +257,27 @@ function Schedule({ onCancel, selectedRow, event }) {
           </Stack>
 
           <Stack>
-          <FormControl sx={{ display: "flex", flexDirection: "row", justifyContent:"flex-start" }}
-            >
-          <Checkbox
-              checked={formik.values.beyond21DaysInd === "Y"}
-              onChange={(event) => {
-                formik.setFieldValue(
-                  "beyond21DaysInd",
-                  event.target.checked ? "Y" : "N"
-                );
-                setErrorMessages([]);
+            <FormControl
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-start",
               }}
-              sx={{ padding:"0px"}}
-            />
-            <Typography
-              sx={{alignSelf: "center", paddingLeft:"10px" }}
             >
-              Appointment Beyond 21 days
-            </Typography>
+              <Checkbox
+                checked={formik.values.beyond21DaysInd === "Y"}
+                onChange={(event) => {
+                  formik.setFieldValue(
+                    "beyond21DaysInd",
+                    event.target.checked ? "Y" : ""
+                  );
+                  setErrors([]);
+                }}
+                sx={{ padding: "0px" }}
+              />
+              <Typography sx={{ alignSelf: "center", paddingLeft: "10px" }}>
+                Include appointments that are beyond 21 days after the prior appointment
+              </Typography>
             </FormControl>
           </Stack>
 
@@ -284,6 +293,45 @@ function Schedule({ onCancel, selectedRow, event }) {
                 onBlur={formik.handleBlur}
                 name="caseManagerAvl"
                 sx={{ width: "70%" }}
+                renderValue={(selected) => {
+                  const selectedReason = caseMgrAvl.find(
+                    (reason) => reason.id === selected
+                  );
+                  return (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-around",
+                        alignItems: "center",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      <span style={{ width: "20ch", textAlign: "left" }}>
+                        {selectedReason?.nameList.name}
+                      </span>
+                      <span style={{ width: "25ch", textAlign: "left" }}>
+                        {selectedReason?.nameList.office}
+                      </span>
+                      <span style={{ width: "25ch", textAlign: "left" }}>
+                        {selectedReason?.nameList.dateTime}
+                      </span>
+
+                      <span style={{ width: "20ch", textAlign: "left" }}>
+                        {selectedReason?.nameList.caseLoad}
+                      </span>
+                      {selectedReason?.beyondReseaDeadline === "Y" && (
+                        <span style={{ color: "blue", marginLeft: "auto" }}>
+                          {/* <MoreTimeIcon
+                            style={{ color: "#364da2", fontSize: "small" }}
+                          /> */}{" "}
+                          &gt;21
+                        </span>
+                      )}
+                    </Box>
+                  );
+                }}
               >
                 {caseMgrAvl?.map((reason) => (
                   <MenuItem
@@ -343,9 +391,10 @@ function Schedule({ onCancel, selectedRow, event }) {
 
                     {reason.beyondReseaDeadline === "Y" && (
                       <span style={{ color: "blue", marginLeft: "auto" }}>
-                        <MoreTimeIcon
+                        {/* <MoreTimeIcon
                           style={{ color: "#364da2", fontSize: "small" }}
-                        />
+                        /> */}{" "}
+                        &gt;21
                       </span>
                     )}
                   </MenuItem>
@@ -403,3 +452,4 @@ function Schedule({ onCancel, selectedRow, event }) {
 }
 
 export default Schedule;
+

@@ -54,6 +54,9 @@ const caseLookUpSummaryURL = `${baseApiUrl}${process.env.REACT_APP_CASE_LOOK_UP_
 
 const kpiSummaryURL = `${baseApiUrl}${process.env.REACT_APP_CASE_KPI_SUMMARY}`;
 
+const scheduleLocalOfficeURL = `${baseApiUrl}${process.env.REACT_APP_CASE_SCHEDULE_LOCAL_OFFICE}`;
+const scheduleCaseManagerAvlURL = `${baseApiUrl}${process.env.REACT_APP_CASE_SCHEDULE_CASE_MANAGER_AVL_LIST}`;
+
 export {
   baseApiUrl,
   validateJWTURL,
@@ -100,6 +103,9 @@ export {
   caseTerminationReasonURL,
   caseLookUpSummaryURL,
 
-  kpiSummaryURL
+  kpiSummaryURL,
+
+  scheduleLocalOfficeURL,
+  scheduleCaseManagerAvlURL
 };
 
