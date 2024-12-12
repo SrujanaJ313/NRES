@@ -14,7 +14,6 @@ import {
   Typography,
   Stack,
   Link,
- 
 } from "@mui/material";
 import TablePagination from "@mui/material/TablePagination";
 import TableSortLabel from "@mui/material/TableSortLabel";
@@ -29,6 +28,7 @@ import CaseModeTableRow from "./CaseModeTableRow";
 import { caseLoadSummaryURL } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
+import Schedule from "./Schedule";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -68,12 +68,18 @@ const COLUMNS = [
   },
 ];
 
-const CaseModeView = ({ showCalendarView, onSwitchView,selectedStage, userId, userName }) => {
+const CaseModeView = ({
+  showCalendarView,
+  onSwitchView,
+  selectedStage,
+  userId,
+  userName,
+}) => {
   const [rows, setRows] = useState([]);
   const [errorMessages, setErrorMessages] = useState([]);
   const [type, setType] = useState([]);
   const [open, setOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState('');
+  const [selectedRow, setSelectedRow] = useState("");
   const [reassignInd, setReassignInd] = useState(false);
 
   const [pagination, setPagination] = useState({
@@ -183,7 +189,7 @@ const CaseModeView = ({ showCalendarView, onSwitchView,selectedStage, userId, us
     }
   };
   const getTitle = () => {
-    if (type === "reassign") {
+    if (["reassign", "schedule"].includes(type)) {
       return (
         <>
           <span style={{ paddingRight: "5%" }}>
@@ -204,25 +210,25 @@ const CaseModeView = ({ showCalendarView, onSwitchView,selectedStage, userId, us
 
   return (
     <>
-     <Box
-          sx={{
-            mt: "2px",
-            position: "absolute",
-            right: "24px",
-            zIndex: "10",
-          }}
+      <Box
+        sx={{
+          mt: "2px",
+          position: "absolute",
+          right: "24px",
+          zIndex: "10",
+        }}
+      >
+        <Link
+          href="#"
+          underline="always"
+          color="#183084"
+          onClick={onSwitchView}
         >
-          <Link
-            href="#"
-            underline="always"
-            color="#183084"
-            onClick={onSwitchView}
-          >
-            {showCalendarView
-              ? "Switch to Caseload view"
-              : "Switch to Calendar View"}
-          </Link>
-        </Box> 
+          {showCalendarView
+            ? "Switch to Caseload view"
+            : "Switch to Calendar View"}
+        </Link>
+      </Box>
       <Box sx={{ paddingTop: 3, paddingBottom: 2 }}>
         <TableContainer component={Paper}>
           <Table
@@ -257,7 +263,7 @@ const CaseModeView = ({ showCalendarView, onSwitchView,selectedStage, userId, us
               </TableRow>
             </TableHead>
             <TableBody>
-                         {rows.map((row, index) => (
+              {rows.map((row, index) => (
                 <CaseModeTableRow
                   key={index}
                   row={row}
@@ -296,7 +302,7 @@ const CaseModeView = ({ showCalendarView, onSwitchView,selectedStage, userId, us
             {type && (
               <Stack mt={2}>
                 <Typography fontWeight={600} fontSize={"1rem"} color="primary">
-                  Reassign Case
+                  {type === "reassign" ? "Reassign Case" : "Schedule"}
                 </Typography>
               </Stack>
             )}
@@ -308,25 +314,54 @@ const CaseModeView = ({ showCalendarView, onSwitchView,selectedStage, userId, us
                 />
               </Stack>
             )}
+            {type === "schedule" && (
+              <Stack>
+                <Schedule
+                  onCancel={() => setOpen(false)}
+                  selectedRow={selectedRow}
+                />
+              </Stack>
+            )}
           </Stack>
         </DialogContent>
       </CustomModal>
-
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={!reassignInd}
-          onClick={() => {
-            setOpen(true);
-            setType("reassign");
+      <div
+        style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "30%",
           }}
         >
-          Reassign Case
-        </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            // disabled={!reassignInd}
+            onClick={() => {
+              setOpen(true);
+              setType("schedule");
+            }}
+          >
+            Schedule
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+          disabled={!reassignInd}
+            onClick={() => {
+              setOpen(true);
+              setType("reassign");
+            }}
+          >
+            Reassign Case
+          </Button>
+        </div>
       </div>
     </>
   );
 };
 
 export default CaseModeView;
+
