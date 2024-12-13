@@ -56,6 +56,7 @@ const kpiSummaryURL = `${baseApiUrl}${process.env.REACT_APP_CASE_KPI_SUMMARY}`;
 
 const scheduleLocalOfficeURL = `${baseApiUrl}${process.env.REACT_APP_CASE_SCHEDULE_LOCAL_OFFICE}`;
 const scheduleCaseManagerAvlURL = `${baseApiUrl}${process.env.REACT_APP_CASE_SCHEDULE_CASE_MANAGER_AVL_LIST}`;
+const scheduleSaveURL = `${baseApiUrl}${process.env.REACT_APP_CASE_SCHEDULE_SAVE}`;
 
 export {
   baseApiUrl,
@@ -106,6 +107,7 @@ export {
   kpiSummaryURL,
 
   scheduleLocalOfficeURL,
-  scheduleCaseManagerAvlURL
+  scheduleCaseManagerAvlURL,
+  scheduleSaveURL
 };
 

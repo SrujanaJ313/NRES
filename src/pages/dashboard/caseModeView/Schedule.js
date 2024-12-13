@@ -14,12 +14,12 @@ import {
   Stack,
   FormGroup,
   Checkbox,
-  Box
+  Box,
 } from "@mui/material";
 import {
-  reassignSaveURL,
   scheduleLocalOfficeURL,
   scheduleCaseManagerAvlURL,
+  scheduleSaveURL,
 } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
 import { useFormik } from "formik";
@@ -27,7 +27,6 @@ import { schedulePageValidationSchema } from "../../../helpers/Validation";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
 import { isUpdateAccessExist } from "../../../utils/cookies";
 import { useSnackbar } from "../../../context/SnackbarContext";
-import MoreTimeIcon from "@mui/icons-material/MoreTime";
 
 function Schedule({ onCancel, selectedRow, event }) {
   const showSnackbar = useSnackbar();
@@ -50,18 +49,24 @@ function Schedule({ onCancel, selectedRow, event }) {
     validationSchema: () => schedulePageValidationSchema(formik.values.mode),
     onSubmit: async (values) => {
       try {
-        const { reassignReasonCd, staffNotes, localOffice, caseManagerAvl } =
-          values;
+        const { staffNotes, caseManagerAvl } = values;
         const payload = {
-          caseId: selectedRow.caseNum,
-          eventId: caseManagerAvl,
-          reassignReasonCd,
-          caseOffice: localOffice,
-          staffNotes,
+          eventId: caseManagerAvl.toString() || "38539",
+          claimId: selectedRow.clmId || "7151668",
         };
-        await client.post(reassignSaveURL, payload);
-        showSnackbar("Your request has been recorded successfully.", 5000);
-        onCancel();
+        if (staffNotes.length) {
+          payload.staffNotes = staffNotes;
+        }
+        const result = await client.post(scheduleSaveURL, payload);
+        if (result?.status !== 200) {
+          const errorMsg = result?.errorDetails
+            .map((err) => err?.errorCode)
+            .map((err) => err);
+          setErrors(errorMsg);
+        } else {
+          showSnackbar("Your request has been recorded successfully.", 5000);
+          onCancel();
+        }
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
           `POST:${process.env.REACT_APP_REASSIGN_SAVE}`,
@@ -80,7 +85,7 @@ function Schedule({ onCancel, selectedRow, event }) {
         const payload = {
           clmId: selectedRow?.clmId || 7142098,
           clmLofInd: formik.values.localOffice,
-          showBeyondReseaDeadlineInd: formik.values.beyond21DaysInd ,
+          showBeyondReseaDeadlineInd: formik.values.beyond21DaysInd,
           meetingModeInperson: formik.values.mode.selectedPrefMtgModeInPerson
             ? "I"
             : "",
@@ -97,7 +102,6 @@ function Schedule({ onCancel, selectedRow, event }) {
           const [name, office, dateTime, caseLoad] = item.name.split(" - ");
           return { ...item, nameList: { name, office, dateTime, caseLoad } };
         });
-        // console.log("result---->", result);
         setCaseMgrAvl(result);
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
@@ -114,7 +118,11 @@ function Schedule({ onCancel, selectedRow, event }) {
       console.log("triggered manager");
       fetchCaseManagerAvailibility();
     }
-  }, [formik.values.localOffice,formik.values.localOffice,formik.values.mode]);
+  }, [
+    formik.values.localOffice,
+    formik.values.localOffice,
+    formik.values.mode,
+  ]);
 
   useEffect(() => {
     async function fetchCaseOfficeName() {
@@ -276,7 +284,8 @@ function Schedule({ onCancel, selectedRow, event }) {
                 sx={{ padding: "0px" }}
               />
               <Typography sx={{ alignSelf: "center", paddingLeft: "10px" }}>
-                Include appointments that are beyond 21 days after the prior appointment
+                Include appointments that are beyond 21 days after the prior
+                appointment
               </Typography>
             </FormControl>
           </Stack>
