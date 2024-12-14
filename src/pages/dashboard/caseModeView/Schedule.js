@@ -58,7 +58,7 @@ function Schedule({ onCancel, selectedRow, event }) {
           payload.staffNotes = staffNotes;
         }
         const result = await client.post(scheduleSaveURL, payload);
-        if (result?.status !== 200) {
+        if (result?.status === 400) {
           const errorMsg = result?.errorDetails
             .map((err) => err?.errorCode)
             .map((err) => err);
