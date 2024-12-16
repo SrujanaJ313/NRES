@@ -46,7 +46,7 @@ function Schedule({ onCancel, selectedRow, event }) {
       },
       beyond21DaysInd: "",
     },
-    validationSchema: () => schedulePageValidationSchema(formik.values.mode),
+    validationSchema: schedulePageValidationSchema,
     onSubmit: async (values) => {
       try {
         const { staffNotes, caseManagerAvl } = values;
@@ -115,7 +115,6 @@ function Schedule({ onCancel, selectedRow, event }) {
       formik.values.mode.selectedPrefMtgModeInPerson ||
       formik.values.mode.selectedPrefMtgModeVirtual
     ) {
-      console.log("triggered manager");
       fetchCaseManagerAvailibility();
     }
   }, [
@@ -152,7 +151,7 @@ function Schedule({ onCancel, selectedRow, event }) {
       formik.setFieldValue("mode", selectedModes);
     }
   };
-
+  
   return (
     <form onSubmit={formik.handleSubmit}>
       <Stack spacing={2}>
@@ -409,7 +408,7 @@ function Schedule({ onCancel, selectedRow, event }) {
                   </MenuItem>
                 ))}
               </Select>
-              {formik?.errors?.caseManagerAvl && (
+              {formik?.touched?.caseManagerAvl && formik?.errors?.caseManagerAvl && (
                 <FormHelperText error>
                   {formik.errors.caseManagerAvl}
                 </FormHelperText>

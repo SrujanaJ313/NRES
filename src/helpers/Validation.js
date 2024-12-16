@@ -694,7 +694,6 @@ const reAssignPageValidationSchema = yup.object({
     .required("Look Up Case Manager Availability is required"),
 });
 
-
 const lookUpAppointmentsValidationSchema = () => {
   return yup.object().shape({
     // officeNum: yup.array().when([], {
@@ -771,23 +770,20 @@ const caseLookUpValidationSchema = (formik) => {
             .required("RTW days To is required"),
       }),
     caseScoreMin: yup
-    .number()
-    .min(0, "Score must be between 0 and 1")
-    .max(1, "Score must be between 0 and 1"),
-  
-  caseScoreMax: yup
-    .number()
-    .when(["caseScoreMin"], {
+      .number()
+      .min(0, "Score must be between 0 and 1")
+      .max(1, "Score must be between 0 and 1"),
+
+    caseScoreMax: yup.number().when(["caseScoreMin"], {
       is: (value) => value !== undefined && value !== null,
-      then: () => yup
-        .number()
-        .min(0, "Score must be between 0 and 1")
-        .max(1, "Score must be between 0 and 1")  
-        .moreThan(
-          yup.ref("caseScoreMin"),
-          "Score Range to must be greater"
-        ).required("Score Range to is required"),
-       
+      then: () =>
+        yup
+          .number()
+          .min(0, "Score must be between 0 and 1")
+          .max(1, "Score must be between 0 and 1")
+          .moreThan(yup.ref("caseScoreMin"), "Score Range to must be greater")
+          .required("Score Range to is required"),
+
       otherwise: yup.number().nullable(), // No validation if caseScoreMin is not entered
     }),
 
@@ -823,28 +819,25 @@ const caseLookUpValidationSchema = (formik) => {
   });
 };
 
-
-const schedulePageValidationSchema = (mode) => {
-  return yup.object({
-    caseManagerAvl: yup
-      .string()
-      .required("Case Manager Availability is required"),
-    localOffice: yup
-      .string()
-      .oneOf(["Y", "N"])
-      .required("Look Up Case Manager Availability is required"),
-      mode: yup.object({
-        selectedPrefMtgModeInPerson: yup.boolean(),
-        selectedPrefMtgModeVirtual: yup.boolean(),
-      })
-      .test(
-        "at-least-one-true",
-        "At least one of the Preferred Meeting Modes is required",
-        (value) => Object.values(value || {}).includes(true)
-      )
-  });
-} 
-  
+const schedulePageValidationSchema = yup.object({
+  caseManagerAvl: yup
+    .string()
+    .required("Case Manager Availability is required"),
+  localOffice: yup
+    .string()
+    .oneOf(["Y", "N"])
+    .required("Look Up Case Manager Availability is required"),
+  mode: yup
+    .object({
+      selectedPrefMtgModeInPerson: yup.boolean(),
+      selectedPrefMtgModeVirtual: yup.boolean(),
+    })
+    .test(
+      "at-least-one-true",
+      "At least one of the Preferred Meeting Modes is required",
+      (value) => Object.values(value || {}).includes(true)
+    ),
+});
 
 export {
   initialAppointmentDetailsSchema,
@@ -858,7 +851,6 @@ export {
   reAssignPageValidationSchema,
   lookUpAppointmentsValidationSchema,
   caseLookUpValidationSchema,
-
-  schedulePageValidationSchema
+  schedulePageValidationSchema,
 };
 

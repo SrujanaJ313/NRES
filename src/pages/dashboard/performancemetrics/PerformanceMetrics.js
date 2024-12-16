@@ -216,7 +216,7 @@ const PerformanceMetrics = ({ userId }) => {
   return (
     <Container
       sx={{
-        height: "calc(100% - 5.1rem)",
+        // height: "calc(100% - 5.1rem)",
         overflowY: "auto",
         "&::-webkit-scrollbar": {
           width: "5px",
