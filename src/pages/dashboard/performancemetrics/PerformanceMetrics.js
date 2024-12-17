@@ -123,17 +123,27 @@ const PerformanceMetrics = ({ userId }) => {
         value: kpiSummary?.noShowFailedCount,
         percentage: kpiSummary?.noShowFailedPercent,
       },
-      {
-        label: "Remote:",
-        value: kpiSummary?.remoteApptCount,
-        percentage: kpiSummary?.remoteApptPercent,
-      },
-      {
-        label: "In-person:",
-        value: kpiSummary?.inPersonApptCount,
-        percentage: kpiSummary?.inPersonApptPercent,
-      },
+      // {
+      //   label: "Remote:",
+      //   value: kpiSummary?.remoteApptCount,
+      //   percentage: kpiSummary?.remoteApptPercent,
+      // },
+      // {
+      //   label: "In-person:",
+      //   value: kpiSummary?.inPersonApptCount,
+      //   percentage: kpiSummary?.inPersonApptPercent,
+      // },
     ],
+    remote:  {
+      label: "Remote:",
+      value: kpiSummary?.remoteApptCount,
+      percentage: kpiSummary?.remoteApptPercent,
+    },
+    inPerson: {
+      label: "In-person:",
+      value: kpiSummary?.inPersonApptCount,
+      percentage: kpiSummary?.inPersonApptPercent,
+    },
     inadequateWorkSearches: kpiSummary?.noOfInadequateWSCmts,
     jobReferralsMade: kpiSummary?.noOfJobReferralsMade,
     inadequateWSWeeks: kpiSummary?.noOfInadequateWSWeeks
@@ -400,6 +410,18 @@ const PerformanceMetrics = ({ userId }) => {
           />
         ))}
       </Box>
+
+      <StatItem
+        label={data.remote.label}
+        value={data.remote.value}
+        percentage={data.remote.percentage}
+      />
+
+      <StatItem
+        label={data.inPerson.label}
+        value={data.inPerson.value}
+        percentage={data.inPerson.percentage}
+      />
 
       <StatItem
         label="Inadequate WS-claimant:"
