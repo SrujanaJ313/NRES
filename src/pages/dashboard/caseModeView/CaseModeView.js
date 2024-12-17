@@ -209,7 +209,7 @@ const CaseModeView = ({
   };
 
   return (
-    <>
+    <div style={{height:"635px" }}>
       <Box
         sx={{
           mt: "2px",
@@ -359,7 +359,7 @@ const CaseModeView = ({
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
