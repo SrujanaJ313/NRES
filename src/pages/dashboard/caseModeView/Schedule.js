@@ -119,8 +119,8 @@ function Schedule({ onCancel, selectedRow, event }) {
     }
   }, [
     formik.values.localOffice,
-    formik.values.localOffice,
     formik.values.mode,
+    formik.values.beyond21DaysInd
   ]);
 
   useEffect(() => {
