@@ -264,7 +264,8 @@ function AppointmentDetails({ event, onCancel, caseDetails, onSubmitClose }) {
         <JMSItems
           formik={formik}
           jmsItemsList={jmsItemsList}
-          disableForm={disableForm}
+          // disableForm={disableForm}
+          disableForm={false}
         />
         {/* <WorkSearchItems
           data={caseDetails.workSearch}

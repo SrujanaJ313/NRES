@@ -17,9 +17,12 @@ import {
   FormControl,
   TextField,
   Button,
+  Autocomplete,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import moment from "moment";
+import { employeeSearchURL } from "../../../../helpers/Urls";
+import client from "../../../../helpers/Api";
 
 function JMSItems({ formik, jmsItemsList, disableForm }) {
   const { touched, values, errors, handleBlur, setFieldValue } = formik;
@@ -81,10 +84,27 @@ function JMSItems({ formik, jmsItemsList, disableForm }) {
     setFieldValue(name, rows);
   };
 
-  const handleTextChange = (event, index, key) => {
-    const rows = values[key];
+  async function getEmployeeNames(value) {
+    try {
+      const payload = {
+        empName:value
+      }
+      const data = await client.post(employeeSearchURL,payload);
+      return data;
+    } catch (err) {
+      console.log("error in getEmployeeNames", err);
+    }
+  }
+
+  const handleTextChange = async (event, index, key) => {
     const { name, value } = event.target;
+    console.log({name, value, key})
+    let rows = values[key];
+    if (name === "empName") {
+      rows[index].options = await getEmployeeNames(value);
+    }
     rows[index][name] = value;
+    console.log(rows[index])
     setFieldValue(key, rows);
   };
 
@@ -216,27 +236,44 @@ function JMSItems({ formik, jmsItemsList, disableForm }) {
                               size="small"
                               style={{ width: "15rem" }}
                             >
-                              <TextField
-                                type="text"
-                                variant="outlined"
-                                size="small"
-                                name="empName"
-                                label="Employer Name"
-                                value={row.empName}
-                                onChange={(event) =>
+                              <Autocomplete
+                                freeSolo
+                                options={row.options || []}
+                                getOptionLabel={(option) => option.empName}
+                                inputValue={row.empName || ""} 
+                                onInputChange={(_event,newInputValue) => {
                                   handleTextChange(
-                                    event,
+                                    { target: {name:"empName", value: newInputValue } },
                                     index,
                                     item.editFieldName
-                                  )
-                                }
-                                onBlur={handleBlur}
-                                error={
-                                  touched[item.editFieldName]?.[index]
-                                    ?.empName &&
-                                  errors[item.editFieldName]?.[index]?.empName
-                                }
-                                disabled={disableForm}
+                                  );
+                                }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params} // Ensure all params are passed
+                                    type="text"
+                                    variant="outlined"
+                                    size="small"
+                                    name="empName"
+                                    label="Employer Name"
+                                    // value={row.empName}
+                                    // onChange={(event) =>
+                                    //   handleTextChange(
+                                    //     event,
+                                    //     index,
+                                    //     item.editFieldName
+                                    //   )
+                                    // }
+                                    onBlur={handleBlur}
+                                    error={
+                                      touched[item.editFieldName]?.[index]
+                                        ?.empName &&
+                                      errors[item.editFieldName]?.[index]
+                                        ?.empName
+                                    }
+                                    disabled={disableForm}
+                                  />
+                                )}
                               />
                             </FormControl>
                             <FormControl
@@ -322,3 +359,4 @@ function JMSItems({ formik, jmsItemsList, disableForm }) {
 }
 
 export default JMSItems;
+

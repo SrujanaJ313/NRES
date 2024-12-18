@@ -58,6 +58,7 @@ const scheduleLocalOfficeURL = `${baseApiUrl}${process.env.REACT_APP_CASE_SCHEDU
 const scheduleCaseManagerAvlURL = `${baseApiUrl}${process.env.REACT_APP_CASE_SCHEDULE_CASE_MANAGER_AVL_LIST}`;
 const scheduleSaveURL = `${baseApiUrl}${process.env.REACT_APP_CASE_SCHEDULE_SAVE}`;
 
+const employeeSearchURL = `${baseApiUrl}${process.env.REACT_APP_CASE_EMPLOYER_SEARCH}`;
 export {
   baseApiUrl,
   validateJWTURL,
@@ -108,6 +109,8 @@ export {
 
   scheduleLocalOfficeURL,
   scheduleCaseManagerAvlURL,
-  scheduleSaveURL
+  scheduleSaveURL,
+
+  employeeSearchURL
 };
 
