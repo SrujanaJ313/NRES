@@ -100,7 +100,7 @@ function JMSItems({ formik, jmsItemsList, disableForm }) {
       const payload = {
         empName: value,
       };
-      const data = await client.get(employeeSearchURL, payload); //Change to POST while pushing
+      const data = await client.post(employeeSearchURL, payload);
       setOptions(data);
       // return data;
     } catch (err) {
