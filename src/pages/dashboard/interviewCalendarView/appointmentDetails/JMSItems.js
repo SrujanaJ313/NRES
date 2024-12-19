@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Stack from "@mui/material/Stack";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -26,7 +26,17 @@ import client from "../../../../helpers/Api";
 
 function JMSItems({ formik, jmsItemsList, disableForm }) {
   const { touched, values, errors, handleBlur, setFieldValue } = formik;
-
+  const [employeeName, setEmployeeName] = useState("");
+  const [options, setOptions] = useState([]);
+  useEffect(() => {
+    if (employeeName.length < 2) {
+      return;
+    }
+    const timer = setTimeout(() => getEmployeeNames(employeeName), 200);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [employeeName]);
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
     setFieldValue(`jmsItems.${name}`, checked);
@@ -85,12 +95,14 @@ function JMSItems({ formik, jmsItemsList, disableForm }) {
   };
 
   async function getEmployeeNames(value) {
+    console.log("API call starts at", value);
     try {
       const payload = {
-        empName:value
-      }
-      const data = await client.post(employeeSearchURL,payload);
-      return data;
+        empName: value,
+      };
+      const data = await client.get(employeeSearchURL, payload); //Change to POST while pushing
+      setOptions(data);
+      // return data;
     } catch (err) {
       console.log("error in getEmployeeNames", err);
     }
@@ -98,10 +110,10 @@ function JMSItems({ formik, jmsItemsList, disableForm }) {
 
   const handleTextChange = async (event, index, key) => {
     const { name, value } = event.target;
-    console.log({name, value, key})
     let rows = values[key];
     if (name === "empName") {
-      rows[index].options = await getEmployeeNames(value);
+      // rows[index].options = await getEmployeeNames(value);
+      setEmployeeName(value);
     }
     rows[index][name] = value;
     console.log(rows[index])
@@ -238,20 +250,31 @@ function JMSItems({ formik, jmsItemsList, disableForm }) {
                             >
                               <Autocomplete
                                 freeSolo
-                                options={row.options || []}
+                                // options={row.options || []}
+                                options={options.length ? options : []}
                                 getOptionLabel={(option) => option.empName}
-                                inputValue={row.empName || ""} 
-                                onInputChange={(_event,newInputValue) => {
+                                inputValue={row?.empName || ""}
+                                onInputChange={(_event, newInputValue) => {
                                   handleTextChange(
-                                    { target: {name:"empName", value: newInputValue } },
+                                    {
+                                      target: {
+                                        name: "empName",
+                                        value: newInputValue,
+                                      },
+                                    },
                                     index,
                                     item.editFieldName
                                   );
                                 }}
+                                onChange={(_event, selectedOption) => {
+                                  if(selectedOption?.empNum){
+                                    row["empNum"] = selectedOption.empNum;
+                                  }
+                                }}
                                 renderInput={(params) => (
                                   <TextField
                                     {...params} // Ensure all params are passed
-                                    type="text"
+                                    // type="text"
                                     variant="outlined"
                                     size="small"
                                     name="empName"
