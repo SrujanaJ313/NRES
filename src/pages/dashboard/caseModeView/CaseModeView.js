@@ -218,25 +218,28 @@ const CaseModeView = ({
           zIndex: "10",
         }}
       >
-        <Link
+        {/* <Link
           href="#"
           underline="always"
           color="#183084"
           onClick={onSwitchView}
+          sx={{backgroundColor:"red"}}
         >
-          {showCalendarView
+          {!showCalendarView
             ? "Switch to Caseload view"
-            : "Switch to Calendar View"}
-        </Link>
+            : "Switch to Calendar View"
+            }
+        </Link> */}
       </Box>
       <Box sx={{ paddingTop: 3, paddingBottom: 2 }}>
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} sx={{ maxHeight: "490px" }}>
           <Table
-            sx={{ minWidth: 750 }}
+            sx={{ minWidth: 750}}
             size="small"
             aria-label="customized table"
+            stickyHeader
           >
-            <TableHead>
+            <TableHead style={{ backgroundColor: "#183084" }}>
               <TableRow>
                 <StyledTableCell></StyledTableCell>
                 {COLUMNS.map((column) => (

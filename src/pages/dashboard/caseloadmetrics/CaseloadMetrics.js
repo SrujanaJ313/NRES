@@ -250,7 +250,7 @@ const CaseloadMetrics = React.memo(
 
         <Box
           sx={{
-            mt: "21px",
+            mt: "6px",
             position: "absolute",
             right: "24px",
             zIndex: "10",
