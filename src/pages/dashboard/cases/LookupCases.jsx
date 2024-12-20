@@ -741,7 +741,7 @@ function LookupCases({ setLookUpSummary }) {
                     color: formik.values.clmByeStartDt ? "#183084" : "gray",
                   },
                 }}
-                disabled={!formik.values.clmByeStartDt}
+                disabled={!formik.values.clmByeStartDt && !formik.values.clmByeEndDt}
               />
             </Stack>
           </Box>
