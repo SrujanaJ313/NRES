@@ -59,25 +59,42 @@ const Value = styled(Box)(({ theme }) => ({
 //   },
 // }));
 
-const StatItem = ({ label, value, percentage }) => (
-  <Grid container spacing={0.9} alignItems="center">
-    <Grid item xs={6}>
-      <Label>{label}</Label>
-    </Grid>
-    <Grid
-      item
-      xs={!percentage?.toString() ? 0.6 : 3}
-      textAlign={!percentage?.toString() ? "right" : "inherit"}
-    >
-      <Value>{value}</Value>
-    </Grid>
-    {percentage?.toString() && (
-      <Grid item xs={3}>
-        <Value>{percentage}%</Value>
+const StatItem = ({ label, value, percentage }) => {
+  // console.log(`label---> ${label}`);
+  return (
+    <Grid container spacing={0.9} alignItems="center">
+      <Grid item xs={6}>
+        <Label>{label}</Label>
       </Grid>
-    )}
-  </Grid>
-);
+      <Grid
+        item
+        // xs={!percentage?.toString() ? 0.8 : 3}
+        xs={
+          [
+            "Caseload:",
+            "Avg weeks to employment:",
+            "Remote:",
+            "In-person:",
+            "Inadequate WS-claimant:",
+            "Inadequate WS-Weeks:",
+            "Job Referrals:",
+          ].includes(label)
+            ? 2.8
+            : 3
+        }
+        // textAlign={!percentage?.toString() ? "right" : "inherit"}
+      >
+        <Value>{value}</Value>
+      </Grid>
+      {/* ["Remote:"].includes(label) */}
+      {percentage?.toString() && (
+        <Grid item xs={3}>
+          <Value>{percentage}%</Value>
+        </Grid>
+      )}
+    </Grid>
+  );
+};
 
 const PerformanceMetrics = ({ userId }) => {
   const [period, setPeriod] = useState("THREE_MONTHS");
@@ -134,7 +151,7 @@ const PerformanceMetrics = ({ userId }) => {
       //   percentage: kpiSummary?.inPersonApptPercent,
       // },
     ],
-    remote:  {
+    remote: {
       label: "Remote:",
       value: kpiSummary?.remoteApptCount,
       percentage: kpiSummary?.remoteApptPercent,
@@ -146,7 +163,7 @@ const PerformanceMetrics = ({ userId }) => {
     },
     inadequateWorkSearches: kpiSummary?.noOfInadequateWSCmts,
     jobReferralsMade: kpiSummary?.noOfJobReferralsMade,
-    inadequateWSWeeks: kpiSummary?.noOfInadequateWSWeeks
+    inadequateWSWeeks: kpiSummary?.noOfInadequateWSWeeks,
     // trainingReferralsMade: kpiSummary?.noOfJobReferralsMade,
   };
 
@@ -221,7 +238,6 @@ const PerformanceMetrics = ({ userId }) => {
     setCaseManagerId("");
     setLocalOfficeId("");
   };
-  console.log('data?.noOfInadequateWSWeeks-->',data?.noOfInadequateWSWeeks);
 
   return (
     <Container
@@ -427,11 +443,14 @@ const PerformanceMetrics = ({ userId }) => {
         label="Inadequate WS-claimant:"
         value={data.inadequateWorkSearches}
       />
+
       <StatItem
         label="Inadequate WS-Weeks:"
         value={data?.inadequateWSWeeks} //Need to change
       />
+
       <StatItem label="Job Referrals:" value={data.jobReferralsMade} />
+
       {/* <StatItem
         label="Training Referrals made:"
         value={data.trainingReferralsMade}
