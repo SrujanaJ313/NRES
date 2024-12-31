@@ -140,7 +140,7 @@ function ScheduleEvent({ caseDetails, event, onSubmitClose }) {
               variant="contained"
               // onClick={() => setType("reopen")}
               size="small"
-              disabled={caseDetails.reopenAccess === "N"}
+              disabled={caseDetails.reopenAccess === "N" || caseDetails?.caseStage  === "Terminated"}
             >
               Reopen
             </Button>
@@ -149,7 +149,7 @@ function ScheduleEvent({ caseDetails, event, onSubmitClose }) {
               variant="contained"
               onClick={() => setType("reschedule")}
               size="small"
-              disabled={!getIsFutureAppointment()}
+              disabled={!getIsFutureAppointment() || caseDetails?.caseStage  === "Terminated"}
             >
               Reschedule
             </Button>
@@ -157,7 +157,7 @@ function ScheduleEvent({ caseDetails, event, onSubmitClose }) {
               variant="contained"
               onClick={() => setType("switch")}
               size="small"
-              disabled={!getIsFutureAppointment()}
+              disabled={!getIsFutureAppointment() || caseDetails?.caseStage  === "Terminated"}
             >
               Switch Mode
             </Button>
@@ -165,7 +165,7 @@ function ScheduleEvent({ caseDetails, event, onSubmitClose }) {
               variant="contained"
               onClick={() => setType("returnToWork")}
               size="small"
-              disabled={caseDetails?.returnToWorkAccess === "N"}
+              disabled={caseDetails?.returnToWorkAccess === "N" || caseDetails?.caseStage  === "Terminated"}
             >
               Returned to Work
             </Button>
@@ -175,7 +175,7 @@ function ScheduleEvent({ caseDetails, event, onSubmitClose }) {
               sx={{ height: "fit-content" }}
               onClick={() => setType("appointmentDetails")}
               size="small"
-              disabled={!getIsPastAppointment(event)}
+              disabled={!getIsPastAppointment(event) || caseDetails?.caseStage  === "Terminated"}
             >
               Appointment Details
             </Button>
@@ -184,7 +184,7 @@ function ScheduleEvent({ caseDetails, event, onSubmitClose }) {
               sx={{ height: "fit-content" }}
               onClick={() => setType("noShow")}
               size="small"
-              disabled={!isCurrentAppointment()}
+              disabled={!isCurrentAppointment() || caseDetails?.caseStage  === "Terminated"}
             >
               No Show
             </Button>
