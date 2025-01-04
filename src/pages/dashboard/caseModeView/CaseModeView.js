@@ -29,6 +29,7 @@ import { caseLoadSummaryURL } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
 import Schedule from "./Schedule";
+import ReassignAll from "./ReAssignAll";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -67,6 +68,12 @@ const COLUMNS = [
     label: "Indicators",
   },
 ];
+
+const TYPES = {
+  reassign: "Reassign Case",
+  schedule: "Schedule",
+  reassignAll: "Reassign Cases belonging to ",
+};
 
 const CaseModeView = ({
   showCalendarView,
@@ -189,7 +196,7 @@ const CaseModeView = ({
     }
   };
   const getTitle = () => {
-    if (["reassign", "schedule"].includes(type)) {
+    if (["reassign", "schedule", "reassignAll"].includes(type)) {
       return (
         <>
           <span style={{ paddingRight: "5%" }}>
@@ -209,7 +216,7 @@ const CaseModeView = ({
   };
 
   return (
-    <div style={{height:"635px" }}>
+    <div style={{ height: "635px" }}>
       <Box
         sx={{
           mt: "2px",
@@ -234,7 +241,7 @@ const CaseModeView = ({
       <Box sx={{ paddingTop: 3, paddingBottom: 2 }}>
         <TableContainer component={Paper} sx={{ maxHeight: "490px" }}>
           <Table
-            sx={{ minWidth: 750}}
+            sx={{ minWidth: 750 }}
             size="small"
             aria-label="customized table"
             stickyHeader
@@ -305,7 +312,8 @@ const CaseModeView = ({
             {type && (
               <Stack mt={2}>
                 <Typography fontWeight={600} fontSize={"1rem"} color="primary">
-                  {type === "reassign" ? "Reassign Case" : "Schedule"}
+                  {/* {type === "reassign" ? "Reassign Case" : "Schedule"} */}
+                  {type !== "reassignAll"? TYPES[type]:`${TYPES[type]}${selectedRow?.claimantName || 'Mary Peters'}`}
                 </Typography>
               </Stack>
             )}
@@ -325,6 +333,15 @@ const CaseModeView = ({
                 />
               </Stack>
             )}
+            {type === "reassignAll" && (
+              <Stack>
+                <ReassignAll
+                  onCancel={() => setOpen(false)}
+                  selectedRow={selectedRow}
+                />
+              </Stack>
+            )}
+            
           </Stack>
         </DialogContent>
       </CustomModal>
@@ -335,7 +352,7 @@ const CaseModeView = ({
           style={{
             display: "flex",
             justifyContent: "space-between",
-            width: "30%",
+            width: "50%",
           }}
         >
           <Button
@@ -352,7 +369,18 @@ const CaseModeView = ({
           <Button
             variant="contained"
             color="primary"
-          disabled={!reassignInd}
+            // disabled={!reassignAll}
+            onClick={() => {
+              setOpen(true);
+              setType("reassignAll");
+            }}
+          >
+            Reassign All
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={!reassignInd}
             onClick={() => {
               setOpen(true);
               setType("reassign");
