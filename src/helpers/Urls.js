@@ -59,6 +59,11 @@ const scheduleCaseManagerAvlURL = `${baseApiUrl}${process.env.REACT_APP_CASE_SCH
 const scheduleSaveURL = `${baseApiUrl}${process.env.REACT_APP_CASE_SCHEDULE_SAVE}`;
 
 const employeeSearchURL = `${baseApiUrl}${process.env.REACT_APP_CASE_EMPLOYER_SEARCH}`;
+
+
+const staffUnavailabilityURL = `${baseApiUrl}${process.env.REACT_APP_CASE_STAFF_UNAVAILABILITY}`;
+
+
 export {
   baseApiUrl,
   validateJWTURL,
@@ -111,6 +116,8 @@ export {
   scheduleCaseManagerAvlURL,
   scheduleSaveURL,
 
-  employeeSearchURL
+  employeeSearchURL,
+
+  staffUnavailabilityURL
 };
 

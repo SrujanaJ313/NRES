@@ -24,6 +24,7 @@ import {
   appointmentStaffListURL,
   appointmentAvailableURL,
   appointmentAvailableSaveURL,
+  staffUnavailabilityURL,
 } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
 import {
@@ -48,6 +49,7 @@ function AvailableEvent({ event, userName, userId, onSubmitClose, onCancel }) {
   // const [selectedClaimant, setSelectedClaimant] = useState("");
   const [convertedFormat, setConvertedFormat] = useState("");
   const [errors, setErrors] = useState([]);
+  const [staffAvailability, setStaffAvailability] = useState("");
 
   useEffect(() => {
     const startDate = moment(event.start).format("M/D/YYYY [at] h:mm a");
@@ -154,6 +156,22 @@ function AvailableEvent({ event, userName, userId, onSubmitClose, onCancel }) {
     formik?.values?.claimant,
     formik?.values?.caseManagerId,
   ]);
+
+  useEffect(() => {
+    async function checkStaffAvailability() {
+      try {
+        const response = await client.get(staffUnavailabilityURL);
+        setStaffAvailability(Boolean(response));
+      } catch (errorResponse) {
+        const newErrMsgs = getMsgsFromErrorCode(
+          `GET:${process.env.REACT_APP_CASE_STAFF_UNAVAILABILITY}`,
+          errorResponse
+        );
+        setErrors(newErrMsgs);
+      }
+    }
+    checkStaffAvailability();
+  }, []);
 
   const { values, setFieldValue } = formik;
   return (
@@ -417,6 +435,12 @@ function AvailableEvent({ event, userName, userId, onSubmitClose, onCancel }) {
               ))}
             </Stack>
           )}
+
+          {
+            staffAvailability &&  <Stack mt={1} direction="column" useFlexGap flexWrap="wrap">
+              <span className="errorMsg">Selected Case Manager is Unavailable for this timeslot. This timeshot will be blocked after batch processing tonight.</span>
+            </Stack>
+          }
         </Stack>
       </DialogContent>
 
@@ -425,7 +449,7 @@ function AvailableEvent({ event, userName, userId, onSubmitClose, onCancel }) {
           type="submit"
           variant="contained"
           color="primary"
-          disabled={!isUpdateAccessExist()}
+          disabled={!isUpdateAccessExist() || staffAvailability}
         >
           Submit
         </Button>
