@@ -161,7 +161,8 @@ function AvailableEvent({ event, userName, userId, onSubmitClose, onCancel }) {
     async function checkStaffAvailability() {
       try {
         const response = await client.get(`${staffUnavailabilityURL}${event.id}`);
-        setStaffAvailability(Boolean(response));
+        const availabilityCheck = response === "Y" ? true : false;
+        setStaffAvailability(availabilityCheck);
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
           `GET:${process.env.REACT_APP_CASE_STAFF_UNAVAILABILITY}`,
