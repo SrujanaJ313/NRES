@@ -160,7 +160,7 @@ function AvailableEvent({ event, userName, userId, onSubmitClose, onCancel }) {
   useEffect(() => {
     async function checkStaffAvailability() {
       try {
-        const response = await client.get(staffUnavailabilityURL);
+        const response = await client.get(`${staffUnavailabilityURL}${event.id}`);
         setStaffAvailability(Boolean(response));
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
