@@ -166,11 +166,19 @@ function InterviewCalendarView({ userId, userName }) {
       return "";
     },
     dayRangeHeaderFormat: ({ start, end }, culture, localizer) => {
-      return `${localizer.format(
-        start,
-        "MMMM DD",
-        culture
-      )} - ${localizer.format(end, "DD, yyyy", culture)}`;
+      const startMonth = localizer.format(start, "MMMM", culture);
+      const startYear = localizer.format(start, "yyyy", culture);
+      const startDay = localizer.format(start, "DD", culture);
+
+      const endMonth = localizer.format(end, "MMMM", culture);
+      const endYear = localizer.format(end, "yyyy", culture);
+      const endDay = localizer.format(end, "DD", culture);
+
+      if (startMonth !== endMonth || startYear !== endYear) {
+        return `${startMonth} ${startDay}, ${startYear} - ${endMonth} ${endDay}, ${endYear}`;
+      } else {
+        return `${startMonth} ${startDay} - ${endDay}, ${startYear}`;
+      }
     },
   };
 
@@ -257,7 +265,7 @@ function InterviewCalendarView({ userId, userName }) {
           work_week: true,
           day: false,
           agenda: false,
-        }}   
+        }}
       />
 
       {open && event && (

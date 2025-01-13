@@ -34,3 +34,8 @@ code {
   font-weight: bold;
   text-decoration: underline;
 }
+
+.rbc-toolbar-label {
+  margin-right: 20%;
+}
+
