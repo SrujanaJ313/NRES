@@ -28,7 +28,6 @@ import { useSnackbar } from "../../../context/SnackbarContext";
 import { returnToWorkEditModeURL } from "../../../helpers/Urls";
 import dayjs from "dayjs";
 
-
 import {
   CookieNames,
   getCookieItem,
@@ -81,7 +80,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
         jmsReferralInd: "N",
         jmsResumeOffInd: "N",
       };
-      
+
       const employmentStartDt = convertISOToMMDDYYYY(values.employmentStartDt);
       return;
       const userId = getCookieItem(CookieNames.USER_ID);
@@ -183,38 +182,47 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
                 className="return-to-work-start-date"
                 sx={{ width: "160px" }}
                 slotProps={{
-                  textField: { size: "small" },
+                  textField: {
+                    size: "small",
+                    variant: "outlined",
+                    error:
+                      formik.touched.employmentStartDt &&
+                      Boolean(formik.errors.employmentStartDt),
+                    helperText:
+                      formik.touched.employmentStartDt &&
+                      formik.errors.employmentStartDt,
+                  },
                 }}
                 value={formik.values.employmentStartDt}
                 onChange={(date) =>
                   formik.setFieldValue("employmentStartDt", date)
                 }
                 disabled={isViewMode}
-                renderInput={(params) => {
-                  return (
-                    <TextField
-                      {...params}
-                      size="small"
-                      variant="outlined"
-                      name="employmentStartDt"
-                      // error={
-                      //   formik.touched.employmentStartDt &&
-                      //   Boolean(formik.errors.employmentStartDt)
-                      // }
-                      // helperText={
-                      //   formik.touched.employmentStartDt &&
-                      //   formik.errors.employmentStartDt
-                      // }
-                    />
-                  );
-                }}
+                // renderInput={(params) => {
+                //   return (
+                //     <TextField
+                //       {...params}
+                //       error={
+                //         formik.touched.employmentStartDt &&
+                //         Boolean(formik.errors.employmentStartDt)
+                //       }
+                //       helperText={
+                //         formik.touched.employmentStartDt &&
+                //         formik.errors.employmentStartDt
+                //       }
+                //       size="small"
+                //       variant="outlined"
+                //       name="employmentStartDt"
+                //     />
+                //   );
+                // }}
               />
-              {formik.touched.employmentStartDt &&
+              {/* {formik.touched.employmentStartDt &&
                 formik.errors.employmentStartDt && (
                   <FormHelperText error>
                     {formik.errors.employmentStartDt}
                   </FormHelperText>
-                )}
+                )} */}
             </FormControl>
           </LocalizationProvider>
         </Stack>
@@ -330,7 +338,9 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Typography sx={{  color:isViewMode?'gray':'' }}>$</Typography>
+                  <Typography sx={{ color: isViewMode ? "gray" : "" }}>
+                    $
+                  </Typography>
                 </InputAdornment>
               ),
             }}
@@ -341,17 +351,17 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             disabled={isViewMode}
-            // error={
-            //   formik.touched.hourlyPayRate &&
-            //   Boolean(formik.errors.hourlyPayRate)
-            // }
-            // helperText={
-            //   formik.touched.hourlyPayRate && formik.errors.hourlyPayRate
-            // }
+            error={
+              formik.touched.hourlyPayRate &&
+              Boolean(formik.errors.hourlyPayRate)
+            }
+            helperText={
+              formik.touched.hourlyPayRate && formik.errors.hourlyPayRate
+            }
           />
-          {formik.touched.hourlyPayRate && formik.errors.hourlyPayRate && (
+          {/* {formik.touched.hourlyPayRate && formik.errors.hourlyPayRate && (
             <FormHelperText error>{formik.errors.hourlyPayRate}</FormHelperText>
-          )}
+          )} */}
         </Stack>
 
         <Stack
@@ -374,7 +384,7 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
               sx={{
                 width: "30%",
                 alignSelf: "center",
-                color:isViewMode?'gray':''
+                color: isViewMode ? "gray" : "",
               }}
             >
               *Work Schedule:
@@ -672,3 +682,4 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
 }
 
 export default ReturnedToWork;
+

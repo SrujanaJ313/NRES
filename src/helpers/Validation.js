@@ -17,24 +17,44 @@ const initialAppointmentDetailsSchema = yup.object().shape({
       ActiveResume: yup.boolean().oneOf([true], "Required field"),
       ActiveVirtualRecuiter: yup.boolean().oneOf([true], "Required field"),
       JMSCaseNotes: yup.boolean().oneOf([true], "Required field"),
-      JMSRegComplete: yup.boolean(),
+      JMSRegComplete:  yup.boolean().oneOf([true], "Required field"),
       JMSRegIncomplete: yup.boolean(),
       WagnerPeyserApplComplete: yup.boolean().oneOf([true], "Required field"),
       WagnerPeyserApplSignature: yup.boolean().oneOf([true], "Required field"),
-      IEPSignatureCopy: yup.boolean().oneOf([true], "Required field"),
+      IEPSignatureCopy: yup.boolean(),
+      // IEPSignatureCopy: yup.boolean().oneOf([true], "Required field"),
     })
     .test(
       "one-and-only-one",
       "Only either JMS Registration Complete or JMS Registration Incomplete & Warning Issued should be selected",
-      (value) => {
+      function (value) {
         const { JMSRegComplete, JMSRegIncomplete } = value;
-        // Ensure exactly one checkbox is checked
-        return (
+        const isValid =
           (JMSRegComplete && !JMSRegIncomplete) ||
-          (!JMSRegComplete && JMSRegIncomplete)
-        );
+          (!JMSRegComplete && JMSRegIncomplete);
+
+        if (!isValid) {
+          return this.createError({
+            path: "JMSRegComplete", // Error tied to JMSRegComplete field
+            message:
+              "Only one of JMS Registration Complete or Incomplete should be selected",
+          });
+        }
+        return true;
       }
     ),
+  // .test(
+  //   "one-and-only-one",
+  //   "Only either JMS Registration Complete or JMS Registration Incomplete & Warning Issued should be selected",
+  //   (value) => {
+  //     const { JMSRegComplete, JMSRegIncomplete } = value;
+  //     // Ensure exactly one checkbox is checked
+  //     return (
+  //       (JMSRegComplete && !JMSRegIncomplete) ||
+  //       (!JMSRegComplete && JMSRegIncomplete)
+  //     );
+  //   }
+  // ),
   outsideWebReferral: yup
     .array()
     // .when("jmsItems.OutsideWebReferral", {
