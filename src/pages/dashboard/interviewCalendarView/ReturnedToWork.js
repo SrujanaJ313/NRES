@@ -180,7 +180,12 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
               <DatePicker
                 label="*Start Date"
                 className="return-to-work-start-date"
-                sx={{ width: "160px" }}
+                sx={{
+                  width: "160px",
+                  "& .MuiFormHelperText-root": {
+                    width: "320px",
+                  },
+                }}
                 slotProps={{
                   textField: {
                     size: "small",
@@ -344,7 +349,12 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
                 </InputAdornment>
               ),
             }}
-            sx={{ width: "160px" }}
+            sx={{
+              width: "160px",
+              "& .MuiFormHelperText-root": {
+                width: "320px",
+              },
+            }}
             name="hourlyPayRate"
             value={formik.values.hourlyPayRate}
             type="number"
@@ -359,9 +369,6 @@ function ReturnedToWork({ onCancel, event, onSubmitClose }) {
               formik.touched.hourlyPayRate && formik.errors.hourlyPayRate
             }
           />
-          {/* {formik.touched.hourlyPayRate && formik.errors.hourlyPayRate && (
-            <FormHelperText error>{formik.errors.hourlyPayRate}</FormHelperText>
-          )} */}
         </Stack>
 
         <Stack
