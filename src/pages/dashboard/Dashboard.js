@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [stage, setStage] = useState("All");
   const [userId, setUserId] = useState(getCookieItem(CookieNames.USER_ID));
   const [userName, setUserName] = useState(getUserName());
+  const [selectedRow, setSelectedRow] = useState("");
 
   const handleSwitchView = useCallback(() => {
     setIsCalendarView((prev) => !prev);
@@ -24,6 +25,7 @@ const Dashboard = () => {
     setUserName(user.name);
     setUserId(event.target.value);
     setStage("All");
+    setSelectedRow("");
   };
 
   return (
@@ -46,11 +48,13 @@ const Dashboard = () => {
               <InterviewCalendarView userId={userId} userName={userName} />
             ) : (
               <CaseModeView
-              showCalendarView={isCalendarView}
-              onSwitchView={handleSwitchView}
+                showCalendarView={isCalendarView}
+                onSwitchView={handleSwitchView}
                 selectedStage={stage}
                 userId={userId}
                 userName={userName}
+                selectedRow={selectedRow}
+                setSelectedRow={setSelectedRow}
               />
             )}
           </Box>
@@ -61,3 +65,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

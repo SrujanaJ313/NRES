@@ -28,7 +28,6 @@ import CaseModeTableRow from "./CaseModeTableRow";
 import { caseLoadSummaryURL } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
-// import Schedule from "./Schedule";
 import ReassignAll from "./ReAssignAll";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -75,12 +74,14 @@ const CaseModeView = ({
   selectedStage,
   userId,
   userName,
+  selectedRow,
+  setSelectedRow,
 }) => {
   const [rows, setRows] = useState([]);
   const [errorMessages, setErrorMessages] = useState([]);
   const [type, setType] = useState([]);
   const [open, setOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState("");
+  // const [selectedRow, setSelectedRow] = useState("");
   const [reassignInd, setReassignInd] = useState(false);
 
   const [pagination, setPagination] = useState({
@@ -254,8 +255,7 @@ const CaseModeView = ({
           right: "24px",
           zIndex: "10",
         }}
-      >
-      </Box>
+      ></Box>
       <Box sx={{ paddingTop: 3, paddingBottom: 2 }}>
         <TableContainer component={Paper} sx={{ maxHeight: "490px" }}>
           <Table
@@ -380,7 +380,7 @@ const CaseModeView = ({
           <Button
             variant="contained"
             color="primary"
-            disabled={!reassignInd}
+            disabled={!reassignInd || !selectedRow}
             onClick={() => {
               setOpen(true);
               setType("reassign");
