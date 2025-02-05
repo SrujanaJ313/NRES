@@ -23,7 +23,7 @@ import {
 } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
 import { useFormik } from "formik";
-import { schedulePageValidationSchema } from "../../../helpers/Validation";
+// import { schedulePageValidationSchema } from "../../../helpers/Validation";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
 import { isUpdateAccessExist } from "../../../utils/cookies";
 import { useSnackbar } from "../../../context/SnackbarContext";
@@ -31,13 +31,14 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import moment from "moment";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-
+import AlertDialog from "../../../components/DialogBox";
 function ReassignAll({ onCancel, selectedRow, userId }) {
   const showSnackbar = useSnackbar();
   const [errors, setErrors] = useState([]);
   // const [caseMgrAvl, setCaseMgrAvl] = useState([]);
   const [caseOfficeName, setCaseOfficeName] = useState("");
   const [reassignReasons, setReassignReasons] = useState([]);
+  const [open, setOpen] = React.useState(false);
   const formik = useFormik({
     initialValues: {
       caseManagerId: "",
@@ -59,7 +60,7 @@ function ReassignAll({ onCancel, selectedRow, userId }) {
         if (limitOffice) {
           payload.limitOffice = limitOffice === "limitTo";
         }
-        console.log(`here`, payload);
+
         if (staffNotes.length) {
           payload.staffNotes = staffNotes;
         }
@@ -129,176 +130,203 @@ function ReassignAll({ onCancel, selectedRow, userId }) {
     formik.setFieldValue("limitOffice", event.target.value);
   };
 
+  // Function to handle form submission
+  const handleFormSubmit = (event) => {
+    console.log(`event-->`, event);
+    event.preventDefault(); 
+    setOpen(true); 
+  };
+
+  // Function to handle confirmed submission
+  const handleConfirmSubmit = () => {
+    setOpen(false); // Close dialog
+    formik.handleSubmit(); // Manually trigger Formik submission
+  };
+
+  // Function to handle cancel action
+  const handleCancel = () => {
+    setOpen(false); // Just close the dialog
+  };
+
   return (
-    <form onSubmit={formik.handleSubmit}>
-      <Stack spacing={2}>
-        <Stack direction={"column"} spacing={2}>
-          <Stack direction="row">
-            <FormControl
-              component="fieldset"
-              error={
-                formik.touched.localOffice && Boolean(formik.errors.localOffice)
-              }
-              sx={{
-                width: "100%",
-                display: "flex",
-                flexDirection: "row",
-              }}
-            >
-              <Typography
+    <>
+      <AlertDialog
+        open={open}
+        handleConfirmSubmit={handleConfirmSubmit}
+        handleCancel={handleCancel}
+      />
+      {/* <form onSubmit={formik.handleSubmit}> */}
+      <form onSubmit={handleFormSubmit}>
+        <Stack spacing={2}>
+          <Stack direction={"column"} spacing={2}>
+            <Stack direction="row">
+              <FormControl
+                component="fieldset"
+                error={
+                  formik.touched.localOffice &&
+                  Boolean(formik.errors.localOffice)
+                }
                 sx={{
-                  width: "40%",
-                  alignSelf: "center",
-                  color: "#183084",
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "row",
                 }}
               >
-                Auto-reassign all cases with appointment dates on or after:
-              </Typography>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
-                  value={formik.values.reassignDt}
-                  onChange={(newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue("reassignDt", newValue);
-                    } else {
-                      formik.setFieldValue("reassignDt", null);
-                    }
+                <Typography
+                  sx={{
+                    width: "40%",
+                    alignSelf: "center",
+                    color: "#183084",
                   }}
-                  slotProps={{
-                    textField: { size: "small" },
-                  }}
-                  onBlur={formik.handleBlur}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      id="reassignDt"
-                      name="reassignDt"
-                      size="small"
-                      fullWidth
-                      sx={{
-                        "& .MuiInputLabel-root": {
-                          color: "#183084",
-                          fontWeight: "bold",
-                        },
-                        width: "20%",
-                        height: "32px",
-                      }}
-                    />
-                  )}
-                />
-              </LocalizationProvider>
-            </FormControl>
-            {/* {formik.errors.reassignDt && (
+                >
+                  Auto-reassign all cases with appointment dates on or after:
+                </Typography>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                    value={formik.values.reassignDt}
+                    onChange={(newValue) => {
+                      if (newValue) {
+                        formik.setFieldValue("reassignDt", newValue);
+                      } else {
+                        formik.setFieldValue("reassignDt", null);
+                      }
+                    }}
+                    slotProps={{
+                      textField: { size: "small" },
+                    }}
+                    onBlur={formik.handleBlur}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        id="reassignDt"
+                        name="reassignDt"
+                        size="small"
+                        fullWidth
+                        sx={{
+                          "& .MuiInputLabel-root": {
+                            color: "#183084",
+                            fontWeight: "bold",
+                          },
+                          width: "20%",
+                          height: "32px",
+                        }}
+                      />
+                    )}
+                  />
+                </LocalizationProvider>
+              </FormControl>
+              {/* {formik.errors.reassignDt && (
               <FormHelperText sx={{ color: "red" }}>
                 {formik.errors.reassignDt}
               </FormHelperText>
             )} */}
-          </Stack>
+            </Stack>
 
-          <Stack>
-            <FormControl sx={{ display: "flex", flexDirection: "column" }}>
-              <Typography
-                sx={{
-                  width: "30%",
-                  alignSelf: "self-start",
-                  color: "#183084",
-                }}
-              >
-                Auto-reassign to case managers as follows:
-              </Typography>
-              <FormGroup column sx={{ alignItems: "center", width: "80%" }}>
-                <RadioGroup
-                  name="limitedOffice"
-                  value={formik.values.limitOffice}
-                  onChange={handleRadioButtonsChange}
-                  onBlur={formik.handleBlur}
+            <Stack>
+              <FormControl sx={{ display: "flex", flexDirection: "column" }}>
+                <Typography
+                  sx={{
+                    width: "30%",
+                    alignSelf: "self-start",
+                    color: "#183084",
+                  }}
                 >
-                  <FormControlLabel
-                    control={<Radio />}
-                    value="limitTo"
-                    label={`Limit to Case Managers within the ${caseOfficeName}`}
-                  />
-                  <FormControlLabel
-                    control={<Radio />}
-                    value="extendAll"
-                    label={`Extend all Case Managers, while prioritizing Case Managers within the ${caseOfficeName}`}
-                    // disabled={event?.usageDesc === "Initial Appointment"}
-                  />
-                </RadioGroup>
-              </FormGroup>
-            </FormControl>
-            {/* {formik.touched.limitOffice && formik.errors.limitOffice && (
+                  Auto-reassign to case managers as follows:
+                </Typography>
+                <FormGroup column sx={{ alignItems: "center", width: "80%" }}>
+                  <RadioGroup
+                    name="limitedOffice"
+                    value={formik.values.limitOffice}
+                    onChange={handleRadioButtonsChange}
+                    onBlur={formik.handleBlur}
+                  >
+                    <FormControlLabel
+                      control={<Radio />}
+                      value="limitTo"
+                      label={`Limit to Case Managers within the ${caseOfficeName}`}
+                    />
+                    <FormControlLabel
+                      control={<Radio />}
+                      value="extendAll"
+                      label={`Extend all Case Managers, while prioritizing Case Managers within the ${caseOfficeName}`}
+                      // disabled={event?.usageDesc === "Initial Appointment"}
+                    />
+                  </RadioGroup>
+                </FormGroup>
+              </FormControl>
+              {/* {formik.touched.limitOffice && formik.errors.limitOffice && (
               <FormHelperText error>{formik.errors.limitOffice}</FormHelperText>
             )} */}
-          </Stack>
-
-          <Stack direction={"column"} justifyContent={"space-between"}>
-            <FormControl size="small" fullWidth>
-              <InputLabel id="reschedule-request-dropdown">
-                *Reason for Reassignment
-              </InputLabel>
-              <Select
-                label="*Reason for Reassignment"
-                value={formik.values.reassignReasonCd}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                name="reassignReasonCd"
-                sx={{ width: "50%" }}
-              >
-                {reassignReasons?.map((reason) => (
-                  <MenuItem key={reason.id} value={reason.id}>
-                    {reason.name}
-                  </MenuItem>
-                ))}
-              </Select>
-              {formik?.errors?.reassignReasonCd && (
-                <FormHelperText error>
-                  {formik.errors.reassignReasonCd}
-                </FormHelperText>
-              )}
-            </FormControl>
-          </Stack>
-
-          <Stack direction={"column"} spacing={2}>
-            <TextField
-              name="staffNotes"
-              label="Staff Notes, if any"
-              size="small"
-              value={formik.values.staffNotes}
-              onChange={formik.handleChange}
-              variant="outlined"
-              multiline
-              rows={3}
-              fullWidth
-            />
-          </Stack>
-
-          {!!errors?.length && (
-            <Stack mt={1} direction="column" useFlexGap flexWrap="wrap">
-              {errors.map((x) => (
-                <div key={x}>
-                  <span className="errorMsg">*{x}</span>
-                </div>
-              ))}
             </Stack>
-          )}
 
-          <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button
-              variant="contained"
-              color="primary"
-              type="submit"
-              disabled={!isUpdateAccessExist()}
-            >
-              Submit
-            </Button>
-            <Button variant="outlined" onClick={onCancel}>
-              Cancel
-            </Button>
+            <Stack direction={"column"} justifyContent={"space-between"}>
+              <FormControl size="small" fullWidth>
+                <InputLabel id="reschedule-request-dropdown">
+                  *Reason for Reassignment
+                </InputLabel>
+                <Select
+                  label="*Reason for Reassignment"
+                  value={formik.values.reassignReasonCd}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  name="reassignReasonCd"
+                  sx={{ width: "50%" }}
+                >
+                  {reassignReasons?.map((reason) => (
+                    <MenuItem key={reason.id} value={reason.id}>
+                      {reason.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {formik?.errors?.reassignReasonCd && (
+                  <FormHelperText error>
+                    {formik.errors.reassignReasonCd}
+                  </FormHelperText>
+                )}
+              </FormControl>
+            </Stack>
+
+            <Stack direction={"column"} spacing={2}>
+              <TextField
+                name="staffNotes"
+                label="Staff Notes, if any"
+                size="small"
+                value={formik.values.staffNotes}
+                onChange={formik.handleChange}
+                variant="outlined"
+                multiline
+                rows={3}
+                fullWidth
+              />
+            </Stack>
+
+            {!!errors?.length && (
+              <Stack mt={1} direction="column" useFlexGap flexWrap="wrap">
+                {errors.map((x) => (
+                  <div key={x}>
+                    <span className="errorMsg">*{x}</span>
+                  </div>
+                ))}
+              </Stack>
+            )}
+
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button
+                variant="contained"
+                color="primary"
+                type="submit"
+                // disabled={!isUpdateAccessExist()}
+              >
+                Submit
+              </Button>
+              <Button variant="outlined" onClick={onCancel}>
+                Cancel
+              </Button>
+            </Stack>
           </Stack>
         </Stack>
-      </Stack>
-    </form>
+      </form>
+    </>
   );
 }
 
