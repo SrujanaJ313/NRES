@@ -28,7 +28,7 @@ import CaseModeTableRow from "./CaseModeTableRow";
 import { caseLoadSummaryURL } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
-import Schedule from "./Schedule";
+// import Schedule from "./Schedule";
 import ReassignAll from "./ReAssignAll";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -69,12 +69,6 @@ const COLUMNS = [
   },
 ];
 
-const TYPES = {
-  reassign: "Reassign Case",
-  schedule: "Schedule",
-  reassignAll: "Reassign Cases belonging to ",
-};
-
 const CaseModeView = ({
   showCalendarView,
   onSwitchView,
@@ -101,7 +95,36 @@ const CaseModeView = ({
     field: "caseNum",
     direction: "asc",
   });
+  console.log(`userName--->`, userName);
 
+  const TYPES = {
+    reassign: {
+      name: "Reassign Case",
+      getTitle: () => (
+        <>
+          <span style={{ paddingRight: "5%" }}>
+            Case: {selectedRow?.claimantName}
+          </span>
+          <span style={{ paddingRight: "5%" }}></span>
+          <span style={{ paddingRight: "10%" }}>
+            BYE: {moment(selectedRow?.bye).format("MM/DD/YYYY")}
+          </span>
+          <span style={{ paddingRight: "10%" }}>
+            Stage: {selectedRow?.stage}
+          </span>
+          <span>Case Manager : {userName}</span>
+        </>
+      ),
+    },
+    // schedule: "Schedule",
+    reassignAll: {
+      name: "Reassign Cases belonging to ",
+      getTitle: () => <span>Case Manager : {userName}</span>,
+    },
+  };
+
+  console.log(`selectedStage`, selectedStage);
+  console.log(`userId`, userId);
   useEffect(() => {
     const payload = {
       metric: selectedStage,
@@ -183,7 +206,9 @@ const CaseModeView = ({
   const getCaseLoadSummaryData = async (payload) => {
     try {
       setErrorMessages([]);
-      const response = await client.post(caseLoadSummaryURL, payload);
+      // const response = await client.post(caseLoadSummaryURL, payload);
+      const response = await client.get(caseLoadSummaryURL, payload); //Testing purpose
+      console.log(`response0----> ${JSON.stringify(response)}`);
       setReassignInd(response?.reassignInd);
       setRows(cloneDeep(response.caseLoadSummaryList));
       setTotalCount(response.pagination.totalItemCount);
@@ -195,25 +220,30 @@ const CaseModeView = ({
       setErrorMessages(newErrMsgs);
     }
   };
-  const getTitle = () => {
-    if (["reassign", "schedule", "reassignAll"].includes(type)) {
-      return (
-        <>
-          <span style={{ paddingRight: "5%" }}>
-            Case: {selectedRow?.claimantName}
-          </span>
-          <span style={{ paddingRight: "5%" }}></span>
-          <span style={{ paddingRight: "10%" }}>
-            BYE: {moment(selectedRow?.bye).format("MM/DD/YYYY")}
-          </span>
-          <span style={{ paddingRight: "10%" }}>
-            Stage: {selectedRow?.stage}
-          </span>
-          <span>Case Manager : {userName}</span>
-        </>
-      );
-    }
-  };
+  // const getTitle = () => {
+  // if (["reassign", "schedule", "reassignAll"].includes(type)) {
+  // if (type === "reassign") {
+  //   return (
+  //     <>
+  //       <span style={{ paddingRight: "5%" }}>
+  //         Case: {selectedRow?.claimantName}
+  //       </span>
+  //       <span style={{ paddingRight: "5%" }}></span>
+  //       <span style={{ paddingRight: "10%" }}>
+  //         BYE: {moment(selectedRow?.bye).format("MM/DD/YYYY")}
+  //       </span>
+  //       <span style={{ paddingRight: "10%" }}>
+  //         Stage: {selectedRow?.stage}
+  //       </span>
+  //       <span>Case Manager : {userName}</span>
+  //     </>
+  //   );
+  // }
+  // if (type === "reassignAll") {
+  //   return <span>Case Manager : {userName}</span>;
+  // }
+  // return TYPES[type].title();
+  // };
 
   return (
     <div style={{ height: "635px" }}>
@@ -225,18 +255,6 @@ const CaseModeView = ({
           zIndex: "10",
         }}
       >
-        {/* <Link
-          href="#"
-          underline="always"
-          color="#183084"
-          onClick={onSwitchView}
-          sx={{backgroundColor:"red"}}
-        >
-          {!showCalendarView
-            ? "Switch to Caseload view"
-            : "Switch to Calendar View"
-            }
-        </Link> */}
       </Box>
       <Box sx={{ paddingTop: 3, paddingBottom: 2 }}>
         <TableContainer component={Paper} sx={{ maxHeight: "490px" }}>
@@ -251,7 +269,6 @@ const CaseModeView = ({
                 <StyledTableCell></StyledTableCell>
                 {COLUMNS.map((column) => (
                   <StyledTableCell key={column.id}>
-                    {" "}
                     <TableSortLabel
                       active={sortBy.field === column.id}
                       direction={
@@ -273,7 +290,7 @@ const CaseModeView = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row, index) => (
+              {rows?.map((row, index) => (
                 <CaseModeTableRow
                   key={index}
                   row={row}
@@ -306,14 +323,16 @@ const CaseModeView = ({
           ))}
         </Stack>
       </Box>
-      <CustomModal title={getTitle()} open={open} maxWidth="md">
+      {/* <CustomModal title={getTitle()} open={open} maxWidth="md"> */}
+      <CustomModal title={TYPES[type]?.getTitle()} open={open} maxWidth="md">
         <DialogContent dividers sx={{ paddingBottom: 1 }}>
           <Stack>
             {type && (
               <Stack mt={2}>
                 <Typography fontWeight={600} fontSize={"1rem"} color="primary">
-                  {/* {type === "reassign" ? "Reassign Case" : "Schedule"} */}
-                  {type !== "reassignAll"? TYPES[type]:`${TYPES[type]}${selectedRow?.claimantName || 'Mary Peters'}`}
+                  {type !== "reassignAll"
+                    ? TYPES[type]?.name
+                    : `${TYPES[type]?.name}${selectedRow?.claimantName || "Mary Peters"}`}
                 </Typography>
               </Stack>
             )}
@@ -325,23 +344,15 @@ const CaseModeView = ({
                 />
               </Stack>
             )}
-            {type === "schedule" && (
-              <Stack>
-                <Schedule
-                  onCancel={() => setOpen(false)}
-                  selectedRow={selectedRow}
-                />
-              </Stack>
-            )}
             {type === "reassignAll" && (
               <Stack>
                 <ReassignAll
                   onCancel={() => setOpen(false)}
                   selectedRow={selectedRow}
+                  userId={userId}
                 />
               </Stack>
             )}
-            
           </Stack>
         </DialogContent>
       </CustomModal>
@@ -352,20 +363,9 @@ const CaseModeView = ({
           style={{
             display: "flex",
             justifyContent: "space-between",
-            width: "50%",
+            width: "30%",
           }}
         >
-          <Button
-            variant="contained"
-            color="primary"
-            // disabled={!reassignInd}
-            onClick={() => {
-              setOpen(true);
-              setType("schedule");
-            }}
-          >
-            Schedule
-          </Button>
           <Button
             variant="contained"
             color="primary"

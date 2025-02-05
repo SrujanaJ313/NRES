@@ -16,9 +16,10 @@ import {
 } from "@mui/material";
 import {
   scheduleLocalOfficeURL,
-  scheduleCaseManagerAvlURL,
-  scheduleSaveURL,
+  // scheduleCaseManagerAvlURL,
+  // scheduleSaveURL,
   reassignReasonsURL,
+  reassignAllSaveURL,
 } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
 import { useFormik } from "formik";
@@ -26,38 +27,44 @@ import { schedulePageValidationSchema } from "../../../helpers/Validation";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
 import { isUpdateAccessExist } from "../../../utils/cookies";
 import { useSnackbar } from "../../../context/SnackbarContext";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import moment from "moment";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
-function ReassignAll({ onCancel, selectedRow, event }) {
+function ReassignAll({ onCancel, selectedRow, userId }) {
   const showSnackbar = useSnackbar();
   const [errors, setErrors] = useState([]);
-  const [caseMgrAvl, setCaseMgrAvl] = useState([]);
+  // const [caseMgrAvl, setCaseMgrAvl] = useState([]);
   const [caseOfficeName, setCaseOfficeName] = useState("");
   const [reassignReasons, setReassignReasons] = useState([]);
   const formik = useFormik({
     initialValues: {
+      caseManagerId: "",
+      reassignDt: null,
+      limitOffice: "",
       reassignReasonCd: "",
-      caseManagerAvl: "",
-      localOffice: "",
       staffNotes: "",
-      mode: {
-        selectedPrefMtgModeInPerson:
-          event?.usageDesc === "Initial Appointment" ? true : false,
-        selectedPrefMtgModeVirtual: false,
-      },
-      beyond21DaysInd: "",
     },
-    validationSchema: schedulePageValidationSchema,
     onSubmit: async (values) => {
       try {
-        const { staffNotes, caseManagerAvl } = values;
+        const { limitOffice, reassignReasonCd, reassignDt, staffNotes } =
+          values;
         const payload = {
-          eventId: caseManagerAvl.toString() || "38539",
-          claimId: selectedRow.clmId || "7151668",
+          caseManagerId: userId || "",
+          reassignReasonCd,
+          reassignDt: moment(reassignDt).format("MM/DD/YYYY"),
+          limitOffice,
         };
+        if (limitOffice) {
+          payload.limitOffice = limitOffice === "limitTo";
+        }
+        console.log(`here`, payload);
         if (staffNotes.length) {
           payload.staffNotes = staffNotes;
         }
-        const result = await client.post(scheduleSaveURL, payload);
+        console.log(`ReAssign Save ALL payload`, payload);
+        const result = await client.post(reassignAllSaveURL, payload);
         if (result?.status === 400) {
           const errorMsg = result?.errorDetails
             .map((err) => err?.errorCode)
@@ -69,7 +76,7 @@ function ReassignAll({ onCancel, selectedRow, event }) {
         }
       } catch (errorResponse) {
         const newErrMsgs = getMsgsFromErrorCode(
-          `POST:${process.env.REACT_APP_REASSIGN_SAVE}`,
+          `POST:${process.env.REACT_APP_REASSIGN_ALL_SAVE}`,
           errorResponse
         );
         setErrors(newErrMsgs);
@@ -78,50 +85,6 @@ function ReassignAll({ onCancel, selectedRow, event }) {
     validateOnChange: true,
     validateOnBlur: false,
   });
-
-  useEffect(() => {
-    async function fetchCaseManagerAvailibility() {
-      try {
-        const payload = {
-          clmId: selectedRow?.clmId || 7142098,
-          clmLofInd: formik.values.localOffice,
-          showBeyondReseaDeadlineInd: formik.values.beyond21DaysInd,
-          meetingModeInperson: formik.values.mode.selectedPrefMtgModeInPerson
-            ? "I"
-            : "",
-          meetingModeVirtual: formik.values.mode.selectedPrefMtgModeVirtual
-            ? "V"
-            : "",
-        };
-        const data =
-          process.env.REACT_APP_ENV === "mockserver"
-            ? await client.get(scheduleCaseManagerAvlURL)
-            : await client.post(scheduleCaseManagerAvlURL, payload);
-
-        const result = data.map((item) => {
-          const [name, office, dateTime, caseLoad] = item.name.split(" - ");
-          return { ...item, nameList: { name, office, dateTime, caseLoad } };
-        });
-        setCaseMgrAvl(result);
-      } catch (errorResponse) {
-        const newErrMsgs = getMsgsFromErrorCode(
-          `GET:${process.env.REACT_APP_CASE_SCHEDULE_CASE_MANAGER_AVL_LIST}`, //Need to add in Error Constants
-          errorResponse
-        );
-        setErrors(newErrMsgs);
-      }
-    }
-    if (
-      formik.values.mode.selectedPrefMtgModeInPerson ||
-      formik.values.mode.selectedPrefMtgModeVirtual
-    ) {
-      fetchCaseManagerAvailibility();
-    }
-  }, [
-    formik.values.localOffice,
-    formik.values.mode,
-    formik.values.beyond21DaysInd,
-  ]);
 
   useEffect(() => {
     async function fetchCaseOfficeName() {
@@ -162,15 +125,8 @@ function ReassignAll({ onCancel, selectedRow, event }) {
     fetchReAssignReasons();
   }, []);
 
-  const handleCheckboxChange = (event) => {
-    const { checked, name } = event.target;
-    if (name === "tempSuspendedInd") {
-      formik.setFieldValue("tempSuspendedInd", checked === true ? "Y" : "N");
-    } else {
-      let selectedModes = { ...formik.values.mode };
-      selectedModes[name] = checked;
-      formik.setFieldValue("mode", selectedModes);
-    }
+  const handleRadioButtonsChange = (event) => {
+    formik.setFieldValue("limitOffice", event.target.value);
   };
 
   return (
@@ -193,34 +149,48 @@ function ReassignAll({ onCancel, selectedRow, event }) {
                 sx={{
                   width: "40%",
                   alignSelf: "center",
-                  color:"#183084"
+                  color: "#183084",
                 }}
               >
                 Auto-reassign all cases with appointment dates on or after:
               </Typography>
-              <TextField
-                id="autoReassignCases"
-                name="autoReassignCases"
-                // label="Orientation From"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={formik.values.orientationStartDt}
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                size="small"
-                fullWidth
-                sx={{
-                  "& .MuiInputLabel-root": {
-                    color: "#183084",
-                    fontWeight: "bold",
-                  },
-                  width:"20%"
-                }}
-              />
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  value={formik.values.reassignDt}
+                  onChange={(newValue) => {
+                    if (newValue) {
+                      formik.setFieldValue("reassignDt", newValue);
+                    } else {
+                      formik.setFieldValue("reassignDt", null);
+                    }
+                  }}
+                  slotProps={{
+                    textField: { size: "small" },
+                  }}
+                  onBlur={formik.handleBlur}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      id="reassignDt"
+                      name="reassignDt"
+                      size="small"
+                      fullWidth
+                      sx={{
+                        "& .MuiInputLabel-root": {
+                          color: "#183084",
+                          fontWeight: "bold",
+                        },
+                        width: "20%",
+                        height: "32px",
+                      }}
+                    />
+                  )}
+                />
+              </LocalizationProvider>
             </FormControl>
-            {/* {formik.errors.localOffice && (
+            {/* {formik.errors.reassignDt && (
               <FormHelperText sx={{ color: "red" }}>
-                {formik.errors.localOffice}
+                {formik.errors.reassignDt}
               </FormHelperText>
             )} */}
           </Stack>
@@ -231,16 +201,16 @@ function ReassignAll({ onCancel, selectedRow, event }) {
                 sx={{
                   width: "30%",
                   alignSelf: "self-start",
-                  color:"#183084"
+                  color: "#183084",
                 }}
               >
                 Auto-reassign to case managers as follows:
               </Typography>
-              <FormGroup column sx={{alignItems:"center", width:"80%"}}>
+              <FormGroup column sx={{ alignItems: "center", width: "80%" }}>
                 <RadioGroup
-                  name="selectedPrefMtgMode"
-                  value={formik.values.mode.selectedPrefMtgMode}
-                  onChange={handleCheckboxChange}
+                  name="limitedOffice"
+                  value={formik.values.limitOffice}
+                  onChange={handleRadioButtonsChange}
                   onBlur={formik.handleBlur}
                 >
                   <FormControlLabel
@@ -252,13 +222,13 @@ function ReassignAll({ onCancel, selectedRow, event }) {
                     control={<Radio />}
                     value="extendAll"
                     label={`Extend all Case Managers, while prioritizing Case Managers within the ${caseOfficeName}`}
-                    disabled={event?.usageDesc === "Initial Appointment"}
+                    // disabled={event?.usageDesc === "Initial Appointment"}
                   />
                 </RadioGroup>
               </FormGroup>
             </FormControl>
-            {/* {formik.touched.mode && formik.errors.mode && (
-              <FormHelperText error>{formik.errors.mode}</FormHelperText>
+            {/* {formik.touched.limitOffice && formik.errors.limitOffice && (
+              <FormHelperText error>{formik.errors.limitOffice}</FormHelperText>
             )} */}
           </Stack>
 
