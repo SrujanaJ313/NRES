@@ -859,6 +859,12 @@ const schedulePageValidationSchema = yup.object({
     ),
 });
 
+const reassignAllValidationSchema = yup.object({
+  reassignDt: yup.date().required('Reassigned date is required'),
+  limitOffice: yup.string().required('One of the limit offices need to be selected'),
+  reassignReasonCd:yup.string().required('Reason for Reassignment is required')
+})
+
 export {
   initialAppointmentDetailsSchema,
   firstAppointmentDetailsSchema,
@@ -872,5 +878,6 @@ export {
   lookUpAppointmentsValidationSchema,
   caseLookUpValidationSchema,
   schedulePageValidationSchema,
+  reassignAllValidationSchema
 };
 

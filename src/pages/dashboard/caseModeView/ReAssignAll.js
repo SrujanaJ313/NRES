@@ -23,7 +23,7 @@ import {
 } from "../../../helpers/Urls";
 import client from "../../../helpers/Api";
 import { useFormik } from "formik";
-// import { schedulePageValidationSchema } from "../../../helpers/Validation";
+import { reassignAllValidationSchema } from "../../../helpers/Validation";
 import { getMsgsFromErrorCode } from "../../../helpers/utils";
 import { isUpdateAccessExist } from "../../../utils/cookies";
 import { useSnackbar } from "../../../context/SnackbarContext";
@@ -47,6 +47,7 @@ function ReassignAll({ onCancel, selectedRow, userId }) {
       reassignReasonCd: "",
       staffNotes: "",
     },
+    validationSchema: reassignAllValidationSchema,
     onSubmit: async (values) => {
       try {
         const { limitOffice, reassignReasonCd, reassignDt, staffNotes } =
@@ -130,22 +131,19 @@ function ReassignAll({ onCancel, selectedRow, userId }) {
     formik.setFieldValue("limitOffice", event.target.value);
   };
 
-  // Function to handle form submission
   const handleFormSubmit = (event) => {
     console.log(`event-->`, event);
-    event.preventDefault(); 
-    setOpen(true); 
+    event.preventDefault();
+    setOpen(true);
   };
 
-  // Function to handle confirmed submission
   const handleConfirmSubmit = () => {
-    setOpen(false); // Close dialog
-    formik.handleSubmit(); // Manually trigger Formik submission
+    setOpen(false);
+    formik.handleSubmit();
   };
 
-  // Function to handle cancel action
   const handleCancel = () => {
-    setOpen(false); // Just close the dialog
+    setOpen(false);
   };
 
   return (
@@ -215,12 +213,19 @@ function ReassignAll({ onCancel, selectedRow, userId }) {
                   />
                 </LocalizationProvider>
               </FormControl>
-              {/* {formik.errors.reassignDt && (
-              <FormHelperText sx={{ color: "red" }}>
+            </Stack>
+            {formik.errors.reassignDt && (
+              <FormHelperText
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  color: "red",
+                  // backgroundColor: "skyblue",
+                }}
+              >
                 {formik.errors.reassignDt}
               </FormHelperText>
-            )} */}
-            </Stack>
+            )}
 
             <Stack>
               <FormControl sx={{ display: "flex", flexDirection: "column" }}>
@@ -254,10 +259,18 @@ function ReassignAll({ onCancel, selectedRow, userId }) {
                   </RadioGroup>
                 </FormGroup>
               </FormControl>
-              {/* {formik.touched.limitOffice && formik.errors.limitOffice && (
-              <FormHelperText error>{formik.errors.limitOffice}</FormHelperText>
-            )} */}
             </Stack>
+            {formik.touched.limitOffice && formik.errors.limitOffice && (
+              <FormHelperText
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-start",
+                }}
+                error
+              >
+                {formik.errors.limitOffice}
+              </FormHelperText>
+            )}
 
             <Stack direction={"column"} justifyContent={"space-between"}>
               <FormControl size="small" fullWidth>
@@ -278,13 +291,19 @@ function ReassignAll({ onCancel, selectedRow, userId }) {
                     </MenuItem>
                   ))}
                 </Select>
-                {formik?.errors?.reassignReasonCd && (
-                  <FormHelperText error>
-                    {formik.errors.reassignReasonCd}
-                  </FormHelperText>
-                )}
               </FormControl>
             </Stack>
+            {formik.touched.reassignReasonCd && formik.errors.reassignReasonCd && (
+              <FormHelperText
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-start",
+                }}
+                error
+              >
+                {formik.errors.reassignReasonCd}
+              </FormHelperText>
+            )}
 
             <Stack direction={"column"} spacing={2}>
               <TextField
