@@ -131,9 +131,19 @@ function ReassignAll({ onCancel, selectedRow, userId }) {
     formik.setFieldValue("limitOffice", event.target.value);
   };
 
-  const handleFormSubmit = (event) => {
-    console.log(`event-->`, event);
+  const handleFormSubmit = async (event) => {
     event.preventDefault();
+    const errors = await formik.validateForm();
+    if (Object.keys(errors).length) {
+      const touchedFields = Object.keys(formik.values).reduce((acc, field) => {
+        acc[field] = true;
+        return acc;
+      }, {});
+
+      formik.setErrors(errors);
+      formik.setTouched(touchedFields);
+      return;
+    }
     setOpen(true);
   };
 
@@ -214,7 +224,7 @@ function ReassignAll({ onCancel, selectedRow, userId }) {
                 </LocalizationProvider>
               </FormControl>
             </Stack>
-            {formik.errors.reassignDt && (
+            {formik.touched.reassignDt && formik.errors.reassignDt && (
               <FormHelperText
                 sx={{
                   display: "flex",
@@ -293,17 +303,18 @@ function ReassignAll({ onCancel, selectedRow, userId }) {
                 </Select>
               </FormControl>
             </Stack>
-            {formik.touched.reassignReasonCd && formik.errors.reassignReasonCd && (
-              <FormHelperText
-                sx={{
-                  display: "flex",
-                  justifyContent: "flex-start",
-                }}
-                error
-              >
-                {formik.errors.reassignReasonCd}
-              </FormHelperText>
-            )}
+            {formik.touched.reassignReasonCd &&
+              formik.errors.reassignReasonCd && (
+                <FormHelperText
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-start",
+                  }}
+                  error
+                >
+                  {formik.errors.reassignReasonCd}
+                </FormHelperText>
+              )}
 
             <Stack direction={"column"} spacing={2}>
               <TextField
