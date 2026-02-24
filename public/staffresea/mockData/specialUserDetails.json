@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "firstName": "John",
+    "middleInitial": "A",
+    "lastName": "Smith",
+    "userName": "jsmith_special",
+    "mobilePhone": "(603) 555-1234",
+    "unableToUseEmail": true,
+    "claimantId": "CLM001",
+    "status": "Active",
+    "createdDate": "01/15/2025"
+  },
+  {
+    "id": 2,
+    "firstName": "Maria",
+    "middleInitial": "L",
+    "lastName": "Johnson",
+    "userName": "mjohnson_special",
+    "mobilePhone": "(603) 555-5678",
+    "unableToUseEmail": false,
+    "claimantId": "CLM002",
+    "status": "Active",
+    "createdDate": "02/10/2025"
+  },
+  {
+    "id": 3,
+    "firstName": "Robert",
+    "middleInitial": "J",
+    "lastName": "Williams",
+    "userName": "rwilliams_su",
+    "mobilePhone": "(207) 608-2189",
+    "unableToUseEmail": true,
+    "claimantId": "CLM003",
+    "status": "Pending",
+    "createdDate": "02/20/2025"
+  }
+]

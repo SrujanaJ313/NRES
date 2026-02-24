@@ -60,6 +60,7 @@ const scheduleSaveURL = `${baseApiUrl}${process.env.REACT_APP_CASE_SCHEDULE_SAVE
 
 const employeeSearchURL = `${baseApiUrl}${process.env.REACT_APP_CASE_EMPLOYER_SEARCH}`;
 
+const specialUserDetailsURL = `${baseApiUrl}${process.env.REACT_APP_SPECIAL_USER_DETAILS}`;
 
 const staffUnavailabilityURL = `${baseApiUrl}${process.env.REACT_APP_CASE_STAFF_UNAVAILABILITY}`;
 
@@ -116,6 +117,7 @@ export {
   scheduleCaseManagerAvlURL,
   scheduleSaveURL,
   employeeSearchURL,
+  specialUserDetailsURL,
   staffUnavailabilityURL,
 
   reassignAllSaveURL
