@@ -2,11 +2,13 @@
   {
     "id": 1,
     "firstName": "John",
-    "middleInitial": "A",
     "lastName": "Smith",
     "userName": "jsmith_special",
+    "userLoginName": "jsmith_login",
+    "dateOfBirth": "03/15/1985",
+    "ssn": "***-**-1234",
+    "emailAddress": "john.smith@example.com",
     "mobilePhone": "(603) 555-1234",
-    "unableToUseEmail": true,
     "claimantId": "CLM001",
     "status": "Active",
     "createdDate": "01/15/2025"
@@ -14,11 +16,13 @@
   {
     "id": 2,
     "firstName": "Maria",
-    "middleInitial": "L",
     "lastName": "Johnson",
     "userName": "mjohnson_special",
+    "userLoginName": "mjohnson_login",
+    "dateOfBirth": "07/22/1990",
+    "ssn": "***-**-5678",
+    "emailAddress": "maria.johnson@example.com",
     "mobilePhone": "(603) 555-5678",
-    "unableToUseEmail": false,
     "claimantId": "CLM002",
     "status": "Active",
     "createdDate": "02/10/2025"
@@ -26,13 +30,29 @@
   {
     "id": 3,
     "firstName": "Robert",
-    "middleInitial": "J",
     "lastName": "Williams",
     "userName": "rwilliams_su",
+    "userLoginName": "rwilliams_login",
+    "dateOfBirth": "11/08/1978",
+    "ssn": "***-**-9012",
+    "emailAddress": "robert.w@example.com",
     "mobilePhone": "(207) 608-2189",
-    "unableToUseEmail": true,
     "claimantId": "CLM003",
-    "status": "Pending",
+    "status": "Inactive",
     "createdDate": "02/20/2025"
+  },
+  {
+    "id": 4,
+    "firstName": "Sarah",
+    "lastName": "Davis",
+    "userName": "sdavis_special",
+    "userLoginName": "sdavis_login",
+    "dateOfBirth": "05/30/1982",
+    "ssn": "***-**-3456",
+    "emailAddress": "sarah.davis@example.com",
+    "mobilePhone": "(603) 555-3456",
+    "claimantId": "CLM004",
+    "status": "Deleted",
+    "createdDate": "01/05/2025"
   }
 ]

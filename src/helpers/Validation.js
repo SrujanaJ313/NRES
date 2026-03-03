@@ -867,11 +867,14 @@ const reassignAllValidationSchema = yup.object({
 
 const specialUserLookupValidationSchema = yup.object({
   firstName: yup.string(),
-  middleInitial: yup.string().max(1, "Middle initial must be one character"),
   lastName: yup.string(),
   userName: yup.string(),
+  userLoginName: yup.string(),
+  dateOfBirth: yup.string(),
+  ssn: yup.string(),
+  emailAddress: yup.string(),
   mobilePhone: yup.string(),
-  unableToUseEmail: yup.boolean(),
+  status: yup.string().oneOf(["", "Active", "Inactive", "Deleted"], "Invalid status"),
 });
 
 export {

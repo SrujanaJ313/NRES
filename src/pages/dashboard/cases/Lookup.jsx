@@ -44,13 +44,15 @@ function LookUp() {
               <TableHead>
                 <TableRow>
                   <StyledTableCell variant="head">First Name</StyledTableCell>
-                  <StyledTableCell variant="head">Middle Initial</StyledTableCell>
                   <StyledTableCell variant="head">Last Name</StyledTableCell>
                   <StyledTableCell variant="head">User Name</StyledTableCell>
+                  <StyledTableCell variant="head">User Login Name</StyledTableCell>
+                  <StyledTableCell variant="head">Date of Birth</StyledTableCell>
+                  <StyledTableCell variant="head">SSN</StyledTableCell>
+                  <StyledTableCell variant="head">Email Address</StyledTableCell>
                   <StyledTableCell variant="head">Mobile Phone</StyledTableCell>
-                  <StyledTableCell variant="head">Unable to Use Email</StyledTableCell>
-                  <StyledTableCell variant="head">Claimant ID</StyledTableCell>
                   <StyledTableCell variant="head">Status</StyledTableCell>
+                  <StyledTableCell variant="head">Claimant ID</StyledTableCell>
                   <StyledTableCell variant="head">Created Date</StyledTableCell>
                 </TableRow>
               </TableHead>
@@ -58,13 +60,15 @@ function LookUp() {
                 {lookUpSummary.map((row) => (
                   <TableRow key={row.id || `${row.userName}-${row.lastName}`} hover>
                     <TableCell>{row.firstName || "-"}</TableCell>
-                    <TableCell>{row.middleInitial || "-"}</TableCell>
                     <TableCell>{row.lastName || "-"}</TableCell>
                     <TableCell>{row.userName || "-"}</TableCell>
+                    <TableCell>{row.userLoginName || "-"}</TableCell>
+                    <TableCell>{row.dateOfBirth || "-"}</TableCell>
+                    <TableCell>{row.ssn || "-"}</TableCell>
+                    <TableCell>{row.emailAddress || "-"}</TableCell>
                     <TableCell>{row.mobilePhone || "-"}</TableCell>
-                    <TableCell>{row.unableToUseEmail ? "Yes" : "No"}</TableCell>
-                    <TableCell>{row.claimantId || "-"}</TableCell>
                     <TableCell>{row.status || "-"}</TableCell>
+                    <TableCell>{row.claimantId || "-"}</TableCell>
                     <TableCell>{row.createdDate || "-"}</TableCell>
                   </TableRow>
                 ))}

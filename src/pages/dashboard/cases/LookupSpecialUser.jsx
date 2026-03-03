@@ -2,11 +2,14 @@ import React, { useState } from "react";
 import {
   Box,
   TextField,
-  Checkbox,
   Button,
   Typography,
   Stack,
   FormHelperText,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
 } from "@mui/material";
 import InputMask from "react-input-mask";
 import client from "../../../helpers/Api";
@@ -27,11 +30,14 @@ function LookupSpecialUser({ setLookUpSummary }) {
   const formik = useFormik({
     initialValues: {
       firstName: "",
-      middleInitial: "",
       lastName: "",
       userName: "",
+      userLoginName: "",
+      dateOfBirth: "",
+      ssn: "",
+      emailAddress: "",
       mobilePhone: "",
-      unableToUseEmail: false,
+      status: "",
     },
     validationSchema: specialUserLookupValidationSchema,
     onSubmit: async (values) => {
@@ -41,7 +47,7 @@ function LookupSpecialUser({ setLookUpSummary }) {
         const mockData = Array.isArray(data) ? data : (data?.data || data?.results || []);
 
         const filterMatch = (item, searchValues) => {
-          const searchFields = ["firstName", "lastName", "userName"];
+          const searchFields = ["firstName", "lastName", "userName", "userLoginName", "emailAddress"];
           for (const field of searchFields) {
             const searchVal = (searchValues[field] || "").trim().toLowerCase();
             if (searchVal) {
@@ -49,10 +55,14 @@ function LookupSpecialUser({ setLookUpSummary }) {
               if (!itemVal.includes(searchVal)) return false;
             }
           }
-          const middleVal = (searchValues.middleInitial || "").trim().toLowerCase();
-          if (middleVal && (item.middleInitial || "").toLowerCase() !== middleVal) return false;
           const phoneVal = (searchValues.mobilePhone || "").replace(/\D/g, "");
           if (phoneVal && (item.mobilePhone || "").replace(/\D/g, "").indexOf(phoneVal) < 0) return false;
+          const ssnVal = (searchValues.ssn || "").replace(/\D/g, "");
+          if (ssnVal && (item.ssn || "").replace(/\D/g, "").indexOf(ssnVal) < 0) return false;
+          const dobVal = (searchValues.dateOfBirth || "").trim();
+          if (dobVal && (item.dateOfBirth || "") !== dobVal) return false;
+          const statusVal = (searchValues.status || "").trim();
+          if (statusVal && (item.status || "") !== statusVal) return false;
           return true;
         };
 
@@ -162,24 +172,19 @@ function LookupSpecialUser({ setLookUpSummary }) {
 
           <Box display="flex" justifyContent="center">
             <TextField
-              id="middleInitial"
-              name="middleInitial"
-              label="Middle Initial"
-              placeholder="Middle Initial"
-              value={formik.values.middleInitial}
+              id="dateOfBirth"
+              name="dateOfBirth"
+              label="Date of Birth"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={formik.values.dateOfBirth}
               onBlur={formik.handleBlur}
-              onChange={(e) => {
-                const val = e.target.value.slice(0, 1);
-                formik.setFieldValue("middleInitial", val);
-                setErrorMessages([]);
-              }}
-              inputProps={{ maxLength: 1 }}
+              onChange={onHandleChange}
               fullWidth
               size="small"
               sx={inputSx}
             />
           </Box>
-          {ErrorMessage("middleInitial", { marginLeft: "5%" })}
 
           <Box display="flex" justifyContent="center">
             <TextField
@@ -203,6 +208,63 @@ function LookupSpecialUser({ setLookUpSummary }) {
               label="Choose a User Name"
               placeholder="Choose a User Name"
               value={formik.values.userName}
+              onBlur={formik.handleBlur}
+              onChange={onHandleChange}
+              fullWidth
+              size="small"
+              sx={inputSx}
+            />
+          </Box>
+
+          <Box display="flex" justifyContent="center">
+            <TextField
+              id="userLoginName"
+              name="userLoginName"
+              label="User Login Name"
+              placeholder="User Login Name"
+              value={formik.values.userLoginName}
+              onBlur={formik.handleBlur}
+              onChange={onHandleChange}
+              fullWidth
+              size="small"
+              sx={inputSx}
+            />
+          </Box>
+
+          <Box display="flex" justifyContent="center">
+            <TextField
+              id="ssn"
+              name="ssn"
+              label="SSN"
+              placeholder="XXX-XX-XXXX"
+              value={formik.values.ssn}
+              onBlur={formik.handleBlur}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, "");
+                if (val.length <= 9) {
+                  const formatted = val
+                    .replace(/(\d{3})(\d{2})?(\d{4})?/, (_, a, b, c) =>
+                      [a, b, c].filter(Boolean).join("-")
+                    );
+                  formik.setFieldValue("ssn", val ? formatted : "");
+                }
+                setErrorMessages([]);
+              }}
+              inputProps={{ maxLength: 11, inputMode: "numeric" }}
+              fullWidth
+              size="small"
+              sx={inputSx}
+            />
+          </Box>
+
+          <Box display="flex" justifyContent="center">
+            <TextField
+              id="emailAddress"
+              name="emailAddress"
+              label="Email Address"
+              placeholder="Email Address"
+              type="email"
+              value={formik.values.emailAddress}
               onBlur={formik.handleBlur}
               onChange={onHandleChange}
               fullWidth
@@ -237,22 +299,24 @@ function LookupSpecialUser({ setLookUpSummary }) {
             </InputMask>
           </Box>
 
-          {/* <Box display="flex" justifyContent="flex-start" alignItems="center">
-            <Checkbox
-              sx={{ marginLeft: "0.8rem", padding: "0" }}
-              checked={formik.values.unableToUseEmail}
-              onChange={(event) => {
-                formik.setFieldValue("unableToUseEmail", event.target.checked);
+          <FormControl sx={{ paddingLeft: "15px", paddingRight: "15px" }}>
+            <Typography sx={{ color: "#183084", fontWeight: "bold", marginBottom: 0.5 }}>
+              Status
+            </Typography>
+            <RadioGroup
+              row
+              name="status"
+              value={formik.values.status}
+              onChange={(e) => {
+                formik.setFieldValue("status", e.target.value);
                 setErrorMessages([]);
               }}
-            />
-            <Typography
-              sx={{ color: "#183084", fontWeight: "bold", paddingLeft: "5px" }}
             >
-              I have ascertained that the claimant is unable to set up and use
-              an email address
-            </Typography>
-          </Box> */}
+              <FormControlLabel value="Active" control={<Radio size="small" />} label="Active" />
+              <FormControlLabel value="Inactive" control={<Radio size="small" />} label="Inactive" />
+              <FormControlLabel value="Deleted" control={<Radio size="small" />} label="Deleted" />
+            </RadioGroup>
+          </FormControl>
           <Stack display="flex" flexDirection="row-reverse">
             <Box
               display="flex"
